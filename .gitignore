@@ -36,3 +36,6 @@ npm-debug.log*
 
 # Railway
 .railway/
+
+# Local Netlify folder
+.netlify

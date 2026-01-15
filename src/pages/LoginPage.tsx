@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, Loader2, Phone, UserCircle, Lock, Shield, Target } from 'lucide-react';
+import { Loader2, Phone, User, Lock } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-import { Student } from '../../types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +24,9 @@ export const LoginPage: React.FC = () => {
 
     try {
       await actions.login(phone, phone);
-      navigate('/student');
+      setTimeout(() => {
+        navigate('/student', { replace: true });
+      }, 100);
     } catch (err: any) {
       setError(err.message || 'رقم الهاتف غير صحيح');
     } finally {
@@ -36,188 +41,207 @@ export const LoginPage: React.FC = () => {
 
     try {
       await actions.login(username, password);
-      // Navigate based on role
-      if (state.user?.role === 'ADMIN') {
-        navigate('/admin');
-      } else if (state.user?.role === 'TEACHER') {
-        navigate('/teacher');
-      } else if (state.user?.role === 'SALES') {
-        navigate('/sales');
-      } else {
-        navigate('/dashboard');
-      }
+      setTimeout(() => {
+        const currentUser = state.user;
+        if (currentUser?.role === 'ADMIN') {
+          navigate('/admin', { replace: true });
+        } else if (currentUser?.role === 'TEACHER') {
+          navigate('/teacher', { replace: true });
+        } else if (currentUser?.role === 'SALES') {
+          navigate('/sales', { replace: true });
+        } else if (currentUser?.role === 'STUDENT') {
+          navigate('/student', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
+      }, 200);
     } catch (err: any) {
-      setError(err.message || 'بيانات خاطئة. Admin: admin/123 | Teacher: teacher/123 | Sales: sales/123');
+      setError(err.message || 'بيانات خاطئة. Admin: admin/123 | Teacher: omar.samy/123 | Sales: sales/123');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-500 via-green-600 to-green-700 p-4 relative overflow-hidden">
-      {/* Soccer Field Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-1/2 left-0 right-0 h-1 bg-white"></div>
-        <div className="absolute top-1/2 left-1/2 w-32 h-32 border-4 border-white rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute top-1/2 left-0 w-24 h-32 border-4 border-white transform -translate-y-1/2 border-r-0 rounded-r-full"></div>
-        <div className="absolute top-1/2 right-0 w-24 h-32 border-4 border-white transform -translate-y-1/2 border-l-0 rounded-l-full"></div>
-      </div>
-
-      {/* Soccer Ball Decoration */}
-      <div className="absolute top-10 right-10 w-20 h-20 opacity-20 animate-bounce">
-        <svg viewBox="0 0 100 100" className="w-full h-full">
-          <circle cx="50" cy="50" r="45" fill="white"/>
-          <path d="M50 5 L50 95 M5 50 L95 50 M25 25 L75 75 M75 25 L25 75" stroke="#1a472a" strokeWidth="3"/>
-          <circle cx="50" cy="50" r="8" fill="#1a472a"/>
-        </svg>
-      </div>
-
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md animate-in fade-in zoom-in duration-300 relative z-10 border-4 border-green-400">
-        {/* Soccer Theme Header */}
-        <div className="text-center mb-8">
-          <div className="bg-gradient-to-br from-green-500 to-green-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-4 border-white">
-            <svg viewBox="0 0 24 24" className="w-12 h-12 text-white">
-              <circle cx="12" cy="12" r="10" fill="white" opacity="0.3"/>
-              <path d="M12 2 L12 22 M2 12 L22 12 M6 6 L18 18 M18 6 L6 18" stroke="white" strokeWidth="2"/>
-              <circle cx="12" cy="12" r="2" fill="white"/>
-            </svg>
+    <div className="login-container-new">
+      <div className="login-background-pattern"></div>
+      <Card className="login-card-new">
+        <CardHeader className="space-y-6 text-center pb-8">
+          <div className="flex flex-col items-center">
+            <div className="logo-wrapper-new">
+              <img 
+                src="/logo.png" 
+                alt="أكاديمية كرة القدم" 
+                className="logo-login-large animate-float-slow hover:scale-110 transition-all duration-500" 
+                onError={(e) => {
+                  // Hide logo if not found
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
+            <div className="text-center">
+              <CardTitle className="text-5xl font-black text-red-700 animate-fade-in mb-2 tracking-tight">
+                ⚽ أكاديمية كرة القدم
+              </CardTitle>
+              <p className="text-lg text-gray-600 mt-2 font-bold tracking-wide">
+                نظام إدارة التدريب والأداء
+              </p>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">⚽ أكاديمية كرة القدم</h1>
-          <p className="text-gray-600 font-semibold">نظام إدارة التدريب والأداء</p>
-        </div>
-
-        {/* Login Type Selector */}
-        <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-xl">
-          <button
-            type="button"
-            onClick={() => {
-              setLoginType('student');
-              setError('');
-              setPhone('');
-            }}
-            className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
-              loginType === 'student'
-                ? 'bg-green-600 text-white shadow-md'
-                : 'text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            👤 طالب
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setLoginType('staff');
-              setError('');
-              setUsername('');
-              setPassword('');
-            }}
-            className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
-              loginType === 'staff'
-                ? 'bg-green-600 text-white shadow-md'
-                : 'text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            🎓 فريق العمل
-          </button>
-        </div>
-
-        {/* Student Login Form */}
-        {loginType === 'student' && (
-          <form onSubmit={handleStudentLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <Phone size={16} className="text-green-600" />
-                رقم الهاتف
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="01xxxxxxxxx"
-                className="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none"
-                dir="ltr"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">استخدم رقم هاتفك المسجل</p>
-            </div>
-
-            {error && (
-              <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200 flex items-center gap-2">
-                <AlertCircle size={16} />
-                {error}
-              </div>
-            )}
-
+          <CardDescription className="text-gray-500 text-lg font-medium">
+            تسجيل الدخول للوصول إلى لوحة التحكم
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-6">
+          {/* Login Type Selector */}
+          <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-xl">
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl transition-all shadow-lg shadow-green-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              type="button"
+              onClick={() => {
+                setLoginType('student');
+                setError('');
+                setPhone('');
+              }}
+              className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+                loginType === 'student'
+                  ? 'bg-red-600 text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-200'
+              }`}
             >
-              {loading ? <Loader2 className="animate-spin" size={20} /> : <Target size={20} />}
-              {loading ? 'جاري الدخول...' : 'دخول كطالب'}
+              👤 طالب
             </button>
-          </form>
-        )}
-
-        {/* Staff Login Form */}
-        {loginType === 'staff' && (
-          <form onSubmit={handleStaffLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <UserCircle size={16} className="text-green-600" />
-                اسم المستخدم
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin, teacher, sales..."
-                className="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none"
-                dir="ltr"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <Lock size={16} className="text-green-600" />
-                كلمة المرور
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full p-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 focus:outline-none"
-                dir="ltr"
-                required
-              />
-            </div>
-
-            {error && (
-              <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200 flex items-center gap-2">
-                <AlertCircle size={16} />
-                {error}
-              </div>
-            )}
-
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold rounded-xl transition-all shadow-lg shadow-green-200 disabled:opacity-50 flex items-center justify-center gap-2"
+              type="button"
+              onClick={() => {
+                setLoginType('staff');
+                setError('');
+                setUsername('');
+                setPassword('');
+              }}
+              className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+                loginType === 'staff'
+                  ? 'bg-red-600 text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-200'
+              }`}
             >
-              {loading ? <Loader2 className="animate-spin" size={20} /> : <Shield size={20} />}
-              {loading ? 'جاري الدخول...' : 'دخول كفريق عمل'}
+              🎓 فريق العمل
             </button>
+          </div>
 
-            <div className="text-xs text-gray-500 text-center pt-2 border-t">
-              <p className="mb-1">🔑 حسابات تجريبية:</p>
-              <p>Admin: admin / 123</p>
-              <p>Teacher: omar.samy / 123</p>
-              <p>Sales: sales / 123</p>
-            </div>
-          </form>
-        )}
-      </div>
+          {/* Student Login Form */}
+          {loginType === 'student' && (
+            <form onSubmit={handleStudentLogin} className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="phone" className="text-base font-semibold text-gray-700">رقم الهاتف</Label>
+                <div className="relative">
+                  <Phone className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="01xxxxxxxxx"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="pr-12 h-14 text-base border-2 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
+                    disabled={loading}
+                    dir="ltr"
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+                  <p className="text-red-700 font-medium">{error}</p>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-7 text-xl shadow-2xl hover:shadow-3xl transform transition-all duration-300 hover:scale-[1.02] rounded-xl"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                    جاري الدخول...
+                  </>
+                ) : (
+                  'دخول كطالب'
+                )}
+              </Button>
+            </form>
+          )}
+
+          {/* Staff Login Form */}
+          {loginType === 'staff' && (
+            <form onSubmit={handleStaffLogin} className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="username" className="text-base font-semibold text-gray-700">اسم المستخدم</Label>
+                <div className="relative">
+                  <User className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="admin, teacher, sales..."
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="pr-12 h-14 text-base border-2 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
+                    disabled={loading}
+                    dir="ltr"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <Label htmlFor="password" className="text-base font-semibold text-gray-700">كلمة المرور</Label>
+                <div className="relative">
+                  <Lock className="absolute right-4 top-4 h-5 w-5 text-gray-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pr-12 h-14 text-base border-2 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all"
+                    disabled={loading}
+                    dir="ltr"
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+                  <p className="text-red-700 font-medium">{error}</p>
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-7 text-xl shadow-2xl hover:shadow-3xl transform transition-all duration-300 hover:scale-[1.02] rounded-xl"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                    جاري الدخول...
+                  </>
+                ) : (
+                  'دخول كفريق عمل'
+                )}
+              </Button>
+
+              <div className="text-xs text-gray-500 text-center pt-2 border-t">
+                <p className="mb-1">🔑 حسابات تجريبية:</p>
+                <p>Admin: admin / 123</p>
+                <p>Teacher: omar.samy / 123</p>
+                <p>Sales: sales / 123</p>
+              </div>
+            </form>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

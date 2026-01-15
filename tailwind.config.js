@@ -9,9 +9,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#10b981', // Emerald 500
-        secondary: '#3b82f6', // Blue 500
+        primary: '#dc2626', // Red 600 - Main theme color
+        secondary: '#991b1b', // Red 800
         danger: '#ef4444', // Red 500
+        accent: '#7f1d1d', // Red 900
       },
       fontFamily: {
         sans: ['Cairo', 'sans-serif'],

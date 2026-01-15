@@ -31,15 +31,20 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-green-600 to-green-700 shadow-lg border-b border-green-800 px-6 py-4 sticky top-0 z-50">
-      <div className="container mx-auto flex justify-between items-center">
+    <nav className="navbar-new">
+      <div className="container mx-auto px-6 flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <div className="bg-white text-green-600 p-2 rounded-lg">
-            <BookOpen size={20} />
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="أكاديمية كرة القدم" 
+            className="logo-large"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
           <div>
-            <h1 className="font-bold text-white text-xl">⚽ أكاديمية كرة القدم</h1>
-            <p className="text-green-100 text-sm">{state.user.username}</p>
+            <h1 className="text-3xl font-black text-white">⚽ أكاديمية كرة القدم</h1>
+            <p className="text-red-100 font-semibold">{state.user.username}</p>
           </div>
         </div>
 
