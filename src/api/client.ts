@@ -99,6 +99,15 @@ async function request<T>(
   
   if (currentToken) {
     headers['Authorization'] = `Bearer ${currentToken}`;
+    // Debug logging (remove in production if needed)
+    if (import.meta.env.DEV) {
+      console.log('🔑 Sending token in request:', currentToken.substring(0, 20) + '...');
+    }
+  } else {
+    // Debug logging
+    if (import.meta.env.DEV) {
+      console.warn('⚠️ No auth token available for request');
+    }
   }
 
   try {

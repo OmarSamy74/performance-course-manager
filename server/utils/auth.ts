@@ -116,13 +116,27 @@ export function hasRole(userRole: UserRole, requiredRole: UserRole): boolean {
  * Extract token from Authorization header
  */
 export function extractToken(headers: Record<string, string | string[] | undefined>): string | null {
-  const authHeader = headers.authorization || headers.Authorization;
-  if (!authHeader) return null;
+  // Try multiple header name variations (case-insensitive)
+  const authHeader = 
+    headers.authorization || 
+    headers.Authorization || 
+    headers.AUTHORIZATION ||
+    (headers as any)['authorization'];
   
-  const header = Array.isArray(authHeader) ? authHeader[0] : authHeader;
-  if (header.startsWith('Bearer ')) {
-    return header.substring(7);
+  if (!authHeader) {
+    return null;
   }
   
-  return header;
+  const header = Array.isArray(authHeader) ? authHeader[0] : authHeader;
+  
+  // Handle Bearer token format
+  if (typeof header === 'string') {
+    if (header.startsWith('Bearer ')) {
+      return header.substring(7).trim();
+    }
+    // Also accept token without Bearer prefix
+    return header.trim();
+  }
+  
+  return null;
 }
