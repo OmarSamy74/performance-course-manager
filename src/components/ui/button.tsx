@@ -1,57 +1,65 @@
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "../../lib/utils";
+import React from 'react';
+import { cn } from '../../lib/utils';
+import { Loader2 } from 'lucide-react';
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2",
-  {
-    variants: {
-      variant: {
-        default:
-          "bg-red-600 text-white shadow-sm hover:bg-red-700",
-        destructive:
-          "bg-red-600 text-white shadow-sm hover:bg-red-700",
-        outline:
-          "border border-gray-300 bg-background shadow-sm hover:bg-gray-50",
-        secondary:
-          "bg-gray-100 text-gray-900 shadow-sm hover:bg-gray-200",
-        ghost:
-          "hover:bg-gray-100 hover:text-gray-900",
-        link: "text-red-600 underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md gap-1.5 px-3 text-xs",
-        lg: "h-10 rounded-md px-6 text-base",
-        icon: "h-9 w-9",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-);
-
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+  isLoading?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    );
-  }
-);
-Button.displayName = "Button";
+export const Button: React.FC<ButtonProps> = ({
+  children,
+  className,
+  variant = 'primary',
+  size = 'md',
+  isLoading = false,
+  leftIcon,
+  rightIcon,
+  disabled,
+  ...props
+}) => {
+  const variantClasses = {
+    primary: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl',
+    secondary: 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white shadow-lg hover:shadow-xl',
+    danger: 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl',
+    success: 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl',
+    outline: 'bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-700 hover:bg-gray-50',
+  };
 
-export { Button, buttonVariants };
+  const sizeClasses = {
+    sm: 'px-4 py-2 text-sm',
+    md: 'px-6 py-3 text-base',
+    lg: 'px-8 py-4 text-lg',
+  };
+
+  return (
+    <button
+      className={cn(
+        'font-bold rounded-xl transition-all transform hover:scale-[1.02]',
+        'disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none',
+        'flex items-center justify-center gap-2',
+        variantClasses[variant],
+        sizeClasses[size],
+        className
+      )}
+      disabled={disabled || isLoading}
+      {...props}
+    >
+      {isLoading ? (
+        <>
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span>جاري المعالجة...</span>
+        </>
+      ) : (
+        <>
+          {leftIcon && <span>{leftIcon}</span>}
+          {children}
+          {rightIcon && <span>{rightIcon}</span>}
+        </>
+      )}
+    </button>
+  );
+};

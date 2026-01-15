@@ -1,6 +1,11 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Briefcase, LogOut, Users, Target, Eye, CheckCircle2, Plus, Search, Phone, MessageSquare, Trash2, Upload, FileSpreadsheet } from 'lucide-react';
+import { Modal } from '../components/ui/Modal';
+import { FormField } from '../components/ui/FormField';
+import { Input } from '../components/ui/Input';
+import { Textarea } from '../components/ui/Textarea';
+import { Button } from '../components/ui/Button';
 import { useApp } from '../context/AppContext';
 import { Lead, LeadStatus, Student, PaymentPlan, InstallmentStatus } from '../../types';
 import { getLeadStatusColor, getLeadStatusLabel, fileToBase64 } from '../lib/business-utils';
@@ -370,15 +375,14 @@ export const SalesPage: React.FC = () => {
       </div>
 
       {/* Add Lead Modal */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in zoom-in-95 duration-300 border border-gray-100">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl">
-                <Plus className="text-white" size={24} />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-800">إضافة عميل جديد</h2>
-            </div>
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="إضافة عميل جديد"
+        icon={<Plus className="text-white" size={24} />}
+        iconColor="purple"
+        size="md"
+      >
             <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
               <div className="flex items-center gap-2 text-blue-800 text-sm mb-3">
                 <FileSpreadsheet size={18} />
@@ -391,67 +395,61 @@ export const SalesPage: React.FC = () => {
                 <p>• العمود الرابع: <strong>ملاحظات</strong> (اختياري)</p>
               </div>
             </div>
-            <form onSubmit={handleAddLead} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">اسم العميل *</label>
-                <input 
-                  type="text" 
-                  required 
-                  placeholder="أدخل اسم العميل" 
-                  value={newLead.name} 
-                  onChange={e => setNewLead({...newLead, name: e.target.value})} 
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">رقم الهاتف *</label>
-                <input 
-                  type="text" 
-                  required 
-                  placeholder="01xxxxxxxxx" 
-                  value={newLead.phone} 
-                  onChange={e => setNewLead({...newLead, phone: e.target.value})} 
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">المصدر</label>
-                <input 
-                  type="text" 
-                  placeholder="مثلاً: فيسبوك، إحالة، إعلان" 
-                  value={newLead.source} 
-                  onChange={e => setNewLead({...newLead, source: e.target.value})} 
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">ملاحظات</label>
-                <textarea 
-                  placeholder="أدخل أي ملاحظات إضافية" 
-                  value={newLead.notes} 
-                  onChange={e => setNewLead({...newLead, notes: e.target.value})} 
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400 resize-none h-24" 
-                />
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button 
-                  type="button" 
-                  onClick={() => setIsAddModalOpen(false)} 
-                  className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 font-semibold transition-all shadow-sm hover:shadow"
-                >
-                  إلغاء
-                </button>
-                <button 
-                  type="submit" 
-                  className="flex-1 py-3.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                >
-                  💾 حفظ العميل
-                </button>
-              </div>
-            </form>
+        <form onSubmit={handleAddLead} className="space-y-4">
+          <FormField label="اسم العميل" required>
+            <Input 
+              type="text" 
+              required 
+              placeholder="أدخل اسم العميل" 
+              value={newLead.name} 
+              onChange={e => setNewLead({...newLead, name: e.target.value})} 
+            />
+          </FormField>
+          <FormField label="رقم الهاتف" required>
+            <Input 
+              type="text" 
+              required 
+              placeholder="01xxxxxxxxx" 
+              value={newLead.phone} 
+              onChange={e => setNewLead({...newLead, phone: e.target.value})} 
+            />
+          </FormField>
+          <FormField label="المصدر">
+            <Input 
+              type="text" 
+              placeholder="مثلاً: فيسبوك، إحالة، إعلان" 
+              value={newLead.source} 
+              onChange={e => setNewLead({...newLead, source: e.target.value})} 
+            />
+          </FormField>
+          <FormField label="ملاحظات">
+            <Textarea 
+              placeholder="أدخل أي ملاحظات إضافية" 
+              value={newLead.notes} 
+              onChange={e => setNewLead({...newLead, notes: e.target.value})} 
+              className="h-24"
+            />
+          </FormField>
+          <div className="flex gap-3 pt-4">
+            <Button 
+              type="button" 
+              onClick={() => setIsAddModalOpen(false)} 
+              variant="outline"
+              className="flex-1"
+            >
+              إلغاء
+            </Button>
+            <Button 
+              type="submit" 
+              variant="primary"
+              className="flex-1"
+              leftIcon="💾"
+            >
+              حفظ العميل
+            </Button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </div>
   );
 };

@@ -1,6 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wallet, Briefcase, LogOut, Plus, Trash2, CheckCircle2, AlertCircle, Eye, XCircle, FileSpreadsheet, Search, LayoutDashboard } from 'lucide-react';
+import { Modal } from '../components/ui/Modal';
+import { FormField } from '../components/ui/FormField';
+import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/Button';
 import { useApp } from '../context/AppContext';
 import { Student, PaymentPlan, InstallmentStatus, COURSE_COST } from '../../types';
 import { calculateFinancials, formatCurrency, getStatusColor, getStatusLabel } from '../lib/business-utils';
@@ -347,83 +351,78 @@ export const AdminPage: React.FC = () => {
         )}
       
         {/* Add Student Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in zoom-in-95 duration-300 border border-gray-100">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl">
-                  <Plus className="text-white" size={24} />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-800">إضافة طالب جديد</h2>
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="إضافة طالب جديد"
+          icon={<Plus className="text-white" size={24} />}
+          iconColor="red"
+          size="md"
+        >
+          <form onSubmit={handleAddStudent} className="space-y-5">
+            <FormField label="الاسم الثلاثي" required>
+              <Input 
+                type="text" 
+                required 
+                value={newName} 
+                onChange={(e) => setNewName(e.target.value)} 
+                placeholder="أدخل الاسم الثلاثي" 
+              />
+            </FormField>
+            <FormField label="رقم الهاتف">
+              <Input 
+                type="text" 
+                value={newPhone} 
+                onChange={(e) => setNewPhone(e.target.value)} 
+                placeholder="01xxxxxxxxx" 
+              />
+            </FormField>
+            <FormField label="خطة الدفع">
+              <div className="grid grid-cols-2 gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setNewPlan(PaymentPlan.HALF)} 
+                  className={`p-4 rounded-xl border-2 transition-all font-semibold ${
+                    newPlan === PaymentPlan.HALF 
+                      ? 'border-red-500 bg-gradient-to-br from-red-50 to-red-100 text-red-700 shadow-md scale-105' 
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
+                  }`}
+                >
+                  💰 50% مقدم
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setNewPlan(PaymentPlan.FULL)} 
+                  className={`p-4 rounded-xl border-2 transition-all font-semibold ${
+                    newPlan === PaymentPlan.FULL 
+                      ? 'border-red-500 bg-gradient-to-br from-red-50 to-red-100 text-red-700 shadow-md scale-105' 
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
+                  }`}
+                >
+                  💳 كامل
+                </button>
               </div>
-              <form onSubmit={handleAddStudent} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">الاسم الثلاثي *</label>
-                  <input 
-                    type="text" 
-                    required 
-                    value={newName} 
-                    onChange={(e) => setNewName(e.target.value)} 
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
-                    placeholder="أدخل الاسم الثلاثي" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">رقم الهاتف</label>
-                  <input 
-                    type="text" 
-                    value={newPhone} 
-                    onChange={(e) => setNewPhone(e.target.value)} 
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
-                    placeholder="01xxxxxxxxx" 
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">خطة الدفع</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button 
-                      type="button" 
-                      onClick={() => setNewPlan(PaymentPlan.HALF)} 
-                      className={`p-4 rounded-xl border-2 transition-all font-semibold ${
-                        newPlan === PaymentPlan.HALF 
-                          ? 'border-red-500 bg-gradient-to-br from-red-50 to-red-100 text-red-700 shadow-md scale-105' 
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
-                      }`}
-                    >
-                      💰 50% مقدم
-                    </button>
-                    <button 
-                      type="button" 
-                      onClick={() => setNewPlan(PaymentPlan.FULL)} 
-                      className={`p-4 rounded-xl border-2 transition-all font-semibold ${
-                        newPlan === PaymentPlan.FULL 
-                          ? 'border-red-500 bg-gradient-to-br from-red-50 to-red-100 text-red-700 shadow-md scale-105' 
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
-                      }`}
-                    >
-                      💳 كامل
-                    </button>
-                  </div>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button 
-                    type="button" 
-                    onClick={() => setIsModalOpen(false)} 
-                    className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 font-semibold transition-all shadow-sm hover:shadow"
-                  >
-                    إلغاء
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="flex-1 py-3.5 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
-                  >
-                    💾 حفظ الطالب
-                  </button>
-                </div>
-              </form>
+            </FormField>
+            <div className="flex gap-3 pt-4">
+              <Button 
+                type="button" 
+                onClick={() => setIsModalOpen(false)} 
+                variant="outline"
+                className="flex-1"
+              >
+                إلغاء
+              </Button>
+              <Button 
+                type="submit" 
+                variant="primary"
+                className="flex-1"
+                leftIcon="💾"
+              >
+                حفظ الطالب
+              </Button>
             </div>
-          </div>
-        )}
+          </form>
+        </Modal>
       </div>
     </div>
   );

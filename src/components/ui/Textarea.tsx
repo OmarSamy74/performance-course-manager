@@ -1,11 +1,11 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   variant?: 'default' | 'error' | 'success';
 }
 
-export const Input: React.FC<InputProps> = ({ 
+export const Textarea: React.FC<TextareaProps> = ({ 
   className, 
   variant = 'default',
   ...props 
@@ -17,11 +17,11 @@ export const Input: React.FC<InputProps> = ({
   };
 
   return (
-    <input
+    <textarea
       className={cn(
         'w-full px-4 py-3 border-2 rounded-xl',
         'focus:ring-4 focus:outline-none transition-all',
-        'text-gray-800 placeholder-gray-400',
+        'text-gray-800 placeholder-gray-400 resize-none',
         'disabled:bg-gray-50 disabled:cursor-not-allowed',
         variantClasses[variant],
         className
