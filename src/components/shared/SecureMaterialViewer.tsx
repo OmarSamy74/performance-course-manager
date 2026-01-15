@@ -232,41 +232,35 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
               />
             </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center p-4 relative">
-              {/* Primary: iframe */}
-              <iframe 
-                key={blobUrl}
-                src={`${blobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
-                className="w-full h-full md:w-3/4 bg-white shadow-2xl"
-                style={{ border: 'none', minHeight: '600px' }}
-                title="PDF Viewer"
-                allow="fullscreen"
-                onLoad={() => {
-                  setIframeLoaded(true);
-                  setIsLoading(false);
-                  console.log('PDF iframe loaded successfully');
-                }}
-              />
-              {/* Fallback: object tag (hidden, used if iframe doesn't work) */}
+            <div className="w-full h-full flex items-center justify-center p-4">
+              {/* Primary: iframe with proper dimensions */}
+              <div className="w-full h-full md:w-3/4 bg-white shadow-2xl" style={{ minHeight: '600px' }}>
+                <iframe 
+                  key={blobUrl}
+                  src={`${blobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                  className="w-full h-full"
+                  style={{ border: 'none', display: 'block' }}
+                  title="PDF Viewer"
+                  allow="fullscreen"
+                  onLoad={() => {
+                    setIframeLoaded(true);
+                    setIsLoading(false);
+                    console.log('PDF iframe loaded successfully');
+                  }}
+                />
+              </div>
+              {/* Fallback: Show download link if iframe doesn't load after timeout */}
               {!iframeLoaded && blobUrl && (
-                <object
-                  data={blobUrl}
-                  type="application/pdf"
-                  className="absolute inset-0 w-full h-full md:w-3/4 mx-auto"
-                  style={{ minHeight: '600px', zIndex: 1 }}
-                  aria-label={material.title}
-                >
-                  <div className="text-white text-center p-8">
-                    <p className="mb-4">لا يمكن عرض ملف PDF في هذا المتصفح</p>
-                    <a 
-                      href={blobUrl} 
-                      download={material.title}
-                      className="text-blue-400 underline"
-                    >
-                      اضغط هنا لتحميل الملف
-                    </a>
-                  </div>
-                </object>
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 rounded-lg">
+                  <p className="text-white text-sm mb-2">إذا لم يظهر الملف، يمكنك تحميله:</p>
+                  <a 
+                    href={blobUrl} 
+                    download={`${material.title}.pdf`}
+                    className="text-blue-400 underline hover:text-blue-300"
+                  >
+                    اضغط هنا لتحميل الملف
+                  </a>
+                </div>
               )}
             </div>
           )
