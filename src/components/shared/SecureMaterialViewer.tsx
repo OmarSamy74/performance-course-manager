@@ -18,6 +18,14 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
     setError('');
     setIframeLoaded(false);
     
+    console.log('SecureMaterialViewer - Material:', {
+      id: material.id,
+      title: material.title,
+      fileType: material.fileType,
+      fileUrlLength: material.fileUrl?.length || 0,
+      fileUrlPreview: material.fileUrl?.substring(0, 100) || 'null'
+    });
+    
     // Timeout to detect if PDF fails to load
     const loadTimeout = setTimeout(() => {
       if (!iframeLoaded && blobUrl) {
@@ -29,6 +37,7 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
     const createBlobUrl = async () => {
       try {
         if (!material.fileUrl) {
+          console.error('No fileUrl in material:', material);
           setError('لا يوجد رابط للملف');
           setIsLoading(false);
           return '';
