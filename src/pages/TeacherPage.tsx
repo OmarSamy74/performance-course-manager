@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Users, FileText, Plus, Trash2, Clock, Upload, Loader2, Play, Edit, CheckCircle2, FileCheck, Brain, GraduationCap, Calendar, Target } from 'lucide-react';
+import { BookOpen, Users, FileText, Plus, Trash2, Clock, Upload, Loader2, Play, Edit, CheckCircle2, FileCheck, Brain, GraduationCap, Calendar as CalendarIcon, Target } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { CourseMaterial, Lesson, Assignment, Quiz } from '../../types';
 import { generateUUID } from '../lib/utils';
@@ -233,26 +233,16 @@ export const TeacherPage: React.FC = () => {
     return <LessonPlayer lesson={viewingLesson} onBack={() => setViewingLesson(null)} />;
   }
 
-  // If Teacher wants to see Admin View
+  // If Teacher wants to see Admin View - redirect to admin page
   if (view === 'ADMIN') {
+    React.useEffect(() => {
+      navigate('/admin', { replace: true });
+    }, []);
     return (
-      <div className="relative">
-        <div className="fixed bottom-4 left-4 z-50">
-          <button 
-            onClick={() => setView('CLASSROOM')} 
-            className="bg-red-600 text-white px-5 py-2.5 rounded-full shadow-lg flex items-center gap-2 hover:bg-red-700 font-bold"
-          >
-            <BookOpen size={18} /> ⚽ العودة للكلاس روم
-          </button>
-        </div>
-        <div className="p-8">
-          <p className="text-center text-gray-600">إدارة الطلاب - سيتم التوجيه إلى صفحة الإدارة</p>
-          <button 
-            onClick={() => navigate('/admin')} 
-            className="mt-4 mx-auto block bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700"
-          >
-            الذهاب إلى إدارة الطلاب
-          </button>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">جاري التوجيه إلى صفحة الإدارة...</p>
         </div>
       </div>
     );
@@ -538,7 +528,7 @@ export const TeacherPage: React.FC = () => {
                   <div className="flex items-center gap-2 text-xs text-gray-400">
                     {assignment.dueDate && (
                       <>
-                        <Calendar size={14} />
+                        <CalendarIcon size={14} />
                         <span>{new Date(assignment.dueDate).toLocaleDateString('ar-EG')}</span>
                       </>
                     )}
