@@ -250,14 +250,14 @@ export const SalesPage: React.FC = () => {
         {/* Actions */}
         <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4">
           <h2 className="text-2xl font-bold text-gray-800">قائمة العملاء المحتملين</h2>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <div className="relative">
               <input type="text" placeholder="بحث..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-4 pr-10 py-2 border rounded-xl w-64 bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none" />
               <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
             </div>
-            <label className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-lg shadow-blue-200 transition-all cursor-pointer">
-              <Upload size={20} />
-              <span>{isUploading ? 'جاري الاستيراد...' : 'رفع ملف Excel'}</span>
+            <label className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-blue-200 transition-all cursor-pointer font-semibold">
+              <FileSpreadsheet size={20} />
+              <span>{isUploading ? 'جاري الاستيراد...' : 'استيراد Excel'}</span>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -267,7 +267,7 @@ export const SalesPage: React.FC = () => {
                 className="hidden"
               />
             </label>
-            <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl shadow-lg shadow-green-200 transition-all">
+            <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-green-200 transition-all font-semibold">
               <Plus size={20} /> <span>إضافة عميل</span>
             </button>
           </div>
