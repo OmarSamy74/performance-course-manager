@@ -77,7 +77,9 @@ export const LoginPage: React.FC = () => {
         <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden transform transition-all duration-500 hover:scale-[1.02]">
           {/* Header with Gradient */}
           <div className="relative bg-gradient-to-r from-red-600 via-red-700 to-red-800 p-8 text-center text-white overflow-hidden">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+            <div className="absolute inset-0 opacity-20" style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}></div>
             <div className="relative z-10 flex flex-col items-center gap-4">
               <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl border-4 border-white/30 transform hover:scale-110 transition-transform duration-300">
                 <GraduationCap size={48} className="drop-shadow-lg" />
@@ -135,7 +137,7 @@ export const LoginPage: React.FC = () => {
 
             {/* Student Login Form */}
             {loginType === 'student' && (
-              <form onSubmit={handleStudentLogin} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <form onSubmit={handleStudentLogin} className="space-y-6">
                 <div className="relative group">
                   <label className="absolute right-4 top-3 text-gray-400 text-sm font-medium transition-all duration-300 pointer-events-none group-focus-within:text-red-600 group-focus-within:scale-90 group-focus-within:-translate-y-6">
                     رقم الهاتف
@@ -180,7 +182,7 @@ export const LoginPage: React.FC = () => {
 
             {/* Staff Login Form */}
             {loginType === 'staff' && (
-              <form onSubmit={handleStaffLogin} className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <form onSubmit={handleStaffLogin} className="space-y-6">
                 <div className="relative group">
                   <label className="absolute right-4 top-3 text-gray-400 text-sm font-medium transition-all duration-300 pointer-events-none group-focus-within:text-red-600 group-focus-within:scale-90 group-focus-within:-translate-y-6">
                     اسم المستخدم
