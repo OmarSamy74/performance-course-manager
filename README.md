@@ -46,7 +46,7 @@ A comprehensive course management system built with React, Express, and file-bas
    - `NODE_ENV=production`
    - `PORT` (automatically set by Railway)
    - `VITE_API_URL` (your Railway public URL)
-4. Data is stored in JSON files on Railway's persistent file system
+4. **Railway Storage is the PRIMARY database** - All data stored in `/data` directory on Railway
 
 The app will be automatically deployed and available at your Railway domain.
 
