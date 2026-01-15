@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, Student, Lead, CourseMaterial } from '../../types';
+import { User, Student, Lead, CourseMaterial, UserRole } from '../../types';
 import { useAuth } from '../hooks/useAuth';
 import { studentsApi, leadsApi, materialsApi, lessonsApi } from '../api/client';
 
@@ -56,7 +56,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }));
       
       // Leads: only for admin, teacher, sales
-      if (user.role === 'ADMIN' || user.role === 'TEACHER' || user.role === 'SALES') {
+      if (user.role === UserRole.ADMIN || user.role === UserRole.TEACHER || user.role === UserRole.SALES) {
         promises.push(leadsApi.list().catch((err) => {
           console.warn('Failed to fetch leads:', err);
           return { leads: [] };

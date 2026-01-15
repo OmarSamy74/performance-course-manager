@@ -43,13 +43,13 @@ export const LoginPage: React.FC = () => {
       await actions.login(username, password);
       setTimeout(() => {
         const currentUser = state.user;
-        if (currentUser?.role === 'ADMIN') {
+        if (currentUser?.role === UserRole.ADMIN) {
           navigate('/admin', { replace: true });
-        } else if (currentUser?.role === 'TEACHER') {
+        } else if (currentUser?.role === UserRole.TEACHER) {
           navigate('/teacher', { replace: true });
-        } else if (currentUser?.role === 'SALES') {
+        } else if (currentUser?.role === UserRole.SALES) {
           navigate('/sales', { replace: true });
-        } else if (currentUser?.role === 'STUDENT') {
+        } else if (currentUser?.role === UserRole.STUDENT) {
           navigate('/student', { replace: true });
         } else {
           navigate('/dashboard', { replace: true });

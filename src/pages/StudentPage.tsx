@@ -14,13 +14,42 @@ export const StudentPage: React.FC = () => {
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
   const [viewingMaterial, setViewingMaterial] = useState<CourseMaterial | null>(null);
 
+  // Wait for data to load before checking for student
+  if (state.loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
+
   const student = state.students.find((s: Student) => s.id === state.user?.studentId);
 
-  if (!student) {
+  if (!student && state.user?.studentId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center p-8">
           <p className="text-gray-600 mb-4">خطأ: لم يتم العثور على بيانات الطالب.</p>
+          <button 
+            onClick={() => navigate('/login')} 
+            className="text-red-600 underline hover:text-red-700"
+          >
+            العودة إلى تسجيل الدخول
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // If no studentId in user, show error
+  if (!state.user?.studentId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8">
+          <p className="text-gray-600 mb-4">خطأ: لا يوجد معرف طالب مرتبط بحسابك.</p>
           <button 
             onClick={() => navigate('/login')} 
             className="text-red-600 underline hover:text-red-700"
