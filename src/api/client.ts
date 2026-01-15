@@ -135,7 +135,15 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
-    setAuthToken(data.token);
+    
+    // Set token immediately after successful login
+    if (data.token) {
+      setAuthToken(data.token);
+      console.log('✅ Auth token set after login');
+    } else {
+      console.error('❌ No token received from login response');
+    }
+    
     return data;
   },
   logout: async () => {
