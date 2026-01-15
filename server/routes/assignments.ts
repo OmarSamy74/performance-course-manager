@@ -153,7 +153,7 @@ router.put('/', async (req: AuthRequest, res: Response) => {
 
     // Grade submission (teacher/admin)
     if (submissionId) {
-      if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
+      if (!hasRole(user.role, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
         return res.status(403).json({ error: 'Forbidden' });
       }
 
