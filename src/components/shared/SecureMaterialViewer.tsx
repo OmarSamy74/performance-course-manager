@@ -11,10 +11,20 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
   const [blobUrl, setBlobUrl] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
     setError('');
+    setIframeLoaded(false);
+    
+    // Timeout to detect if PDF fails to load
+    const loadTimeout = setTimeout(() => {
+      if (!iframeLoaded && blobUrl) {
+        console.warn('PDF load timeout - iframe may have failed to load');
+        // Don't set error immediately, give it more time
+      }
+    }, 10000); // 10 second timeout
     
     const createBlobUrl = async () => {
       try {
@@ -150,10 +160,9 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
     });
 
     return () => {
-      // Cleanup will happen when component unmounts or blobUrl changes
-      // We'll handle cleanup in a separate effect
+      clearTimeout(loadTimeout);
     };
-  }, [material.fileUrl, material.title, material.fileType]);
+  }, [material.fileUrl, material.title, material.fileType, iframeLoaded, blobUrl]);
 
   // Cleanup blob URL when component unmounts or blobUrl changes
   useEffect(() => {
@@ -214,7 +223,8 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
               />
             </div>
           ) : (
-            <div className="w-full h-full flex items-center justify-center p-4">
+            <div className="w-full h-full flex items-center justify-center p-4 relative">
+              {/* Primary: iframe */}
               <iframe 
                 key={blobUrl}
                 src={`${blobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
@@ -223,15 +233,32 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
                 title="PDF Viewer"
                 allow="fullscreen"
                 onLoad={() => {
+                  setIframeLoaded(true);
                   setIsLoading(false);
                   console.log('PDF iframe loaded successfully');
                 }}
-                onError={(e) => {
-                  console.error('Iframe error:', e);
-                  setError('فشل في تحميل ملف PDF. يرجى المحاولة مرة أخرى.');
-                  setIsLoading(false);
-                }}
               />
+              {/* Fallback: object tag (hidden, used if iframe doesn't work) */}
+              {!iframeLoaded && blobUrl && (
+                <object
+                  data={blobUrl}
+                  type="application/pdf"
+                  className="absolute inset-0 w-full h-full md:w-3/4 mx-auto"
+                  style={{ minHeight: '600px', zIndex: 1 }}
+                  aria-label={material.title}
+                >
+                  <div className="text-white text-center p-8">
+                    <p className="mb-4">لا يمكن عرض ملف PDF في هذا المتصفح</p>
+                    <a 
+                      href={blobUrl} 
+                      download={material.title}
+                      className="text-blue-400 underline"
+                    >
+                      اضغط هنا لتحميل الملف
+                    </a>
+                  </div>
+                </object>
+              )}
             </div>
           )
         ) : (
