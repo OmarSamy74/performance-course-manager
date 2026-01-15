@@ -44,12 +44,40 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     setDataLoading(true);
     try {
-      const [studentsRes, leadsRes, materialsRes, lessonsRes] = await Promise.all([
-        studentsApi.list().catch(() => ({ students: [] })),
-        leadsApi.list().catch(() => ({ leads: [] })),
-        materialsApi.list().catch(() => ({ materials: [] })),
-        lessonsApi.list().catch(() => ({ lessons: [] }))
-      ]);
+      // Fetch data based on user role
+      // Students can access: students (own), materials, lessons
+      // Admin/Teacher/Sales can access: students, leads, materials, lessons
+      const promises: Promise<any>[] = [];
+      
+      // Students: always fetch (students can see their own data)
+      promises.push(studentsApi.list().catch((err) => {
+        console.warn('Failed to fetch students:', err);
+        return { students: [] };
+      }));
+      
+      // Leads: only for admin, teacher, sales
+      if (user.role === 'ADMIN' || user.role === 'TEACHER' || user.role === 'SALES') {
+        promises.push(leadsApi.list().catch((err) => {
+          console.warn('Failed to fetch leads:', err);
+          return { leads: [] };
+        }));
+      } else {
+        promises.push(Promise.resolve({ leads: [] }));
+      }
+      
+      // Materials: all authenticated users can access
+      promises.push(materialsApi.list().catch((err) => {
+        console.warn('Failed to fetch materials:', err);
+        return { materials: [] };
+      }));
+      
+      // Lessons: all authenticated users can access
+      promises.push(lessonsApi.list().catch((err) => {
+        console.warn('Failed to fetch lessons:', err);
+        return { lessons: [] };
+      }));
+
+      const [studentsRes, leadsRes, materialsRes, lessonsRes] = await Promise.all(promises);
 
       setStudents(studentsRes.students || []);
       setLeads(leadsRes.leads || []);
