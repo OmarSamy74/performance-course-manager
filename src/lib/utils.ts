@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { fileToBase64 } from './business-utils';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,3 +18,6 @@ export const generateUUID = (): string => {
     return v.toString(16);
   });
 };
+
+// Re-export fileToBase64 for convenience
+export { fileToBase64 };
