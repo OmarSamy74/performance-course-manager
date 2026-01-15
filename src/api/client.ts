@@ -9,13 +9,22 @@ const getApiBase = () => {
   if (import.meta.env.VITE_API_URL) {
     let url = import.meta.env.VITE_API_URL.trim();
     
+    // Remove trailing slashes
+    url = url.replace(/\/+$/, '');
+    
     // Add protocol if missing (assume https for production)
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       url = `https://${url}`;
     }
     
-    // Ensure it ends with /api
-    return url.endsWith('/api') ? url : `${url}/api`;
+    // Ensure it ends with /api (but not /api/)
+    if (url.endsWith('/api/')) {
+      url = url.slice(0, -1); // Remove trailing slash
+    } else if (!url.endsWith('/api')) {
+      url = `${url}/api`;
+    }
+    
+    return url;
   }
   
   // Check if we're on Netlify (has .netlify in hostname)
@@ -56,9 +65,15 @@ async function request<T>(
   if (isNetlify) {
     // Remove leading slash and any /api prefix
     finalEndpoint = endpoint.replace(/^\/api\//, '').replace(/^\//, '');
+  } else {
+    // Ensure endpoint starts with / (for non-Netlify)
+    if (!finalEndpoint.startsWith('/')) {
+      finalEndpoint = `/${finalEndpoint}`;
+    }
   }
   
-  const url = `${API_BASE}${finalEndpoint}`;
+  // Remove any double slashes (except after http:// or https://)
+  const url = `${API_BASE}${finalEndpoint}`.replace(/([^:]\/)\/+/g, '$1');
   
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
