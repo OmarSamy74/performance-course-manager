@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Users, FileText, Plus, Trash2, Clock, Upload, Loader2, Play, Edit, CheckCircle2, FileCheck, Brain, GraduationCap, Calendar as CalendarIcon, Target } from 'lucide-react';
+import { BookOpen, Users, FileText, Plus, Trash2, Clock, Upload, Loader2, Play, Edit, CheckCircle2, FileCheck, Brain, GraduationCap, Calendar as CalendarIcon, Target, MessageSquare, BarChart3, Mail, Send } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { CourseMaterial, Lesson, Assignment, Quiz } from '../../types';
 import { generateUUID } from '../lib/utils';
@@ -15,13 +15,16 @@ import { Textarea } from '../components/ui/Textarea';
 import { Button } from '../components/ui/button';
 import { PageHeader } from '../components/layout/PageHeader';
 
-type ClassroomTab = 'MATERIALS' | 'LESSONS' | 'ASSIGNMENTS' | 'QUIZZES';
+type ClassroomTab = 'STREAM' | 'CLASSWORK' | 'PEOPLE' | 'GRADES';
+type ClassworkTab = 'MATERIALS' | 'LESSONS' | 'ASSIGNMENTS' | 'QUIZZES';
 
 export const TeacherPage: React.FC = () => {
   const navigate = useNavigate();
   const { state, actions } = useApp();
   const [view, setView] = useState<'CLASSROOM' | 'ADMIN'>('CLASSROOM');
-  const [activeTab, setActiveTab] = useState<ClassroomTab>('MATERIALS');
+  const [activeTab, setActiveTab] = useState<ClassroomTab>('STREAM');
+  const [classworkTab, setClassworkTab] = useState<ClassworkTab>('MATERIALS');
+  const [announcement, setAnnouncement] = useState('');
   
   // Materials state
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -321,81 +324,202 @@ export const TeacherPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Tabs */}
+        {/* Main Tabs - Google Classroom Style */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
           <div className="flex border-b border-gray-200">
             <button
-              onClick={() => setActiveTab('MATERIALS')}
+              onClick={() => setActiveTab('STREAM')}
               className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
-                activeTab === 'MATERIALS' 
-                  ? 'bg-red-600 text-white' 
+                activeTab === 'STREAM' 
+                  ? 'bg-red-600 text-white border-b-2 border-red-600' 
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <FileText size={18} /> المواد
+              <MessageSquare size={18} /> البث (Stream)
             </button>
             <button
-              onClick={() => setActiveTab('LESSONS')}
+              onClick={() => setActiveTab('CLASSWORK')}
               className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
-                activeTab === 'LESSONS' 
-                  ? 'bg-red-600 text-white' 
+                activeTab === 'CLASSWORK' 
+                  ? 'bg-red-600 text-white border-b-2 border-red-600' 
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <Play size={18} /> الدروس
+              <BookOpen size={18} /> الأعمال (Classwork)
             </button>
             <button
-              onClick={() => setActiveTab('ASSIGNMENTS')}
+              onClick={() => setActiveTab('PEOPLE')}
               className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
-                activeTab === 'ASSIGNMENTS' 
-                  ? 'bg-red-600 text-white' 
+                activeTab === 'PEOPLE' 
+                  ? 'bg-red-600 text-white border-b-2 border-red-600' 
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <FileCheck size={18} /> الواجبات
+              <Users size={18} /> الأشخاص (People)
             </button>
             <button
-              onClick={() => setActiveTab('QUIZZES')}
+              onClick={() => setActiveTab('GRADES')}
               className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
-                activeTab === 'QUIZZES' 
-                  ? 'bg-red-600 text-white' 
+                activeTab === 'GRADES' 
+                  ? 'bg-red-600 text-white border-b-2 border-red-600' 
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <Brain size={18} /> الاختبارات
+              <BarChart3 size={18} /> الدرجات (Grades)
             </button>
           </div>
         </div>
 
-        {/* Content based on active tab */}
-        <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800">
-            {activeTab === 'MATERIALS' && 'المواد التعليمية'}
-            {activeTab === 'LESSONS' && 'الدروس'}
-            {activeTab === 'ASSIGNMENTS' && 'الواجبات'}
-            {activeTab === 'QUIZZES' && 'الاختبارات'}
-          </h2>
-          <button 
-            onClick={() => {
-              if (activeTab === 'MATERIALS') setIsUploadModalOpen(true);
-              if (activeTab === 'LESSONS') setIsLessonModalOpen(true);
-              if (activeTab === 'ASSIGNMENTS') setIsAssignmentModalOpen(true);
-              if (activeTab === 'QUIZZES') setIsQuizModalOpen(true);
-            }}
-            className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-red-800 shadow-lg shadow-red-200 transition-all font-bold"
-          >
-            <Plus size={20} /> 
-            <span>
-              {activeTab === 'MATERIALS' && '⚽ رفع مادة جديدة'}
-              {activeTab === 'LESSONS' && 'إضافة درس جديد'}
-              {activeTab === 'ASSIGNMENTS' && 'إضافة واجب جديد'}
-              {activeTab === 'QUIZZES' && 'إضافة اختبار جديد'}
-            </span>
-          </button>
-        </div>
+        {/* Stream Tab - Announcements */}
+        {activeTab === 'STREAM' && (
+          <div className="space-y-6">
+            {/* Post Announcement */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">نشر إعلان</h3>
+              <div className="space-y-4">
+                <Textarea
+                  placeholder="شارك شيئاً مع الفصل..."
+                  value={announcement}
+                  onChange={e => setAnnouncement(e.target.value)}
+                  className="min-h-[120px]"
+                />
+                <div className="flex justify-end gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setAnnouncement('')}
+                  >
+                    إلغاء
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="primary"
+                    onClick={() => {
+                      if (announcement.trim()) {
+                        alert('سيتم إضافة نظام الإعلانات قريباً');
+                        setAnnouncement('');
+                      }
+                    }}
+                    leftIcon={<Send size={18} />}
+                  >
+                    نشر
+                  </Button>
+                </div>
+              </div>
+            </div>
 
-        {/* Materials Tab */}
-        {activeTab === 'MATERIALS' && (
+            {/* Recent Activity Feed */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">النشاط الأخير</h3>
+              <div className="space-y-4">
+                {assignments.length > 0 && (
+                  <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                    <div className="flex items-start gap-3">
+                      <FileCheck className="text-blue-600 mt-1" size={20} />
+                      <div>
+                        <p className="font-semibold text-gray-800">تم إنشاء واجب جديد</p>
+                        <p className="text-sm text-gray-600">{assignments[0].title}</p>
+                        <p className="text-xs text-gray-500 mt-1">{new Date(assignments[0].createdAt).toLocaleDateString('ar-EG')}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {state.materials.length > 0 && (
+                  <div className="p-4 bg-green-50 rounded-xl border border-green-200">
+                    <div className="flex items-start gap-3">
+                      <FileText className="text-green-600 mt-1" size={20} />
+                      <div>
+                        <p className="font-semibold text-gray-800">تم رفع مادة جديدة</p>
+                        <p className="text-sm text-gray-600">{state.materials[0].title}</p>
+                        <p className="text-xs text-gray-500 mt-1">{new Date(state.materials[0].createdAt).toLocaleDateString('ar-EG')}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {state.materials.length === 0 && assignments.length === 0 && (
+                  <p className="text-center text-gray-500 py-8">لا يوجد نشاط حتى الآن</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Classwork Tab - Organized Content */}
+        {activeTab === 'CLASSWORK' && (
+          <div className="space-y-6">
+            {/* Sub-tabs for Classwork */}
+            <div className="bg-gray-50 rounded-xl p-2 flex gap-2">
+              <button
+                onClick={() => setClassworkTab('MATERIALS')}
+                className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
+                  classworkTab === 'MATERIALS' 
+                    ? 'bg-white text-red-600 shadow-sm' 
+                    : 'text-gray-600 hover:bg-white/50'
+                }`}
+              >
+                <FileText size={16} className="inline mr-2" /> المواد
+              </button>
+              <button
+                onClick={() => setClassworkTab('LESSONS')}
+                className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
+                  classworkTab === 'LESSONS' 
+                    ? 'bg-white text-red-600 shadow-sm' 
+                    : 'text-gray-600 hover:bg-white/50'
+                }`}
+              >
+                <Play size={16} className="inline mr-2" /> الدروس
+              </button>
+              <button
+                onClick={() => setClassworkTab('ASSIGNMENTS')}
+                className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
+                  classworkTab === 'ASSIGNMENTS' 
+                    ? 'bg-white text-red-600 shadow-sm' 
+                    : 'text-gray-600 hover:bg-white/50'
+                }`}
+              >
+                <FileCheck size={16} className="inline mr-2" /> الواجبات
+              </button>
+              <button
+                onClick={() => setClassworkTab('QUIZZES')}
+                className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
+                  classworkTab === 'QUIZZES' 
+                    ? 'bg-white text-red-600 shadow-sm' 
+                    : 'text-gray-600 hover:bg-white/50'
+                }`}
+              >
+                <Brain size={16} className="inline mr-2" /> الاختبارات
+              </button>
+            </div>
+
+            {/* Content Header */}
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-800">
+                {classworkTab === 'MATERIALS' && 'المواد التعليمية'}
+                {classworkTab === 'LESSONS' && 'الدروس'}
+                {classworkTab === 'ASSIGNMENTS' && 'الواجبات'}
+                {classworkTab === 'QUIZZES' && 'الاختبارات'}
+              </h2>
+              <button 
+                onClick={() => {
+                  if (classworkTab === 'MATERIALS') setIsUploadModalOpen(true);
+                  if (classworkTab === 'LESSONS') setIsLessonModalOpen(true);
+                  if (classworkTab === 'ASSIGNMENTS') setIsAssignmentModalOpen(true);
+                  if (classworkTab === 'QUIZZES') setIsQuizModalOpen(true);
+                }}
+                className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-red-800 shadow-lg shadow-red-200 transition-all font-bold"
+              >
+                <Plus size={20} /> 
+                <span>
+                  {classworkTab === 'MATERIALS' && '⚽ رفع مادة جديدة'}
+                  {classworkTab === 'LESSONS' && 'إضافة درس جديد'}
+                  {classworkTab === 'ASSIGNMENTS' && 'إضافة واجب جديد'}
+                  {classworkTab === 'QUIZZES' && 'إضافة اختبار جديد'}
+                </span>
+              </button>
+            </div>
+
+            {/* Materials Sub-tab */}
+            {classworkTab === 'MATERIALS' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {state.materials.length === 0 ? (
               <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
@@ -443,8 +567,8 @@ export const TeacherPage: React.FC = () => {
           </div>
         )}
 
-        {/* Lessons Tab */}
-        {activeTab === 'LESSONS' && (
+            {/* Lessons Sub-tab */}
+            {classworkTab === 'LESSONS' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {state.lessons.length === 0 ? (
               <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
@@ -498,8 +622,8 @@ export const TeacherPage: React.FC = () => {
           </div>
         )}
 
-        {/* Assignments Tab */}
-        {activeTab === 'ASSIGNMENTS' && (
+            {/* Assignments Sub-tab */}
+            {classworkTab === 'ASSIGNMENTS' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {assignments.length === 0 ? (
               <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
@@ -544,8 +668,8 @@ export const TeacherPage: React.FC = () => {
           </div>
         )}
 
-        {/* Quizzes Tab */}
-        {activeTab === 'QUIZZES' && (
+            {/* Quizzes Sub-tab */}
+            {classworkTab === 'QUIZZES' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {quizzes.length === 0 ? (
               <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
@@ -587,6 +711,112 @@ export const TeacherPage: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+            )}
+          </div>
+        )}
+
+        {/* People Tab - Student Management */}
+        {activeTab === 'PEOPLE' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">الطلاب المسجلين</h2>
+                <span className="text-sm text-gray-600 bg-gray-100 px-4 py-2 rounded-lg">
+                  {state.students.length} طالب
+                </span>
+              </div>
+              <div className="space-y-3">
+                {state.students.length === 0 ? (
+                  <p className="text-center text-gray-500 py-8">لا يوجد طلاب مسجلين حالياً</p>
+                ) : state.students.map((student: any) => (
+                  <div key={student.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                        <Users className="text-red-600" size={24} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-800">{student.name}</p>
+                        <p className="text-sm text-gray-600">{student.phone}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        leftIcon={<Mail size={16} />}
+                        onClick={() => window.open(`mailto:${student.phone}@example.com`)}
+                      >
+                        إرسال بريد
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Grades Tab - Gradebook */}
+        {activeTab === 'GRADES' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">سجل الدرجات</h2>
+                <Button
+                  variant="primary"
+                  leftIcon={<BarChart3 size={18} />}
+                  onClick={() => alert('سيتم إضافة تصدير الدرجات قريباً')}
+                >
+                  تصدير الدرجات
+                </Button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-right">
+                  <thead className="bg-gray-50 border-b-2 border-gray-200">
+                    <tr>
+                      <th className="p-4 font-bold text-gray-700">اسم الطالب</th>
+                      <th className="p-4 font-bold text-gray-700">الواجبات</th>
+                      <th className="p-4 font-bold text-gray-700">الاختبارات</th>
+                      <th className="p-4 font-bold text-gray-700">المجموع</th>
+                      <th className="p-4 font-bold text-gray-700">النسبة</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {state.students.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center p-8 text-gray-500">
+                          لا يوجد طلاب لعرض درجاتهم
+                        </td>
+                      </tr>
+                    ) : state.students.map((student: any) => {
+                      const studentAssignments = assignments.length; // Placeholder
+                      const studentQuizzes = quizzes.length; // Placeholder
+                      const totalScore = 0; // Placeholder
+                      const percentage = assignments.length > 0 ? Math.round((totalScore / (assignments.length * 100)) * 100) : 0;
+                      
+                      return (
+                        <tr key={student.id} className="hover:bg-gray-50">
+                          <td className="p-4 font-semibold text-gray-800">{student.name}</td>
+                          <td className="p-4 text-gray-600">{studentAssignments}</td>
+                          <td className="p-4 text-gray-600">{studentQuizzes}</td>
+                          <td className="p-4 font-bold text-gray-800">{totalScore}</td>
+                          <td className="p-4">
+                            <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                              percentage >= 80 ? 'bg-green-100 text-green-700' :
+                              percentage >= 60 ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {percentage}%
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         )}
       </div>
