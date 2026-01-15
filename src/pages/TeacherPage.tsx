@@ -595,53 +595,78 @@ export const TeacherPage: React.FC = () => {
 
       {/* Material Upload Modal */}
       {isUploadModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">رفع محتوى جديد</h2>
-            <form onSubmit={handleAddMaterial} className="space-y-4">
-              <input 
-                type="text" 
-                required 
-                placeholder="عنوان المحاضرة" 
-                value={newMaterial.title} 
-                onChange={e => setNewMaterial({...newMaterial, title: e.target.value})} 
-                className="w-full p-3 border rounded-xl" 
-              />
-              <textarea 
-                placeholder="وصف المحتوى" 
-                value={newMaterial.description} 
-                onChange={e => setNewMaterial({...newMaterial, description: e.target.value})} 
-                className="w-full p-3 border rounded-xl h-24" 
-              />
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
-                <input 
-                  type="file"
-                  accept="application/pdf,image/*"
-                  onChange={handleFileUpload}
-                  className="absolute inset-0 opacity-0 cursor-pointer" 
-                />
-                {uploading ? (
-                  <Loader2 className="animate-spin mx-auto text-red-600" size={24} />
-                ) : (
-                  <Upload className="mx-auto text-gray-400 mb-2" size={24} />
-                )}
-                <p className="text-sm text-gray-500">{newMaterial.fileUrl ? "تم اختيار الملف ✅" : "اضغط لاختيار ملف PDF أو صورة"}</p>
-                <p className="text-xs text-gray-400 mt-1">الحد الأقصى: 10 ميجابايت</p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg p-8 animate-in zoom-in-95 duration-300 border border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl">
+                <FileText className="text-white" size={24} />
               </div>
-              <div className="flex gap-2 mt-4">
+              <h2 className="text-2xl font-bold text-gray-800">رفع محتوى جديد</h2>
+            </div>
+            <form onSubmit={handleAddMaterial} className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">عنوان المحاضرة *</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="أدخل عنوان المحاضرة" 
+                  value={newMaterial.title} 
+                  onChange={e => setNewMaterial({...newMaterial, title: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">وصف المحتوى</label>
+                <textarea 
+                  placeholder="أدخل وصفاً للمحتوى (اختياري)" 
+                  value={newMaterial.description} 
+                  onChange={e => setNewMaterial({...newMaterial, description: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all outline-none text-gray-800 placeholder-gray-400 resize-none h-28" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">رفع الملف *</label>
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-red-400 hover:bg-red-50/50 transition-all cursor-pointer relative group">
+                  <input 
+                    type="file"
+                    accept="application/pdf,image/*"
+                    onChange={handleFileUpload}
+                    className="absolute inset-0 opacity-0 cursor-pointer z-10" 
+                  />
+                  {uploading ? (
+                    <div className="space-y-3">
+                      <Loader2 className="animate-spin mx-auto text-red-600" size={32} />
+                      <p className="text-sm font-medium text-gray-600">جاري معالجة الملف...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="mx-auto w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Upload className="text-red-600" size={28} />
+                      </div>
+                      <div>
+                        <p className="text-base font-semibold text-gray-700">
+                          {newMaterial.fileUrl ? "✅ تم اختيار الملف" : "اضغط لاختيار ملف PDF أو صورة"}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">الحد الأقصى: 10 ميجابايت</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
                 <button 
                   type="button" 
                   onClick={() => setIsUploadModalOpen(false)} 
-                  className="flex-1 py-2 bg-gray-100 rounded-xl text-gray-600"
+                  className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 font-semibold transition-all shadow-sm hover:shadow"
                 >
                   إلغاء
                 </button>
                 <button 
                   type="submit" 
                   disabled={!newMaterial.fileUrl || uploading} 
-                  className="flex-1 py-2 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 disabled:opacity-50"
+                  className="flex-1 py-3.5 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:from-red-700 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                 >
-                  {uploading ? 'جاري الرفع...' : 'نشر'}
+                  {uploading ? '⏳ جاري الرفع...' : '📤 نشر المحتوى'}
                 </button>
               </div>
             </form>
@@ -651,66 +676,89 @@ export const TeacherPage: React.FC = () => {
 
       {/* Lesson Modal */}
       {isLessonModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">إضافة درس جديد</h2>
-            <form onSubmit={handleAddLesson} className="space-y-4">
-              <input 
-                type="text" 
-                required 
-                placeholder="عنوان الدرس" 
-                value={newLesson.title} 
-                onChange={e => setNewLesson({...newLesson, title: e.target.value})} 
-                className="w-full p-3 border rounded-xl" 
-              />
-              <textarea 
-                placeholder="وصف الدرس" 
-                value={newLesson.description} 
-                onChange={e => setNewLesson({...newLesson, description: e.target.value})} 
-                className="w-full p-3 border rounded-xl h-24" 
-              />
-              <input 
-                type="text" 
-                placeholder="رابط الفيديو (YouTube/Vimeo)" 
-                value={newLesson.videoUrl} 
-                onChange={e => setNewLesson({...newLesson, videoUrl: e.target.value})} 
-                className="w-full p-3 border rounded-xl" 
-              />
-              <textarea 
-                placeholder="محتوى الدرس (HTML مسموح)" 
-                value={newLesson.content} 
-                onChange={e => setNewLesson({...newLesson, content: e.target.value})} 
-                className="w-full p-3 border rounded-xl h-32" 
-              />
-              <div className="grid grid-cols-2 gap-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl p-8 max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300 border border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
+                <Play className="text-white" size={24} />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">إضافة درس جديد</h2>
+            </div>
+            <form onSubmit={handleAddLesson} className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">عنوان الدرس *</label>
                 <input 
-                  type="number" 
-                  placeholder="ترتيب الدرس" 
-                  value={newLesson.order} 
-                  onChange={e => setNewLesson({...newLesson, order: parseInt(e.target.value) || 0})} 
-                  className="w-full p-3 border rounded-xl" 
-                />
-                <input 
-                  type="number" 
-                  placeholder="المدة بالدقائق" 
-                  value={newLesson.duration} 
-                  onChange={e => setNewLesson({...newLesson, duration: parseInt(e.target.value) || 0})} 
-                  className="w-full p-3 border rounded-xl" 
+                  type="text" 
+                  required 
+                  placeholder="أدخل عنوان الدرس" 
+                  value={newLesson.title} 
+                  onChange={e => setNewLesson({...newLesson, title: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
                 />
               </div>
-              <div className="flex gap-2 mt-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">وصف الدرس</label>
+                <textarea 
+                  placeholder="أدخل وصفاً للدرس" 
+                  value={newLesson.description} 
+                  onChange={e => setNewLesson({...newLesson, description: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder-gray-400 resize-none h-24" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">رابط الفيديو</label>
+                <input 
+                  type="url" 
+                  placeholder="https://youtube.com/... أو https://vimeo.com/..." 
+                  value={newLesson.videoUrl} 
+                  onChange={e => setNewLesson({...newLesson, videoUrl: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">محتوى الدرس</label>
+                <textarea 
+                  placeholder="أدخل محتوى الدرس (HTML مسموح)" 
+                  value={newLesson.content} 
+                  onChange={e => setNewLesson({...newLesson, content: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder-gray-400 resize-none h-32 font-mono text-sm" 
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">ترتيب الدرس</label>
+                  <input 
+                    type="number" 
+                    placeholder="0" 
+                    value={newLesson.order} 
+                    onChange={e => setNewLesson({...newLesson, order: parseInt(e.target.value) || 0})} 
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">المدة (دقائق)</label>
+                  <input 
+                    type="number" 
+                    placeholder="0" 
+                    value={newLesson.duration} 
+                    onChange={e => setNewLesson({...newLesson, duration: parseInt(e.target.value) || 0})} 
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
                 <button 
                   type="button" 
                   onClick={() => setIsLessonModalOpen(false)} 
-                  className="flex-1 py-2 bg-gray-100 rounded-xl text-gray-600"
+                  className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 font-semibold transition-all shadow-sm hover:shadow"
                 >
                   إلغاء
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 py-2 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700"
+                  className="flex-1 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                 >
-                  حفظ
+                  💾 حفظ الدرس
                 </button>
               </div>
             </form>
@@ -720,51 +768,67 @@ export const TeacherPage: React.FC = () => {
 
       {/* Assignment Modal */}
       {isAssignmentModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">إضافة واجب جديد</h2>
-            <form onSubmit={handleAddAssignment} className="space-y-4">
-              <input 
-                type="text" 
-                required 
-                placeholder="عنوان الواجب" 
-                value={newAssignment.title} 
-                onChange={e => setNewAssignment({...newAssignment, title: e.target.value})} 
-                className="w-full p-3 border rounded-xl" 
-              />
-              <textarea 
-                placeholder="وصف الواجب" 
-                value={newAssignment.description} 
-                onChange={e => setNewAssignment({...newAssignment, description: e.target.value})} 
-                className="w-full p-3 border rounded-xl h-24" 
-              />
-              <input 
-                type="datetime-local" 
-                placeholder="تاريخ الاستحقاق" 
-                value={newAssignment.dueDate} 
-                onChange={e => setNewAssignment({...newAssignment, dueDate: e.target.value})} 
-                className="w-full p-3 border rounded-xl" 
-              />
-              <input 
-                type="number" 
-                placeholder="الدرجة الكاملة" 
-                value={newAssignment.maxScore} 
-                onChange={e => setNewAssignment({...newAssignment, maxScore: parseInt(e.target.value) || 100})} 
-                className="w-full p-3 border rounded-xl" 
-              />
-              <div className="flex gap-2 mt-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in zoom-in-95 duration-300 border border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-green-500 to-green-600 rounded-xl">
+                <FileCheck className="text-white" size={24} />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">إضافة واجب جديد</h2>
+            </div>
+            <form onSubmit={handleAddAssignment} className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">عنوان الواجب *</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="أدخل عنوان الواجب" 
+                  value={newAssignment.title} 
+                  onChange={e => setNewAssignment({...newAssignment, title: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">وصف الواجب</label>
+                <textarea 
+                  placeholder="أدخل وصفاً للواجب" 
+                  value={newAssignment.description} 
+                  onChange={e => setNewAssignment({...newAssignment, description: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all outline-none text-gray-800 placeholder-gray-400 resize-none h-24" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">تاريخ الاستحقاق</label>
+                <input 
+                  type="datetime-local" 
+                  value={newAssignment.dueDate} 
+                  onChange={e => setNewAssignment({...newAssignment, dueDate: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all outline-none text-gray-800" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">الدرجة الكاملة</label>
+                <input 
+                  type="number" 
+                  placeholder="100" 
+                  value={newAssignment.maxScore} 
+                  onChange={e => setNewAssignment({...newAssignment, maxScore: parseInt(e.target.value) || 100})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-4 focus:ring-green-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
                 <button 
                   type="button" 
                   onClick={() => setIsAssignmentModalOpen(false)} 
-                  className="flex-1 py-2 bg-gray-100 rounded-xl text-gray-600"
+                  className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 font-semibold transition-all shadow-sm hover:shadow"
                 >
                   إلغاء
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 py-2 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700"
+                  className="flex-1 py-3.5 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                 >
-                  حفظ
+                  💾 حفظ الواجب
                 </button>
               </div>
             </form>
@@ -774,56 +838,78 @@ export const TeacherPage: React.FC = () => {
 
       {/* Quiz Modal */}
       {isQuizModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">إضافة اختبار جديد</h2>
-            <form onSubmit={handleAddQuiz} className="space-y-4">
-              <input 
-                type="text" 
-                required 
-                placeholder="عنوان الاختبار" 
-                value={newQuiz.title} 
-                onChange={e => setNewQuiz({...newQuiz, title: e.target.value})} 
-                className="w-full p-3 border rounded-xl" 
-              />
-              <textarea 
-                placeholder="وصف الاختبار" 
-                value={newQuiz.description} 
-                onChange={e => setNewQuiz({...newQuiz, description: e.target.value})} 
-                className="w-full p-3 border rounded-xl h-24" 
-              />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in zoom-in-95 duration-300 border border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl">
+                <Brain className="text-white" size={24} />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">إضافة اختبار جديد</h2>
+            </div>
+            <form onSubmit={handleAddQuiz} className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">عنوان الاختبار *</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="أدخل عنوان الاختبار" 
+                  value={newQuiz.title} 
+                  onChange={e => setNewQuiz({...newQuiz, title: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">وصف الاختبار</label>
+                <textarea 
+                  placeholder="أدخل وصفاً للاختبار" 
+                  value={newQuiz.description} 
+                  onChange={e => setNewQuiz({...newQuiz, description: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400 resize-none h-24" 
+                />
+              </div>
               <div className="grid grid-cols-2 gap-4">
-                <input 
-                  type="number" 
-                  placeholder="الوقت بالدقائق" 
-                  value={newQuiz.timeLimit} 
-                  onChange={e => setNewQuiz({...newQuiz, timeLimit: parseInt(e.target.value) || 0})} 
-                  className="w-full p-3 border rounded-xl" 
-                />
-                <input 
-                  type="number" 
-                  placeholder="درجة النجاح" 
-                  value={newQuiz.passingScore} 
-                  onChange={e => setNewQuiz({...newQuiz, passingScore: parseInt(e.target.value) || 60})} 
-                  className="w-full p-3 border rounded-xl" 
-                />
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">الوقت (دقائق)</label>
+                  <input 
+                    type="number" 
+                    placeholder="0" 
+                    value={newQuiz.timeLimit} 
+                    onChange={e => setNewQuiz({...newQuiz, timeLimit: parseInt(e.target.value) || 0})} 
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">درجة النجاح</label>
+                  <input 
+                    type="number" 
+                    placeholder="60" 
+                    value={newQuiz.passingScore} 
+                    onChange={e => setNewQuiz({...newQuiz, passingScore: parseInt(e.target.value) || 60})} 
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                  />
+                </div>
               </div>
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-800">
-                ملاحظة: يمكنك إضافة الأسئلة لاحقاً بعد إنشاء الاختبار
+              <div className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-200 rounded-xl">
+                <div className="flex items-start gap-2">
+                  <Brain className="text-yellow-600 mt-0.5 flex-shrink-0" size={18} />
+                  <p className="text-sm font-medium text-yellow-800">
+                    ملاحظة: يمكنك إضافة الأسئلة لاحقاً بعد إنشاء الاختبار
+                  </p>
+                </div>
               </div>
-              <div className="flex gap-2 mt-4">
+              <div className="flex gap-3 pt-4">
                 <button 
                   type="button" 
                   onClick={() => setIsQuizModalOpen(false)} 
-                  className="flex-1 py-2 bg-gray-100 rounded-xl text-gray-600"
+                  className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 font-semibold transition-all shadow-sm hover:shadow"
                 >
                   إلغاء
                 </button>
                 <button 
                   type="submit" 
-                  className="flex-1 py-2 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700"
+                  className="flex-1 py-3.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                 >
-                  حفظ
+                  💾 حفظ الاختبار
                 </button>
               </div>
             </form>

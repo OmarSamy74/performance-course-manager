@@ -240,24 +240,28 @@ export const SalesPage: React.FC = () => {
     <div className="min-h-screen bg-slate-50 pb-12">
       <div className="container mx-auto p-4 md:p-8 space-y-8">
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <StatCard title="إجمالي العملاء" value={stats.total} icon={<Users className="text-blue-600" />} bgColor="bg-blue-50" textColor="text-blue-900" />
           <StatCard title="عملاء جدد" value={stats.newLeads} icon={<Target className="text-purple-600" />} bgColor="bg-purple-50" textColor="text-purple-900" />
           <StatCard title="مهتمين" value={stats.interested} icon={<Eye className="text-orange-600" />} bgColor="bg-orange-50" textColor="text-orange-900" />
           <StatCard title="نسبة التحويل" value={`${stats.conversionRate}%`} subValue={`${stats.converted} طالب`} icon={<CheckCircle2 className="text-green-600" />} bgColor="bg-green-50" textColor="text-green-900" />
         </div>
 
-        {/* Actions */}
-        <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4">
-          <h2 className="text-2xl font-bold text-gray-800">قائمة العملاء المحتملين</h2>
-          <div className="flex gap-3 flex-wrap">
-            <div className="relative">
-              <input type="text" placeholder="بحث..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-4 pr-10 py-2 border rounded-xl w-64 bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none" />
-              <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+        {/* Excel Import Button - Prominent */}
+        <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-4">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-600 p-3 rounded-xl">
+                <FileSpreadsheet className="text-white" size={28} />
+              </div>
+              <div>
+                <h3 className="font-bold text-gray-800 text-lg">استيراد العملاء من Excel</h3>
+                <p className="text-sm text-gray-600">قم برفع ملف Excel يحتوي على بيانات العملاء (الاسم، الهاتف، المصدر، الملاحظات)</p>
+              </div>
             </div>
-            <label className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-blue-200 transition-all cursor-pointer font-semibold">
-              <FileSpreadsheet size={20} />
-              <span>{isUploading ? 'جاري الاستيراد...' : 'استيراد Excel'}</span>
+            <label className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl shadow-lg shadow-blue-200 transition-all cursor-pointer font-bold text-base min-w-[180px] justify-center border-2 border-blue-500 hover:scale-105 transform">
+              <FileSpreadsheet size={22} className="flex-shrink-0" />
+              <span className="whitespace-nowrap">{isUploading ? '⏳ جاري الاستيراد...' : '📊 رفع ملف Excel'}</span>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -267,7 +271,30 @@ export const SalesPage: React.FC = () => {
                 className="hidden"
               />
             </label>
-            <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-green-200 transition-all font-semibold">
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-4 mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">قائمة العملاء المحتملين</h2>
+          <div className="flex gap-3 flex-wrap items-center">
+            <div className="relative">
+              <input type="text" placeholder="بحث..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-4 pr-10 py-2 border rounded-xl w-64 bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none" />
+              <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+            </div>
+            <label className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl shadow-lg shadow-blue-200 transition-all cursor-pointer font-bold text-base min-w-[160px] justify-center border-2 border-blue-500">
+              <FileSpreadsheet size={22} className="flex-shrink-0" />
+              <span className="whitespace-nowrap">{isUploading ? 'جاري الاستيراد...' : '📊 استيراد Excel'}</span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileUpload}
+                disabled={isUploading}
+                className="hidden"
+              />
+            </label>
+            <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl shadow-lg shadow-green-200 transition-all font-bold text-base">
               <Plus size={20} /> <span>إضافة عميل</span>
             </button>
           </div>
@@ -344,29 +371,82 @@ export const SalesPage: React.FC = () => {
 
       {/* Add Lead Modal */}
       {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">إضافة عميل جديد</h2>
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center gap-2 text-blue-800 text-sm mb-2">
-                <FileSpreadsheet size={16} />
-                <span className="font-semibold">تنسيق ملف Excel:</span>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in zoom-in-95 duration-300 border border-gray-100">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl">
+                <Plus className="text-white" size={24} />
               </div>
-              <div className="text-xs text-blue-700 space-y-1">
+              <h2 className="text-2xl font-bold text-gray-800">إضافة عميل جديد</h2>
+            </div>
+            <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
+              <div className="flex items-center gap-2 text-blue-800 text-sm mb-3">
+                <FileSpreadsheet size={18} />
+                <span className="font-bold">تنسيق ملف Excel:</span>
+              </div>
+              <div className="text-xs text-blue-700 space-y-1.5 font-medium">
                 <p>• العمود الأول: <strong>الاسم</strong> (مطلوب)</p>
                 <p>• العمود الثاني: <strong>رقم الهاتف</strong> (مطلوب)</p>
                 <p>• العمود الثالث: <strong>المصدر</strong> (اختياري)</p>
                 <p>• العمود الرابع: <strong>ملاحظات</strong> (اختياري)</p>
               </div>
             </div>
-            <form onSubmit={handleAddLead} className="space-y-3">
-              <input type="text" required placeholder="اسم العميل" value={newLead.name} onChange={e => setNewLead({...newLead, name: e.target.value})} className="w-full p-3 border rounded-xl" />
-              <input type="text" required placeholder="رقم الهاتف" value={newLead.phone} onChange={e => setNewLead({...newLead, phone: e.target.value})} className="w-full p-3 border rounded-xl" />
-              <input type="text" placeholder="المصدر (مثلاً: فيسبوك، إحالة)" value={newLead.source} onChange={e => setNewLead({...newLead, source: e.target.value})} className="w-full p-3 border rounded-xl" />
-              <textarea placeholder="ملاحظات" value={newLead.notes} onChange={e => setNewLead({...newLead, notes: e.target.value})} className="w-full p-3 border rounded-xl h-24" />
-              <div className="flex gap-2 mt-4">
-                <button type="button" onClick={() => setIsAddModalOpen(false)} className="flex-1 py-2 bg-gray-100 rounded-xl text-gray-600">إلغاء</button>
-                <button type="submit" className="flex-1 py-2 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700">حفظ</button>
+            <form onSubmit={handleAddLead} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">اسم العميل *</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="أدخل اسم العميل" 
+                  value={newLead.name} 
+                  onChange={e => setNewLead({...newLead, name: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">رقم الهاتف *</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="01xxxxxxxxx" 
+                  value={newLead.phone} 
+                  onChange={e => setNewLead({...newLead, phone: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">المصدر</label>
+                <input 
+                  type="text" 
+                  placeholder="مثلاً: فيسبوك، إحالة، إعلان" 
+                  value={newLead.source} 
+                  onChange={e => setNewLead({...newLead, source: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">ملاحظات</label>
+                <textarea 
+                  placeholder="أدخل أي ملاحظات إضافية" 
+                  value={newLead.notes} 
+                  onChange={e => setNewLead({...newLead, notes: e.target.value})} 
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none text-gray-800 placeholder-gray-400 resize-none h-24" 
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button 
+                  type="button" 
+                  onClick={() => setIsAddModalOpen(false)} 
+                  className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 font-semibold transition-all shadow-sm hover:shadow"
+                >
+                  إلغاء
+                </button>
+                <button 
+                  type="submit" 
+                  className="flex-1 py-3.5 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                >
+                  💾 حفظ العميل
+                </button>
               </div>
             </form>
           </div>

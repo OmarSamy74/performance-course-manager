@@ -348,54 +348,76 @@ export const AdminPage: React.FC = () => {
       
         {/* Add Student Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-              <h2 className="text-2xl font-bold mb-6 text-gray-800">إضافة طالب جديد</h2>
-              <form onSubmit={handleAddStudent} className="space-y-4">
-                <input 
-                  type="text" 
-                  required 
-                  value={newName} 
-                  onChange={(e) => setNewName(e.target.value)} 
-                  className="w-full p-3 border rounded-xl" 
-                  placeholder="الاسم الثلاثي" 
-                />
-                <input 
-                  type="text" 
-                  value={newPhone} 
-                  onChange={(e) => setNewPhone(e.target.value)} 
-                  className="w-full p-3 border rounded-xl" 
-                  placeholder="01xxxxxxxxx" 
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <button 
-                    type="button" 
-                    onClick={() => setNewPlan(PaymentPlan.HALF)} 
-                    className={`p-3 rounded-xl border-2 ${newPlan === PaymentPlan.HALF ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-200'}`}
-                  >
-                    50% مقدم
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setNewPlan(PaymentPlan.FULL)} 
-                    className={`p-3 rounded-xl border-2 ${newPlan === PaymentPlan.FULL ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-200'}`}
-                  >
-                    كامل
-                  </button>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 animate-in zoom-in-95 duration-300 border border-gray-100">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-gradient-to-br from-red-500 to-red-600 rounded-xl">
+                  <Plus className="text-white" size={24} />
                 </div>
-                <div className="flex gap-3 mt-4">
+                <h2 className="text-2xl font-bold text-gray-800">إضافة طالب جديد</h2>
+              </div>
+              <form onSubmit={handleAddStudent} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">الاسم الثلاثي *</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={newName} 
+                    onChange={(e) => setNewName(e.target.value)} 
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                    placeholder="أدخل الاسم الثلاثي" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">رقم الهاتف</label>
+                  <input 
+                    type="text" 
+                    value={newPhone} 
+                    onChange={(e) => setNewPhone(e.target.value)} 
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-4 focus:ring-red-100 transition-all outline-none text-gray-800 placeholder-gray-400" 
+                    placeholder="01xxxxxxxxx" 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">خطة الدفع</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button 
+                      type="button" 
+                      onClick={() => setNewPlan(PaymentPlan.HALF)} 
+                      className={`p-4 rounded-xl border-2 transition-all font-semibold ${
+                        newPlan === PaymentPlan.HALF 
+                          ? 'border-red-500 bg-gradient-to-br from-red-50 to-red-100 text-red-700 shadow-md scale-105' 
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
+                      }`}
+                    >
+                      💰 50% مقدم
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setNewPlan(PaymentPlan.FULL)} 
+                      className={`p-4 rounded-xl border-2 transition-all font-semibold ${
+                        newPlan === PaymentPlan.FULL 
+                          ? 'border-red-500 bg-gradient-to-br from-red-50 to-red-100 text-red-700 shadow-md scale-105' 
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
+                      }`}
+                    >
+                      💳 كامل
+                    </button>
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
                   <button 
                     type="button" 
                     onClick={() => setIsModalOpen(false)} 
-                    className="flex-1 py-3 text-gray-600 bg-gray-100 rounded-xl"
+                    className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 font-semibold transition-all shadow-sm hover:shadow"
                   >
                     إلغاء
                   </button>
                   <button 
                     type="submit" 
-                    className="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700"
+                    className="flex-1 py-3.5 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   >
-                    حفظ
+                    💾 حفظ الطالب
                   </button>
                 </div>
               </form>
