@@ -311,7 +311,8 @@ export async function createById<T extends { id?: string }>(
     const id = data.id || randomUUID();
     const transformed = transformToDb(tableName, { ...data, id });
     
-    const columns = Object.keys(transformed).join(', ');
+    // Quote column names to prevent PostgreSQL from lowercasing them
+    const columns = Object.keys(transformed).map(col => `"${col}"`).join(', ');
     const values = Object.values(transformed);
     const placeholders = values.map((_, i) => `$${i + 1}`).join(', ');
     
@@ -344,10 +345,11 @@ export async function updateById<T extends { id: string }>(
       return await findById<T>(tableName, id);
     }
     
-    const setClause = columns.map((col, i) => `${col} = $${i + 1}`).join(', ');
+    // Quote column names to prevent PostgreSQL from lowercasing them
+    const setClause = columns.map((col, i) => `"${col}" = $${i + 1}`).join(', ');
     const values = [...Object.values(transformed), id];
     
-    const query = `UPDATE ${tableName} SET ${setClause}, updated_at = CURRENT_TIMESTAMP WHERE id = $${values.length} RETURNING *`;
+    const query = `UPDATE ${tableName} SET ${setClause}, "updated_at" = CURRENT_TIMESTAMP WHERE "id" = $${values.length} RETURNING *`;
     const result = await dbPool.query(query, values);
     
     if (result.rows.length === 0) {
@@ -608,12 +610,17 @@ function transformToDb(tableName: string, data: any): any {
   }
   
   // Remove undefined values and invalid UUID empty strings
+  // Also remove fields that don't belong in database tables
   Object.keys(transformed).forEach(key => {
     if (transformed[key] === undefined) {
       delete transformed[key];
     }
     // Remove empty strings for UUID columns (they should be null instead)
     if ((key === 'user_id' || key === 'student_id' || key === 'assignment_id' || key === 'quiz_id') && transformed[key] === '') {
+      delete transformed[key];
+    }
+    // Remove installments field - it's stored in a separate table
+    if (key === 'installments') {
       delete transformed[key];
     }
   });
