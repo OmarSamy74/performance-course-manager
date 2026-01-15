@@ -1,6 +1,27 @@
-const API_BASE = import.meta.env.DEV 
-  ? 'http://localhost:3001/api' 
-  : (import.meta.env.VITE_API_URL || '/api');
+// Smart API base URL detection
+const getApiBase = () => {
+  // Development: always use local server
+  if (import.meta.env.DEV) {
+    return 'http://localhost:3001/api';
+  }
+  
+  // Production: check for explicit API URL first
+  if (import.meta.env.VITE_API_URL) {
+    const url = import.meta.env.VITE_API_URL;
+    // Ensure it ends with /api
+    return url.endsWith('/api') ? url : `${url}/api`;
+  }
+  
+  // Check if we're on Netlify (has .netlify in hostname)
+  if (typeof window !== 'undefined' && window.location.hostname.includes('netlify')) {
+    return '/.netlify/functions';
+  }
+  
+  // Default: assume same origin (Railway serves both frontend and API)
+  return '/api';
+};
+
+const API_BASE = getApiBase();
 
 let authToken: string | null = localStorage.getItem('auth_token') || null;
 
@@ -21,7 +42,18 @@ async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${API_BASE}${endpoint}`;
+  // For Netlify functions, endpoints map directly to function names
+  // e.g., /auth -> /.netlify/functions/auth
+  const isNetlify = API_BASE === '/.netlify/functions';
+  let finalEndpoint = endpoint;
+  
+  if (isNetlify) {
+    // Remove leading slash and any /api prefix
+    finalEndpoint = endpoint.replace(/^\/api\//, '').replace(/^\//, '');
+  }
+  
+  const url = `${API_BASE}${finalEndpoint}`;
+  
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...options.headers,
@@ -31,17 +63,31 @@ async function request<T>(
     headers['Authorization'] = `Bearer ${authToken}`;
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-    throw new Error(error.error || `HTTP ${response.status}`);
+    if (!response.ok) {
+      // Handle 404 specifically
+      if (response.status === 404) {
+        console.error(`404 Error: ${url} not found. Check API_BASE: ${API_BASE}`);
+        throw new Error(`API endpoint not found: ${url}. Please check your VITE_API_URL environment variable.`);
+      }
+      
+      const error = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+      throw new Error(error.error || error.message || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error: any) {
+    // Enhanced error logging
+    if (error.message && !error.message.includes('API endpoint')) {
+      console.error(`API Request failed: ${url}`, error);
+    }
+    throw error;
   }
-
-  return response.json();
 }
 
 // Auth API
