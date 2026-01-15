@@ -165,6 +165,7 @@ function transformRow<T>(tableName: string, row: any): T {
   if (row.student_id) transformed.studentId = row.student_id;
   if (row.created_at) transformed.createdAt = row.created_at;
   if (row.updated_at) transformed.updatedAt = row.updated_at;
+  if (row.expires_at) transformed.expiresAt = row.expires_at;
   if (row.last_contacted_at) transformed.lastContactedAt = row.last_contacted_at;
   if (row.due_date) transformed.dueDate = row.due_date;
   if (row.submitted_at) transformed.submittedAt = row.submitted_at;
@@ -191,6 +192,7 @@ function transformRow<T>(tableName: string, row: any): T {
   delete transformed.student_id;
   delete transformed.created_at;
   delete transformed.updated_at;
+  delete transformed.expires_at;
   delete transformed.last_contacted_at;
   delete transformed.due_date;
   delete transformed.submitted_at;
@@ -257,6 +259,10 @@ function transformToDb(tableName: string, data: any): any {
   if (transformed.updatedAt !== undefined) {
     transformed.updated_at = transformed.updatedAt;
     delete transformed.updatedAt;
+  }
+  if (transformed.expiresAt !== undefined) {
+    transformed.expires_at = transformed.expiresAt;
+    delete transformed.expiresAt;
   }
   if (transformed.lastContactedAt !== undefined) {
     transformed.last_contacted_at = transformed.lastContactedAt;
