@@ -1,6 +1,6 @@
 const API_BASE = import.meta.env.DEV 
-  ? 'http://localhost:8888/.netlify/functions' 
-  : '/.netlify/functions';
+  ? 'http://localhost:3001/api' 
+  : (import.meta.env.VITE_API_URL || '/api');
 
 let authToken: string | null = localStorage.getItem('auth_token') || null;
 

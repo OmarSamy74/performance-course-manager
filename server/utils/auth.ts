@@ -1,5 +1,5 @@
-import { readData, writeData, findById, createById, updateById, deleteById } from './storage';
-import { User, UserRole } from '../../../types';
+import { readData, findById, createById, deleteById } from './storage.js';
+import { User, UserRole } from '../../types.js';
 
 export interface Session {
   id: string;
@@ -100,16 +100,16 @@ export async function getUserFromSession(token: string): Promise<User | null> {
 /**
  * Verify user has required role
  */
-export function hasRole(session: Session | null, requiredRole: UserRole): boolean {
-  if (!session) return false;
+export function hasRole(userRole: UserRole, requiredRole: UserRole): boolean {
+  if (!userRole) return false;
   
   // Admin has access to everything
-  if (session.role === UserRole.ADMIN) return true;
+  if (userRole === UserRole.ADMIN) return true;
   
   // Teacher has access to teacher and student features
-  if (session.role === UserRole.TEACHER && requiredRole !== UserRole.ADMIN) return true;
+  if (userRole === UserRole.TEACHER && requiredRole !== UserRole.ADMIN) return true;
   
-  return session.role === requiredRole;
+  return userRole === requiredRole;
 }
 
 /**

@@ -23,7 +23,7 @@ export const handler: Handler = async (event, context) => {
         return errorResponse('No authorization token provided', 401);
       }
 
-      const user = getUserFromSession(token);
+      const user = await getUserFromSession(token);
       if (!user) {
         return errorResponse('Invalid or expired session', 401);
       }
@@ -54,7 +54,7 @@ export const handler: Handler = async (event, context) => {
         user = { id: 'sales1', username: 'Sales Agent', role: UserRole.SALES };
       } else {
         // Check students
-        const students = readData<any>('students');
+        const students = await readData<any>('students');
         const student = students.find((s: any) => s.phone === username);
         
         if (student && password === student.phone) {
@@ -71,15 +71,13 @@ export const handler: Handler = async (event, context) => {
         return errorResponse('Invalid credentials', 401);
       }
 
-      // Create or update user in users.json
-      const users = readData<User>('users');
-      const existingUser = findById(users, user.id);
+      // Create or update user in Firestore
+      const existingUser = await findById<User>('users', user.id);
       if (!existingUser) {
-        users.push(user);
-        writeData('users', users);
+        await createById('users', user);
       }
 
-      const session = createSession(user.id, user.role);
+      const session = await createSession(user.id, user.role);
 
       return jsonResponse({
         user,

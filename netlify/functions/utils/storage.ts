@@ -1,116 +1,113 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
-// Get data directory - works in both local and Netlify environment
-function getDataDir() {
-  // In Netlify Functions, use process.cwd() which points to the site root
-  // The functions are in netlify/functions/, so data should be in netlify/functions/data
-  if (process.env.NETLIFY) {
-    // Production Netlify environment
-    return path.join(process.cwd(), 'netlify/functions/data');
-  } else {
-    // Local development
-    return path.join(__dirname, '../data');
-  }
-}
-
-// Get data directory (lazy initialization)
-function getDataDirectory() {
-  const dataDir = getDataDir();
-  // Ensure data directory exists
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-  return dataDir;
-}
+// Firebase-based storage - replaces JSON file storage
+import { 
+  getCollection, 
+  getDocument, 
+  createDocument, 
+  updateDocument, 
+  deleteDocument 
+} from './firebase';
 
 /**
- * Read JSON data from file
+ * Read all documents from a Firestore collection
  */
-export function readData<T>(filename: string): T[] {
-  const DATA_DIR = getDataDirectory();
-  const filePath = path.join(DATA_DIR, `${filename}.json`);
-  
-  if (!fs.existsSync(filePath)) {
-    // Create empty file if it doesn't exist
-    writeData(filename, []);
-    return [];
-  }
-  
+export async function readData<T extends { id: string }>(collectionName: string): Promise<T[]> {
   try {
-    const data = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(data) as T[];
+    return await getCollection<T>(collectionName);
   } catch (error) {
-    console.error(`Error reading ${filename}:`, error);
+    console.error(`Error reading ${collectionName}:`, error);
     return [];
   }
 }
 
 /**
- * Write JSON data to file (atomic operation)
+ * Write/Update documents in Firestore collection
+ * Note: This replaces the entire collection approach - for individual updates, use updateById
  */
-export function writeData<T>(filename: string, data: T[]): void {
-  const DATA_DIR = getDataDirectory();
-  const filePath = path.join(DATA_DIR, `${filename}.json`);
-  const tempPath = `${filePath}.tmp`;
-  
+export async function writeData<T extends { id: string }>(collectionName: string, data: T[]): Promise<void> {
   try {
-    // Write to temp file first
-    fs.writeFileSync(tempPath, JSON.stringify(data, null, 2), 'utf-8');
-    // Atomic move
-    fs.renameSync(tempPath, filePath);
-  } catch (error) {
-    console.error(`Error writing ${filename}:`, error);
-    // Clean up temp file if it exists
-    if (fs.existsSync(tempPath)) {
-      fs.unlinkSync(tempPath);
+    // Get existing documents
+    const existing = await getCollection<T>(collectionName);
+    const existingIds = new Set(existing.map(doc => doc.id));
+    const newIds = new Set(data.map(doc => doc.id));
+
+    // Delete documents that are no longer in the new data
+    const toDelete = existing.filter(doc => !newIds.has(doc.id));
+    for (const doc of toDelete) {
+      await deleteDocument(collectionName, doc.id);
     }
+
+    // Create or update documents
+    for (const doc of data) {
+      const { id, ...docData } = doc;
+      if (existingIds.has(id)) {
+        await updateDocument(collectionName, id, docData);
+      } else {
+        await createDocument(collectionName, { id, ...docData });
+      }
+    }
+  } catch (error) {
+    console.error(`Error writing ${collectionName}:`, error);
     throw error;
   }
 }
 
 /**
- * Find item by ID
+ * Find item by ID from Firestore
  */
-export function findById<T extends { id: string }>(items: T[], id: string): T | undefined {
-  return items.find(item => item.id === id);
+export async function findById<T extends { id: string }>(
+  collectionName: string, 
+  id: string
+): Promise<T | null> {
+  try {
+    return await getDocument<T>(collectionName, id);
+  } catch (error) {
+    console.error(`Error finding ${collectionName}/${id}:`, error);
+    return null;
+  }
 }
 
 /**
- * Update item by ID
+ * Update item by ID in Firestore
  */
-export function updateById<T extends { id: string }>(items: T[], id: string, updates: Partial<T>): T | null {
-  const index = items.findIndex(item => item.id === id);
-  if (index === -1) return null;
-  
-  items[index] = { ...items[index], ...updates };
-  return items[index];
+export async function updateById<T extends { id: string }>(
+  collectionName: string,
+  id: string, 
+  updates: Partial<T>
+): Promise<T | null> {
+  try {
+    return await updateDocument<T>(collectionName, id, updates);
+  } catch (error) {
+    console.error(`Error updating ${collectionName}/${id}:`, error);
+    return null;
+  }
 }
 
 /**
- * Delete item by ID
+ * Delete item by ID from Firestore
  */
-export function deleteById<T extends { id: string }>(items: T[], id: string): boolean {
-  const index = items.findIndex(item => item.id === id);
-  if (index === -1) return false;
-  
-  items.splice(index, 1);
-  return true;
+export async function deleteById(
+  collectionName: string,
+  id: string
+): Promise<boolean> {
+  try {
+    return await deleteDocument(collectionName, id);
+  } catch (error) {
+    console.error(`Error deleting ${collectionName}/${id}:`, error);
+    return false;
+  }
 }
 
 /**
- * Create backup of data file
+ * Create a new document in Firestore
  */
-export function backupData(filename: string): void {
-  const DATA_DIR = getDataDirectory();
-  const filePath = path.join(DATA_DIR, `${filename}.json`);
-  const backupPath = path.join(DATA_DIR, `${filename}.backup.json`);
-  
-  if (fs.existsSync(filePath)) {
-    try {
-      fs.copyFileSync(filePath, backupPath);
-    } catch (error) {
-      console.error(`Error backing up ${filename}:`, error);
-    }
+export async function createById<T extends { id?: string }>(
+  collectionName: string,
+  data: T
+): Promise<T & { id: string }> {
+  try {
+    return await createDocument<T>(collectionName, data);
+  } catch (error) {
+    console.error(`Error creating ${collectionName}:`, error);
+    throw error;
   }
 }

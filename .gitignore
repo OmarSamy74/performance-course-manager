@@ -1,41 +1,38 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
 # Dependencies
-node_modules
-dist
-dist-ssr
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+build/
 
 # Environment variables
 .env
 .env.local
 .env.*.local
-*.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Data storage (local development)
+data/
+*.json
+!package.json
+!tsconfig.json
+!railway.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
 
-# Netlify
-.netlify
+# Logs
+logs/
+*.log
+npm-debug.log*
 
-# Data files (keep structure but ignore actual data in production)
-# netlify/functions/data/*.json
-# !netlify/functions/data/.gitkeep
-
-# Uploads
-netlify/functions/uploads/*
-!netlify/functions/uploads/.gitkeep
+# Railway
+.railway/
