@@ -470,18 +470,38 @@ function transformRow<T>(tableName: string, row: any): T {
 }
 
 /**
+ * Validate UUID format
+ */
+function isValidUUID(value: any): boolean {
+  if (!value || typeof value !== 'string') return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(value);
+}
+
+/**
  * Transform application data to database format
  */
 function transformToDb(tableName: string, data: any): any {
   const transformed: any = { ...data };
   
   // Convert camelCase to snake_case
+  // Only include UUID fields if they have valid UUID values
   if (transformed.userId !== undefined) {
-    transformed.user_id = transformed.userId;
+    if (isValidUUID(transformed.userId)) {
+      transformed.user_id = transformed.userId;
+    } else if (transformed.userId === null || transformed.userId === '') {
+      // Allow null for optional UUID fields, but skip empty strings
+      transformed.user_id = null;
+    }
     delete transformed.userId;
   }
   if (transformed.studentId !== undefined) {
-    transformed.student_id = transformed.studentId;
+    if (isValidUUID(transformed.studentId)) {
+      transformed.student_id = transformed.studentId;
+    } else if (transformed.studentId === null || transformed.studentId === '') {
+      // Allow null for optional UUID fields, but skip empty strings
+      transformed.student_id = null;
+    }
     delete transformed.studentId;
   }
   if (transformed.createdAt !== undefined) {
@@ -557,11 +577,19 @@ function transformToDb(tableName: string, data: any): any {
     delete transformed.maxScore;
   }
   if (transformed.assignmentId !== undefined) {
-    transformed.assignment_id = transformed.assignmentId;
+    if (isValidUUID(transformed.assignmentId)) {
+      transformed.assignment_id = transformed.assignmentId;
+    } else if (transformed.assignmentId === null || transformed.assignmentId === '') {
+      transformed.assignment_id = null;
+    }
     delete transformed.assignmentId;
   }
   if (transformed.quizId !== undefined) {
-    transformed.quiz_id = transformed.quizId;
+    if (isValidUUID(transformed.quizId)) {
+      transformed.quiz_id = transformed.quizId;
+    } else if (transformed.quizId === null || transformed.quizId === '') {
+      transformed.quiz_id = null;
+    }
     delete transformed.quizId;
   }
   if (transformed.proofUrl !== undefined) {
@@ -573,9 +601,13 @@ function transformToDb(tableName: string, data: any): any {
     delete transformed.installmentKey;
   }
   
-  // Remove undefined values
+  // Remove undefined values and invalid UUID empty strings
   Object.keys(transformed).forEach(key => {
     if (transformed[key] === undefined) {
+      delete transformed[key];
+    }
+    // Remove empty strings for UUID columns (they should be null instead)
+    if ((key === 'user_id' || key === 'student_id' || key === 'assignment_id' || key === 'quiz_id') && transformed[key] === '') {
       delete transformed[key];
     }
   });
@@ -642,13 +674,20 @@ export async function saveStudentWithInstallments(student: any) {
       await client.query('BEGIN');
       
       // Save or update student
-      const studentData = {
+      // Only include user_id if it's a valid UUID
+      const studentData: any = {
         id: student.id,
         name: student.name,
         phone: student.phone,
         plan: student.plan,
-        user_id: student.userId,
       };
+      
+      // Only add user_id if it's a valid UUID
+      if (student.userId && isValidUUID(student.userId)) {
+        studentData.user_id = student.userId;
+      } else if (student.userId === null || student.userId === undefined) {
+        studentData.user_id = null;
+      }
       
       const studentExists = await client.query('SELECT id FROM students WHERE id = $1', [student.id]);
       

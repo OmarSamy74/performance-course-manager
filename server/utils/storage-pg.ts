@@ -181,9 +181,13 @@ function transformRow<T>(tableName: string, row: any): T {
 function transformToDb(tableName: string, data: any): any {
   const transformed: any = { ...data };
   
-  // Remove undefined values
+  // Remove undefined values and invalid UUID empty strings
   Object.keys(transformed).forEach(key => {
     if (transformed[key] === undefined) {
+      delete transformed[key];
+    }
+    // Remove empty strings for UUID columns (they should be null instead)
+    if ((key === 'user_id' || key === 'student_id' || key === 'assignment_id' || key === 'quiz_id') && transformed[key] === '') {
       delete transformed[key];
     }
   });
@@ -246,13 +250,20 @@ export async function saveStudentWithInstallments(student: any) {
       await client.query('BEGIN');
       
       // Save or update student
-      const studentData = {
+      // Only include user_id if it's a valid UUID
+      const studentData: any = {
         id: student.id,
         name: student.name,
         phone: student.phone,
         plan: student.plan,
-        user_id: student.userId,
       };
+      
+      // Only add user_id if it's a valid UUID
+      if (student.userId && isValidUUID(student.userId)) {
+        studentData.user_id = student.userId;
+      } else if (student.userId === null || student.userId === undefined) {
+        studentData.user_id = null;
+      }
       
       const studentExists = await client.query('SELECT id FROM students WHERE id = $1', [student.id]);
       
