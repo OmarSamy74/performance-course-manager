@@ -7,7 +7,13 @@ const getApiBase = () => {
   
   // Production: check for explicit API URL first
   if (import.meta.env.VITE_API_URL) {
-    const url = import.meta.env.VITE_API_URL;
+    let url = import.meta.env.VITE_API_URL.trim();
+    
+    // Add protocol if missing (assume https for production)
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = `https://${url}`;
+    }
+    
     // Ensure it ends with /api
     return url.endsWith('/api') ? url : `${url}/api`;
   }
