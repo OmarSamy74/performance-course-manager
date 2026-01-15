@@ -77,7 +77,10 @@ export async function readData<T extends { id: string }>(collectionName: string)
     
     // Special handling for students (need installments)
     if (collectionName === 'students') {
-      const dbPool = await getPool();
+      const pgStorage = await getPgStorage();
+      if (!pgStorage) return [];
+      
+      const dbPool = await pgStorage.getPool();
       const result = await dbPool.query('SELECT id FROM students ORDER BY created_at DESC');
       const students: T[] = [];
       

@@ -4,7 +4,7 @@ import { randomUUID } from 'crypto';
 
 // Lazy load pool to avoid initialization errors
 let pool: any = null;
-async function getPool() {
+export async function getPool() {
   if (!pool) {
     const connection = await import('../db/connection.js');
     pool = connection.default;
