@@ -13,7 +13,7 @@ async function getPgStorage() {
   if (!USE_POSTGRES) return null;
   
   if (!pgStoragePromise) {
-    pgStoragePromise = import('../../server/utils/storage-pg.js').catch((error) => {
+    pgStoragePromise = import('./storage-pg.js').catch((error) => {
       console.warn('⚠️  PostgreSQL import failed, falling back to file storage:', error);
       return null;
     });
@@ -72,8 +72,9 @@ export async function readData<T extends { id: string }>(collectionName: string)
     
     // Special handling for students (need installments)
     if (collectionName === 'students') {
-      const { getPool } = pgStorage;
-      const dbPool = await getPool();
+      const dbPool = await pgStorage.getPool();
+      if (!dbPool) return [];
+      
       const result = await dbPool.query('SELECT id FROM students ORDER BY created_at DESC');
       const students: T[] = [];
       
