@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 /* Base Styles */
 * {
@@ -281,4 +282,96 @@ body {
 [dir="ltr"] {
   direction: ltr;
   text-align: left;
+}
+
+/* Neumorphic Login Form Styles */
+.login-container-neumorphic {
+  background: #e0e5ec;
+  border-radius: 25px;
+  box-shadow: 10px 10px 20px #a3b1c6,
+    -10px -10px 20px #ffffff;
+  padding: 50px 40px;
+  width: 100%;
+  max-width: 340px;
+  text-align: center;
+}
+
+.profile-img-neumorphic {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: #e0e5ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 6px 6px 10px rgba(163, 177, 198, 0.5),
+    inset -6px -6px 10px rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+}
+
+.input-field-neumorphic {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-field-neumorphic input {
+  width: 100%;
+  padding: 12px 45px;
+  border: none;
+  border-radius: 15px;
+  background: #e0e5ec;
+  box-shadow: inset 6px 6px 10px #a3b1c6,
+    inset -6px -6px 10px #ffffff;
+  font-size: 0.95rem;
+  color: #333;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.input-field-neumorphic input:focus {
+  box-shadow: inset 4px 4px 8px #a3b1c6,
+    inset -4px -4px 8px #ffffff;
+}
+
+.input-field-neumorphic input::placeholder {
+  color: #999;
+}
+
+.btn-neumorphic {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 20px;
+  background: #40a9c3;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 5px 5px 15px #a3b1c6,
+    -5px -5px 15px #ffffff;
+  transition: 0.2s;
+}
+
+.btn-neumorphic:hover {
+  background: #3a97af;
+  box-shadow: 3px 3px 10px #a3b1c6,
+    -3px -3px 10px #ffffff;
+}
+
+.btn-neumorphic:active {
+  box-shadow: inset 3px 3px 10px rgba(0, 0, 0, 0.2),
+    inset -3px -3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.options-neumorphic {
+  margin-top: 15px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.options-neumorphic a {
+  color: #111;
+  text-decoration: none;
+  font-weight: 600;
 }
