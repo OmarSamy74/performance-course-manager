@@ -45,12 +45,8 @@ export const TeacherPage: React.FC = () => {
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
   const [newQuiz, setNewQuiz] = useState({ title: '', description: '', questions: [] as any[], timeLimit: 0, passingScore: 60 });
 
-  // Load data
-  useEffect(() => {
-    if (state.user) {
-      actions.refreshData();
-    }
-  }, [state.user]);
+  // Data is automatically loaded by AppContext when user changes
+  // No need to manually call refreshData here
 
   // Materials handlers
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

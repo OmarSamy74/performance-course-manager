@@ -39,13 +39,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(false); // Start as false, will be set to true when needed
 
+  // Ref to prevent multiple simultaneous refreshData calls
+  const refreshInProgressRef = useRef(false);
+  
   // Fetch data from API when user is logged in
   const refreshData = async () => {
+    // Prevent multiple simultaneous calls
+    if (refreshInProgressRef.current) {
+      console.log('⚠️ refreshData already in progress, skipping...');
+      return;
+    }
+    
     if (!user) {
       setDataLoading(false);
       return;
     }
 
+    refreshInProgressRef.current = true;
     setDataLoading(true);
     try {
       // Fetch data based on user role
@@ -111,12 +121,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setQuizzes([]);
     } finally {
       setDataLoading(false);
+      refreshInProgressRef.current = false;
     }
   };
 
   const userRef = React.useRef<string | null>(null);
+  const refreshTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
+    // Clear any pending refresh
+    if (refreshTimeoutRef.current) {
+      clearTimeout(refreshTimeoutRef.current);
+      refreshTimeoutRef.current = null;
+    }
+    
     // If auth is still loading, wait
     if (authLoading) {
       return;
@@ -132,8 +150,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     // Only refresh data if user ID actually changed
     if (user.id !== userRef.current) {
       userRef.current = user.id;
-      refreshData();
+      // Add a small delay to debounce rapid user changes
+      refreshTimeoutRef.current = setTimeout(() => {
+        refreshData();
+      }, 100);
     }
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
   }, [user?.id, authLoading]); // Only depend on user.id to avoid unnecessary refreshes
 
   const loginInProgressRef = useRef(false);
