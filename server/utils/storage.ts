@@ -1,6 +1,7 @@
 // File-based JSON storage for Railway
 import { promises as fs } from 'fs';
 import { join } from 'path';
+import { randomUUID } from 'crypto';
 
 // Use Railway volume if available, otherwise local data directory
 const DATA_DIR = process.env.DATA_DIR || (process.env.RAILWAY_VOLUME_MOUNT_PATH ? join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'data') : join(process.cwd(), 'data'));
@@ -138,7 +139,7 @@ export async function createById<T extends { id?: string }>(
     const collection = await readData<T & { id: string }>(collectionName);
     const newItem: T & { id: string } = {
       ...data,
-      id: data.id || crypto.randomUUID()
+      id: data.id || randomUUID()
     } as T & { id: string };
     
     collection.push(newItem);

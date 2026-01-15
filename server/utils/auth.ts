@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { readData, findById, createById, deleteById } from './storage.js';
 import { User, UserRole } from '../../types.js';
 
@@ -16,7 +17,7 @@ const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
  * Generate a secure session token
  */
 export function generateToken(): string {
-  return crypto.randomUUID() + '-' + Date.now().toString(36);
+  return randomUUID() + '-' + Date.now().toString(36);
 }
 
 /**
@@ -25,7 +26,7 @@ export function generateToken(): string {
 export async function createSession(userId: string, role: UserRole): Promise<Session> {
   const now = Date.now();
   const session: Session = {
-    id: crypto.randomUUID(),
+    id: randomUUID(),
     userId,
     token: generateToken(),
     role,

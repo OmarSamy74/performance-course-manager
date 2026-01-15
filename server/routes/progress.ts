@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { randomUUID } from 'crypto';
 import { readData, writeData, findById, updateById } from '../utils/storage.js';
 import { StudentProgress, Lesson } from '../../types.js';
 import { isValidUUID } from '../utils/validation.js';
@@ -96,7 +97,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     const now = new Date().toISOString();
     const progressData: StudentProgress = {
-      id: existing?.id || crypto.randomUUID(),
+      id: existing?.id || randomUUID(),
       studentId,
       lessonId,
       completed: completed !== undefined ? completed : existing?.completed || false,

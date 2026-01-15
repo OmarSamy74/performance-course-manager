@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { randomUUID } from 'crypto';
 import { readData, writeData, findById, updateById, deleteById } from '../utils/storage.js';
 import { hasRole } from '../utils/auth.js';
 import { UserRole, Assignment, AssignmentSubmission, AssignmentStatus, SubmissionStatus } from '../../types.js';
@@ -78,7 +79,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     const assignments = await readData<Assignment>('assignments');
     const newAssignment: Assignment = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       title,
       description: description || '',
       dueDate,
@@ -124,7 +125,7 @@ router.post('/submit', async (req: AuthRequest, res: Response) => {
 
     const submissions = await readData<AssignmentSubmission>('submissions');
     const submission: AssignmentSubmission = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       assignmentId,
       studentId: user.studentId!,
       status: SubmissionStatus.SUBMITTED,

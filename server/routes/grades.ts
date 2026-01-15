@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { randomUUID } from 'crypto';
 import { readData, writeData, findById } from '../utils/storage.js';
 import { hasRole } from '../utils/auth.js';
 import { UserRole, Grade } from '../../types.js';
@@ -72,7 +73,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     const now = new Date().toISOString();
 
     const grade: Grade = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       studentId,
       assignmentId: assignmentId || undefined,
       quizId: quizId || undefined,

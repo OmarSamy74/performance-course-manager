@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { randomUUID } from 'crypto';
 import { readData, writeData, findById, updateById, deleteById } from '../utils/storage.js';
 import { hasRole } from '../utils/auth.js';
 import { UserRole, Quiz, QuizAttempt, QuestionType } from '../../types.js';
@@ -118,11 +119,11 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     const quizzes = await readData<Quiz>('quizzes');
     const newQuiz: Quiz = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       title,
       description: description || '',
       questions: questions.map((q: any) => ({
-        id: q.id || crypto.randomUUID(),
+        id: q.id || randomUUID(),
         type: q.type || QuestionType.MULTIPLE_CHOICE,
         question: q.question,
         options: q.options || [],
@@ -182,7 +183,7 @@ router.post('/submit', async (req: AuthRequest, res: Response) => {
 
     const attempts = await readData<QuizAttempt>('attempts');
     const attempt: QuizAttempt = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       quizId,
       studentId: user.studentId!,
       answers,

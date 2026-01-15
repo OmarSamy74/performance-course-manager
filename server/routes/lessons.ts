@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { randomUUID } from 'crypto';
 import { readData, writeData, findById, updateById, deleteById } from '../utils/storage.js';
 import { hasRole } from '../utils/auth.js';
 import { UserRole, Lesson } from '../../types.js';
@@ -62,7 +63,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     const lessons = await readData<Lesson>('lessons');
     const newLesson: Lesson = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       title,
       description: description || '',
       content: content || '',
