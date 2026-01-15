@@ -1,17 +1,23 @@
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
   value: string | number;
   subValue?: string;
   icon: React.ReactNode;
-  bgColor: string;
-  textColor: string;
+  bgColor?: string;
+  textColor?: string;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, value, subValue, icon, bgColor, textColor }) => (
-  <div className={`p-6 rounded-2xl shadow-sm border border-gray-100 bg-white`}>
+export const StatCard: React.FC<StatCardProps> = ({ 
+  title, 
+  value, 
+  subValue, 
+  icon, 
+  bgColor = 'bg-blue-50', 
+  textColor = 'text-blue-900' 
+}) => (
+  <div className="p-6 rounded-2xl shadow-sm border border-gray-100 bg-white">
     <div className="flex justify-between items-start mb-4">
       <div className={`p-3 rounded-xl ${bgColor}`}>{icon}</div>
     </div>
