@@ -38,32 +38,16 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
+// Auth token stored in memory only (no localStorage)
 let authToken: string | null = null;
-
-// Initialize from localStorage
-if (typeof window !== 'undefined') {
-  authToken = localStorage.getItem('auth_token');
-}
 
 export function setAuthToken(token: string | null) {
   authToken = token;
-  if (typeof window !== 'undefined') {
-    if (token) {
-      localStorage.setItem('auth_token', token);
-    } else {
-      localStorage.removeItem('auth_token');
-    }
-  }
+  // Token stored in memory only - cleared on page refresh
+  // User will need to login again after page refresh
 }
 
 export function getAuthToken(): string | null {
-  // Always get fresh from localStorage to ensure sync
-  if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('auth_token');
-    if (stored !== authToken) {
-      authToken = stored;
-    }
-  }
   return authToken;
 }
 

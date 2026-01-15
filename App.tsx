@@ -48,14 +48,12 @@ const App: React.FC = () => {
         setLeads(leadsRes.leads || []);
         setMaterials(materialsRes.materials || []);
         setDataLoading(false);
-      }).catch(() => {
-        // Fallback to localStorage if API fails
-        const savedStudents = localStorage.getItem('course_system_v2_students');
-        const savedLeads = localStorage.getItem('course_system_crm_leads');
-        const savedMaterials = localStorage.getItem('course_system_materials');
-        if (savedStudents) setStudents(JSON.parse(savedStudents));
-        if (savedLeads) setLeads(JSON.parse(savedLeads));
-        if (savedMaterials) setMaterials(JSON.parse(savedMaterials));
+      }).catch((error) => {
+        console.error('Failed to load data from API:', error);
+        // No localStorage fallback - data must come from API
+        setStudents([]);
+        setLeads([]);
+        setMaterials([]);
         setDataLoading(false);
       });
     } else if (!currentUser && !authLoading) {
@@ -63,35 +61,20 @@ const App: React.FC = () => {
     }
   }, [currentUser, authLoading]);
 
-  // Sync data to API when it changes (for updates)
+  // Update functions - data is managed via API only
   const updateStudents = async (newStudents: Student[]) => {
     setStudents(newStudents);
-    // Try to sync to API, but don't fail if it doesn't work
-    try {
-      // In a real implementation, we'd update via API here
-      // For now, we'll keep localStorage as backup
-      localStorage.setItem('course_system_v2_students', JSON.stringify(newStudents));
-    } catch (e) {
-      console.error('Failed to sync students:', e);
-    }
+    // Data is persisted via API calls, no local storage needed
   };
 
   const updateLeads = async (newLeads: Lead[]) => {
     setLeads(newLeads);
-    try {
-      localStorage.setItem('course_system_crm_leads', JSON.stringify(newLeads));
-    } catch (e) {
-      console.error('Failed to sync leads:', e);
-    }
+    // Data is persisted via API calls, no local storage needed
   };
 
   const updateMaterials = async (newMaterials: CourseMaterial[]) => {
     setMaterials(newMaterials);
-    try {
-      localStorage.setItem('course_system_materials', JSON.stringify(newMaterials));
-    } catch (e) {
-      console.error('Failed to sync materials:', e);
-    }
+    // Data is persisted via API calls, no local storage needed
   };
 
   // --- ACTIONS ---
