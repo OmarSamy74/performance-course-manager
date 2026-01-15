@@ -160,19 +160,68 @@ export async function writeData<T extends { id: string }>(
 function transformRow<T>(tableName: string, row: any): T {
   const transformed: any = { ...row };
   
-  // Handle special transformations based on table
-  if (tableName === 'students') {
-    // Students need installments as nested object
-    return transformed as T; // Will be handled separately
-  }
+  // Convert snake_case to camelCase
+  if (row.user_id) transformed.userId = row.user_id;
+  if (row.student_id) transformed.studentId = row.student_id;
+  if (row.created_at) transformed.createdAt = row.created_at;
+  if (row.updated_at) transformed.updatedAt = row.updated_at;
+  if (row.last_contacted_at) transformed.lastContactedAt = row.last_contacted_at;
+  if (row.due_date) transformed.dueDate = row.due_date;
+  if (row.submitted_at) transformed.submittedAt = row.submitted_at;
+  if (row.completed_at) transformed.completedAt = row.completed_at;
+  if (row.last_accessed_at) transformed.lastAccessedAt = row.last_accessed_at;
+  if (row.paid_at) transformed.paidAt = row.paid_at;
+  if (row.video_url) transformed.videoUrl = row.video_url;
+  if (row.file_url) transformed.fileUrl = row.file_url;
+  if (row.file_type) transformed.fileType = row.file_type;
+  if (row.module_id) transformed.moduleId = row.module_id;
+  if (row.order_index) transformed.order = row.order_index;
+  if (row.time_limit) transformed.timeLimit = row.time_limit;
+  if (row.passing_score) transformed.passingScore = row.passing_score;
+  if (row.time_spent) transformed.timeSpent = row.time_spent;
+  if (row.progress_percentage) transformed.progress = row.progress_percentage;
+  if (row.max_score) transformed.maxScore = row.max_score;
+  if (row.assignment_id) transformed.assignmentId = row.assignment_id;
+  if (row.quiz_id) transformed.quizId = row.quiz_id;
+  if (row.proof_url) transformed.proofUrl = row.proof_url;
+  if (row.installment_key) transformed.installmentKey = row.installment_key;
   
-  // Convert snake_case to camelCase for JSON fields
-  if (row.installment_key) {
-    // This is an installment row
-    return transformed as T;
-  }
+  // Remove snake_case fields
+  delete transformed.user_id;
+  delete transformed.student_id;
+  delete transformed.created_at;
+  delete transformed.updated_at;
+  delete transformed.last_contacted_at;
+  delete transformed.due_date;
+  delete transformed.submitted_at;
+  delete transformed.completed_at;
+  delete transformed.last_accessed_at;
+  delete transformed.paid_at;
+  delete transformed.video_url;
+  delete transformed.file_url;
+  delete transformed.file_type;
+  delete transformed.module_id;
+  delete transformed.order_index;
+  delete transformed.time_limit;
+  delete transformed.passing_score;
+  delete transformed.time_spent;
+  delete transformed.progress_percentage;
+  delete transformed.max_score;
+  delete transformed.assignment_id;
+  delete transformed.quiz_id;
+  delete transformed.proof_url;
+  delete transformed.installment_key;
   
   return transformed as T;
+}
+
+/**
+ * Validate UUID format
+ */
+function isValidUUID(value: any): boolean {
+  if (!value || typeof value !== 'string') return false;
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(value);
 }
 
 /**
@@ -180,6 +229,123 @@ function transformRow<T>(tableName: string, row: any): T {
  */
 function transformToDb(tableName: string, data: any): any {
   const transformed: any = { ...data };
+  
+  // Convert camelCase to snake_case
+  // Only include UUID fields if they have valid UUID values
+  if (transformed.userId !== undefined) {
+    if (isValidUUID(transformed.userId)) {
+      transformed.user_id = transformed.userId;
+    } else if (transformed.userId === null || transformed.userId === '') {
+      // Allow null for optional UUID fields, but skip empty strings
+      transformed.user_id = null;
+    }
+    delete transformed.userId;
+  }
+  if (transformed.studentId !== undefined) {
+    if (isValidUUID(transformed.studentId)) {
+      transformed.student_id = transformed.studentId;
+    } else if (transformed.studentId === null || transformed.studentId === '') {
+      // Allow null for optional UUID fields, but skip empty strings
+      transformed.student_id = null;
+    }
+    delete transformed.studentId;
+  }
+  if (transformed.createdAt !== undefined) {
+    transformed.created_at = transformed.createdAt;
+    delete transformed.createdAt;
+  }
+  if (transformed.updatedAt !== undefined) {
+    transformed.updated_at = transformed.updatedAt;
+    delete transformed.updatedAt;
+  }
+  if (transformed.lastContactedAt !== undefined) {
+    transformed.last_contacted_at = transformed.lastContactedAt;
+    delete transformed.lastContactedAt;
+  }
+  if (transformed.dueDate !== undefined) {
+    transformed.due_date = transformed.dueDate;
+    delete transformed.dueDate;
+  }
+  if (transformed.submittedAt !== undefined) {
+    transformed.submitted_at = transformed.submittedAt;
+    delete transformed.submittedAt;
+  }
+  if (transformed.completedAt !== undefined) {
+    transformed.completed_at = transformed.completedAt;
+    delete transformed.completedAt;
+  }
+  if (transformed.lastAccessedAt !== undefined) {
+    transformed.last_accessed_at = transformed.lastAccessedAt;
+    delete transformed.lastAccessedAt;
+  }
+  if (transformed.paidAt !== undefined) {
+    transformed.paid_at = transformed.paidAt;
+    delete transformed.paidAt;
+  }
+  if (transformed.videoUrl !== undefined) {
+    transformed.video_url = transformed.videoUrl;
+    delete transformed.videoUrl;
+  }
+  if (transformed.fileUrl !== undefined) {
+    transformed.file_url = transformed.fileUrl;
+    delete transformed.fileUrl;
+  }
+  if (transformed.fileType !== undefined) {
+    transformed.file_type = transformed.fileType;
+    delete transformed.fileType;
+  }
+  if (transformed.moduleId !== undefined) {
+    transformed.module_id = transformed.moduleId;
+    delete transformed.moduleId;
+  }
+  if (transformed.order !== undefined) {
+    transformed.order_index = transformed.order;
+    delete transformed.order;
+  }
+  if (transformed.timeLimit !== undefined) {
+    transformed.time_limit = transformed.timeLimit;
+    delete transformed.timeLimit;
+  }
+  if (transformed.passingScore !== undefined) {
+    transformed.passing_score = transformed.passingScore;
+    delete transformed.passingScore;
+  }
+  if (transformed.timeSpent !== undefined) {
+    transformed.time_spent = transformed.timeSpent;
+    delete transformed.timeSpent;
+  }
+  if (transformed.progress !== undefined) {
+    transformed.progress_percentage = transformed.progress;
+    delete transformed.progress;
+  }
+  if (transformed.maxScore !== undefined) {
+    transformed.max_score = transformed.maxScore;
+    delete transformed.maxScore;
+  }
+  if (transformed.assignmentId !== undefined) {
+    if (isValidUUID(transformed.assignmentId)) {
+      transformed.assignment_id = transformed.assignmentId;
+    } else if (transformed.assignmentId === null || transformed.assignmentId === '') {
+      transformed.assignment_id = null;
+    }
+    delete transformed.assignmentId;
+  }
+  if (transformed.quizId !== undefined) {
+    if (isValidUUID(transformed.quizId)) {
+      transformed.quiz_id = transformed.quizId;
+    } else if (transformed.quizId === null || transformed.quizId === '') {
+      transformed.quiz_id = null;
+    }
+    delete transformed.quizId;
+  }
+  if (transformed.proofUrl !== undefined) {
+    transformed.proof_url = transformed.proofUrl;
+    delete transformed.proofUrl;
+  }
+  if (transformed.installmentKey !== undefined) {
+    transformed.installment_key = transformed.installmentKey;
+    delete transformed.installmentKey;
+  }
   
   // Remove undefined values and invalid UUID empty strings
   Object.keys(transformed).forEach(key => {
