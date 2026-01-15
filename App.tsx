@@ -23,7 +23,7 @@ import * as XLSX from 'xlsx';
 import { Student, PaymentPlan, COURSE_COST, HALF_PAYMENT_INITIAL, User, UserRole, InstallmentStatus, Lead, LeadStatus, CourseMaterial } from './types';
 import { calculateFinancials, formatCurrency, getStatusColor, getStatusLabel, fileToBase64, getLeadStatusColor, getLeadStatusLabel } from './utils';
 import { useAuth } from './src/hooks/useAuth';
-import { studentsApi, leadsApi, materialsApi } from './src/api/client';
+import { studentsApi, leadsApi, materialsApi, lessonsApi } from './src/api/client';
 
 // --- MAIN APP COMPONENT ---
 const App: React.FC = () => {
@@ -33,6 +33,7 @@ const App: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [materials, setMaterials] = useState<CourseMaterial[]>([]);
+  const [lessons, setLessons] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   // Fetch data from API when user is logged in
@@ -42,11 +43,13 @@ const App: React.FC = () => {
       Promise.all([
         studentsApi.list().catch(() => ({ students: [] })),
         leadsApi.list().catch(() => ({ leads: [] })),
-        materialsApi.list().catch(() => ({ materials: [] }))
-      ]).then(([studentsRes, leadsRes, materialsRes]) => {
+        materialsApi.list().catch(() => ({ materials: [] })),
+        lessonsApi.list().catch(() => ({ lessons: [] }))
+      ]).then(([studentsRes, leadsRes, materialsRes, lessonsRes]) => {
         setStudents(studentsRes.students || []);
         setLeads(leadsRes.leads || []);
         setMaterials(materialsRes.materials || []);
+        setLessons(lessonsRes.lessons || []);
         setDataLoading(false);
       }).catch((error) => {
         console.error('Failed to load data from API:', error);
@@ -54,6 +57,7 @@ const App: React.FC = () => {
         setStudents([]);
         setLeads([]);
         setMaterials([]);
+        setLessons([]);
         setDataLoading(false);
       });
     } else if (!currentUser && !authLoading) {
@@ -861,7 +865,7 @@ const AdminDashboard = ({ user, students, setStudents, leads, setLeads, onLogout
 };
 
 // --- TEACHER DASHBOARD (NEW) ---
-const TeacherDashboard = ({ user, materials, setMaterials, students, setStudents, leads, setLeads, onLogout }: any) => {
+const TeacherDashboard = ({ user, materials, setMaterials, lessons, setLessons, students, setStudents, leads, setLeads, onLogout }: any) => {
   const [view, setView] = useState<'CLASSROOM' | 'ADMIN'>('CLASSROOM');
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [newMaterial, setNewMaterial] = useState({ title: '', description: '', fileUrl: '' });
@@ -880,27 +884,40 @@ const TeacherDashboard = ({ user, materials, setMaterials, students, setStudents
     }
   };
 
-  const handleAddMaterial = (e: React.FormEvent) => {
+  const handleAddMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMaterial.fileUrl) return alert("يرجى اختيار ملف");
     
-    const mat: CourseMaterial = {
-      id: generateUUID(),
-      title: newMaterial.title,
-      description: newMaterial.description,
-      fileUrl: newMaterial.fileUrl,
-      fileType: 'PDF',
-      createdAt: new Date().toISOString()
-    };
-    
-    setMaterials([mat, ...materials]);
-    setIsUploadModalOpen(false);
-    setNewMaterial({ title: '', description: '', fileUrl: '' });
+    try {
+      const mat: CourseMaterial = {
+        id: generateUUID(),
+        title: newMaterial.title,
+        description: newMaterial.description,
+        fileUrl: newMaterial.fileUrl,
+        fileType: 'PDF',
+        createdAt: new Date().toISOString()
+      };
+      
+      // Save to Railway via API
+      await materialsApi.create(mat);
+      setMaterials([mat, ...materials]);
+      setIsUploadModalOpen(false);
+      setNewMaterial({ title: '', description: '', fileUrl: '' });
+    } catch (error) {
+      console.error('Failed to save material:', error);
+      alert('فشل في حفظ المحتوى. يرجى المحاولة مرة أخرى.');
+    }
   };
 
-  const deleteMaterial = (id: string) => {
+  const deleteMaterial = async (id: string) => {
     if (confirm("هل أنت متأكد من حذف هذا المحتوى؟")) {
-      setMaterials(materials.filter((m: CourseMaterial) => m.id !== id));
+      try {
+        await materialsApi.delete(id);
+        setMaterials(materials.filter((m: CourseMaterial) => m.id !== id));
+      } catch (error) {
+        console.error('Failed to delete material:', error);
+        alert('فشل في حذف المحتوى. يرجى المحاولة مرة أخرى.');
+      }
     }
   };
 
@@ -939,43 +956,79 @@ const TeacherDashboard = ({ user, materials, setMaterials, students, setStudents
         </div>
       </div>
 
-      <div className="container mx-auto p-4 md:p-8">
+      <div className="container mx-auto p-4 md:p-8 max-w-7xl">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm mb-1">الملفات المرفوعة</p>
+                <p className="text-3xl font-bold">{materials.length}</p>
+              </div>
+              <FileText size={32} className="opacity-80" />
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm mb-1">الدروس المتاحة</p>
+                <p className="text-3xl font-bold">{lessons.length}</p>
+              </div>
+              <BookOpen size={32} className="opacity-80" />
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm mb-1">الطلاب المسجلين</p>
+                <p className="text-3xl font-bold">{students.length}</p>
+              </div>
+              <Users size={32} className="opacity-80" />
+            </div>
+          </div>
+        </div>
+
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">محتوى الكورس</h1>
-            <p className="text-gray-500 mt-1">إدارة المحاضرات والملفات</p>
+            <h1 className="text-3xl font-bold text-gray-800">محتوى الكورس</h1>
+            <p className="text-gray-500 mt-2">إدارة المحاضرات والملفات التعليمية</p>
           </div>
-          <button onClick={() => setIsUploadModalOpen(true)} className="flex items-center gap-2 bg-green-600 text-white px-5 py-2.5 rounded-xl hover:bg-green-700 shadow-lg shadow-green-200 transition-all">
+          <button onClick={() => setIsUploadModalOpen(true)} className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-xl hover:from-green-700 hover:to-green-800 shadow-lg shadow-green-200 transition-all font-bold">
             <Plus size={20} /> <span>⚽ رفع محتوى جديد</span>
           </button>
         </div>
 
-        {/* Materials Grid */}
+        {/* Materials Grid - Professional Design */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {materials.length === 0 ? (
              <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FileText className="text-gray-400" size={32} />
+                <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="text-green-600" size={40} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-400">لا يوجد محتوى حالياً</h3>
-                <p className="text-gray-400 mt-1">ابدأ برفع المحاضرات والمواد التعليمية</p>
+                <h3 className="text-2xl font-bold text-gray-600 mb-2">لا يوجد محتوى حالياً</h3>
+                <p className="text-gray-500 mb-6">ابدأ برفع المحاضرات والمواد التعليمية</p>
+                <button onClick={() => setIsUploadModalOpen(true)} className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 font-bold">
+                  ⚽ رفع أول محتوى
+                </button>
              </div>
           ) : materials.map((item: CourseMaterial) => (
-            <div key={item.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow group">
+            <div key={item.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-green-200 transition-all duration-300 group cursor-pointer">
               <div className="flex justify-between items-start mb-4">
-                <div className="p-3 bg-green-50 text-green-600 rounded-xl">
-                  <FileText size={24} />
+                <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 text-green-600 rounded-xl group-hover:scale-110 transition-transform">
+                  <FileText size={28} />
                 </div>
-                <button onClick={() => deleteMaterial(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
+                <button onClick={(e) => { e.stopPropagation(); deleteMaterial(item.id); }} className="text-gray-300 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50">
                   <Trash2 size={18} />
                 </button>
               </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-2">{item.title}</h3>
-              <p className="text-sm text-gray-500 mb-4 line-clamp-2">{item.description}</p>
-              <div className="flex items-center gap-2 text-xs text-gray-400 mt-auto">
-                <span>{new Date(item.createdAt).toLocaleDateString('ar-EG')}</span>
-                <span>•</span>
-                <span>PDF Document</span>
+              <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">{item.title}</h3>
+              <p className="text-sm text-gray-500 mb-4 line-clamp-3 min-h-[3rem]">{item.description || 'لا يوجد وصف'}</p>
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex items-center gap-2 text-xs text-gray-400">
+                  <Clock size={14} />
+                  <span>{new Date(item.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                </div>
+                <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-bold">{item.fileType}</span>
               </div>
             </div>
           ))}
@@ -1010,7 +1063,7 @@ const TeacherDashboard = ({ user, materials, setMaterials, students, setStudents
 };
 
 // --- STUDENT PORTAL (UPDATED) ---
-const StudentPortal = ({ user, students, setStudents, materials, onLogout }: any) => {
+const StudentPortal = ({ user, students, setStudents, materials, lessons, onLogout }: any) => {
   const student = students.find((s: Student) => s.id === user.studentId);
   const [activeTab, setActiveTab] = useState<'FINANCE' | 'CLASSROOM'>('FINANCE');
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
