@@ -1,12 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Briefcase, LogOut, Users, Target, Eye, CheckCircle2, Plus, Search, Phone, MessageSquare, Trash2 } from 'lucide-react';
+import { Briefcase, LogOut, Users, Target, Eye, CheckCircle2, Plus, Search, Phone, MessageSquare, Trash2, Upload, FileSpreadsheet } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Lead, LeadStatus, Student, PaymentPlan, InstallmentStatus } from '../../types';
 import { getLeadStatusColor, getLeadStatusLabel, fileToBase64 } from '../lib/business-utils';
 import { generateUUID } from '../lib/utils';
 import { StatCard } from '../components/shared/StatCard';
 import { leadsApi, studentsApi } from '../api/client';
+import * as XLSX from 'xlsx';
 
 export const SalesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -14,6 +15,8 @@ export const SalesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newLead, setNewLead] = useState({ name: '', phone: '', source: '', notes: '' });
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const stats = useMemo(() => {
     const total = state.leads.length;
@@ -116,6 +119,119 @@ export const SalesPage: React.FC = () => {
     navigate('/login');
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    if (!file.name.match(/\.(xlsx|xls)$/i)) {
+      alert('يرجى رفع ملف Excel بصيغة .xlsx أو .xls');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+
+      if (data.length < 2) {
+        alert('الملف فارغ أو لا يحتوي على بيانات');
+        setIsUploading(false);
+        return;
+      }
+
+      // Get headers (first row)
+      const headers = data[0].map((h: any) => String(h).toLowerCase().trim());
+      
+      // Find column indices
+      const nameIndex = headers.findIndex((h: string) => h.includes('اسم') || h.includes('name') || h === 'الاسم');
+      const phoneIndex = headers.findIndex((h: string) => h.includes('هاتف') || h.includes('phone') || h.includes('رقم') || h === 'الهاتف');
+      const sourceIndex = headers.findIndex((h: string) => h.includes('مصدر') || h.includes('source') || h === 'المصدر');
+      const notesIndex = headers.findIndex((h: string) => h.includes('ملاحظ') || h.includes('note') || h.includes('تعليق') || h === 'ملاحظات');
+
+      if (nameIndex === -1 || phoneIndex === -1) {
+        alert('الملف يجب أن يحتوي على أعمدة: الاسم ورقم الهاتف على الأقل');
+        setIsUploading(false);
+        return;
+      }
+
+      // Parse rows (skip header)
+      const leadsToCreate: Lead[] = [];
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        const name = row[nameIndex] ? String(row[nameIndex]).trim() : '';
+        const phone = row[phoneIndex] ? String(row[phoneIndex]).trim().replace(/\s+/g, '') : '';
+
+        if (!name || !phone) {
+          errorCount++;
+          continue;
+        }
+
+        // Check if lead already exists
+        const exists = state.leads.some((l: Lead) => l.phone === phone);
+        if (exists) {
+          errorCount++;
+          continue;
+        }
+
+        const lead: Lead = {
+          id: generateUUID(),
+          name,
+          phone,
+          source: sourceIndex !== -1 && row[sourceIndex] ? String(row[sourceIndex]).trim() : 'Direct',
+          notes: notesIndex !== -1 && row[notesIndex] ? String(row[notesIndex]).trim() : '',
+          status: LeadStatus.NEW,
+          createdAt: new Date().toISOString()
+        };
+
+        leadsToCreate.push(lead);
+      }
+
+      if (leadsToCreate.length === 0) {
+        alert('لم يتم العثور على عملاء صالحين للاستيراد');
+        setIsUploading(false);
+        return;
+      }
+
+      // Create all leads
+      const createdLeads: Lead[] = [];
+      for (const lead of leadsToCreate) {
+        try {
+          await leadsApi.create(lead);
+          createdLeads.push(lead);
+          successCount++;
+        } catch (error) {
+          console.error('Failed to create lead:', error);
+          errorCount++;
+        }
+      }
+
+      // Update state
+      if (createdLeads.length > 0) {
+        actions.updateLeads([...createdLeads, ...state.leads]);
+        alert(`تم استيراد ${successCount} عميل بنجاح${errorCount > 0 ? `\nتم تخطي ${errorCount} عميل (مكرر أو بيانات غير صالحة)` : ''}`);
+      } else {
+        alert('فشل في استيراد العملاء. يرجى المحاولة مرة أخرى.');
+      }
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (error) {
+      console.error('Error parsing Excel file:', error);
+      alert('حدث خطأ أثناء قراءة الملف. يرجى التأكد من صحة تنسيق الملف.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
       <div className="container mx-auto p-4 md:p-8 space-y-8">
@@ -135,6 +251,18 @@ export const SalesPage: React.FC = () => {
               <input type="text" placeholder="بحث..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-4 pr-10 py-2 border rounded-xl w-64 bg-white focus:ring-2 focus:ring-purple-500 focus:outline-none" />
               <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
             </div>
+            <label className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl shadow-lg shadow-blue-200 transition-all cursor-pointer">
+              <Upload size={20} />
+              <span>{isUploading ? 'جاري الاستيراد...' : 'رفع ملف Excel'}</span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileUpload}
+                disabled={isUploading}
+                className="hidden"
+              />
+            </label>
             <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl shadow-lg shadow-green-200 transition-all">
               <Plus size={20} /> <span>إضافة عميل</span>
             </button>
@@ -202,6 +330,18 @@ export const SalesPage: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <h2 className="text-xl font-bold mb-4">إضافة عميل جديد</h2>
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-800 text-sm mb-2">
+                <FileSpreadsheet size={16} />
+                <span className="font-semibold">تنسيق ملف Excel:</span>
+              </div>
+              <div className="text-xs text-blue-700 space-y-1">
+                <p>• العمود الأول: <strong>الاسم</strong> (مطلوب)</p>
+                <p>• العمود الثاني: <strong>رقم الهاتف</strong> (مطلوب)</p>
+                <p>• العمود الثالث: <strong>المصدر</strong> (اختياري)</p>
+                <p>• العمود الرابع: <strong>ملاحظات</strong> (اختياري)</p>
+              </div>
+            </div>
             <form onSubmit={handleAddLead} className="space-y-3">
               <input type="text" required placeholder="اسم العميل" value={newLead.name} onChange={e => setNewLead({...newLead, name: e.target.value})} className="w-full p-3 border rounded-xl" />
               <input type="text" required placeholder="رقم الهاتف" value={newLead.phone} onChange={e => setNewLead({...newLead, phone: e.target.value})} className="w-full p-3 border rounded-xl" />
