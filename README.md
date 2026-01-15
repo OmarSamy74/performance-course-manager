@@ -20,7 +20,7 @@ A comprehensive course management system for football academies, built with Reac
 
 - **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, React Router
 - **Backend**: Express.js, TypeScript
-- **Storage**: File-based JSON (Railway persistent volumes)
+- **Database**: PostgreSQL (primary, Railway/Netlify), File-based JSON (fallback)
 - **Deployment**: Railway (primary), Netlify (alternative)
 
 ## Quick Start
