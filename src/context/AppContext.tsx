@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, Student, Lead, CourseMaterial, UserRole } from '../../types';
 import { useAuth } from '../hooks/useAuth';
-import { studentsApi, leadsApi, materialsApi, lessonsApi } from '../api/client';
+import { studentsApi, leadsApi, materialsApi, lessonsApi, assignmentsApi, quizzesApi } from '../api/client';
 
 interface AppState {
   user: User | null;
@@ -9,6 +9,8 @@ interface AppState {
   leads: Lead[];
   materials: CourseMaterial[];
   lessons: any[];
+  assignments?: any[];
+  quizzes?: any[];
   loading: boolean;
 }
 
@@ -33,6 +35,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [leads, setLeads] = useState<Lead[]>([]);
   const [materials, setMaterials] = useState<CourseMaterial[]>([]);
   const [lessons, setLessons] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [quizzes, setQuizzes] = useState<any[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   // Fetch data from API when user is logged in
@@ -76,19 +80,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         console.warn('Failed to fetch lessons:', err);
         return { lessons: [] };
       }));
+      
+      // Assignments: all authenticated users can access
+      promises.push(assignmentsApi.list().catch((err) => {
+        console.warn('Failed to fetch assignments:', err);
+        return { assignments: [] };
+      }));
+      
+      // Quizzes: all authenticated users can access
+      promises.push(quizzesApi.list().catch((err) => {
+        console.warn('Failed to fetch quizzes:', err);
+        return { quizzes: [] };
+      }));
 
-      const [studentsRes, leadsRes, materialsRes, lessonsRes] = await Promise.all(promises);
+      const [studentsRes, leadsRes, materialsRes, lessonsRes, assignmentsRes, quizzesRes] = await Promise.all(promises);
 
       setStudents(studentsRes.students || []);
       setLeads(leadsRes.leads || []);
       setMaterials(materialsRes.materials || []);
       setLessons(lessonsRes.lessons || []);
+      setAssignments(assignmentsRes.assignments || []);
+      setQuizzes(quizzesRes.quizzes || []);
     } catch (error) {
       console.error('Failed to load data from API:', error);
       setStudents([]);
       setLeads([]);
       setMaterials([]);
       setLessons([]);
+      setAssignments([]);
+      setQuizzes([]);
     } finally {
       setDataLoading(false);
     }
@@ -111,6 +131,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setLeads([]);
     setMaterials([]);
     setLessons([]);
+    setAssignments([]);
+    setQuizzes([]);
   };
 
   const state: AppState = {
@@ -119,6 +141,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     leads,
     materials,
     lessons,
+    assignments,
+    quizzes,
     loading: authLoading || dataLoading,
   };
 
