@@ -412,13 +412,20 @@ export const TeacherPage: React.FC = () => {
                 </button>
               </div>
             ) : state.materials.map((item: CourseMaterial) => (
-              <div key={item.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-red-200 transition-all duration-300 group">
+              <div 
+                key={item.id} 
+                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-red-200 transition-all duration-300 group cursor-pointer"
+                onClick={() => setViewingMaterial(item)}
+              >
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 text-red-600 rounded-xl group-hover:scale-110 transition-transform">
                     <FileText size={28} />
                   </div>
                   <button 
-                    onClick={() => deleteMaterial(item.id)} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteMaterial(item.id);
+                    }} 
                     className="text-gray-300 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50"
                   >
                     <Trash2 size={18} />
