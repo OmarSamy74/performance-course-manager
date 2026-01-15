@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Briefcase, LogOut, Users, Target, Eye, CheckCircle2, Plus, Search, Phone, MessageSquare, Trash2 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { Lead, LeadStatus, Student, PaymentPlan, InstallmentStatus } from '../../types';
-import { getLeadStatusColor, getLeadStatusLabel, fileToBase64 } from '../../utils';
-import { generateUUID } from '../utils/uuid';
+import { getLeadStatusColor, getLeadStatusLabel, fileToBase64 } from '../lib/business-utils';
+import { generateUUID } from '../lib/utils';
 import { StatCard } from '../components/shared/StatCard';
 import { leadsApi, studentsApi } from '../api/client';
 

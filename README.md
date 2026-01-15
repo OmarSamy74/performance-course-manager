@@ -1,66 +1,152 @@
+# ⚽ Performance Course Manager
+
+A comprehensive course management system for football academies, built with React, Express, and file-based storage.
+
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <img src="public/logo.png" alt="Logo" width="200" />
 </div>
 
-# Performance Course Manager
+## Features
 
-A comprehensive course management system built with React, Express, and file-based storage.
+- 👥 **Student Management** - Track students, payments, and progress
+- 📚 **Course Materials** - Upload and manage course content
+- 🎓 **Classroom** - Interactive lessons and assignments
+- 💼 **CRM System** - Manage leads and conversions
+- 📊 **Analytics** - Financial tracking and reporting
+- 🔐 **Role-Based Access** - Admin, Teacher, Sales, and Student roles
+- 🎨 **Modern UI** - Red/black/white theme with smooth animations
 
-## Run Locally
+## Tech Stack
 
-**Prerequisites:** Node.js
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, React Router
+- **Backend**: Express.js, TypeScript
+- **Storage**: File-based JSON (Railway persistent volumes)
+- **Deployment**: Railway (primary), Netlify (alternative)
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+## Quick Start
 
-2. Set up environment variables (optional):
-   - Create a `.env.local` file for frontend variables
-   - No backend configuration needed - uses file-based storage
+### Prerequisites
 
-3. Run the development servers:
-   ```bash
-   # Run both frontend and backend concurrently
-   npm run dev:all
-   
-   # Or run them separately:
-   npm run dev          # Frontend (Vite)
-   npm run dev:server   # Backend (Express)
-   ```
+- Node.js 18+
+- npm or yarn
 
-4. Access the app:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:3001
+### Installation
 
-## Deploy to Railway
+```bash
+# Install dependencies
+npm install
 
-📖 **For detailed step-by-step instructions, see:**
-- [RAILWAY_QUICK_START.md](./RAILWAY_QUICK_START.md) - Quick setup guide
-- [RAILWAY_SETUP.md](./RAILWAY_SETUP.md) - Comprehensive deployment guide
+# Initialize database (optional - auto-initializes in production)
+npm run init-db:seed
 
-### Quick Steps:
-1. Connect your repository to Railway
-2. Railway will automatically detect the project and use the `Procfile`
-3. Set environment variables in Railway dashboard:
-   - `NODE_ENV=production`
-   - `PORT` (automatically set by Railway)
-   - `VITE_API_URL` (your Railway public URL)
-4. **Railway Storage is the PRIMARY database** - All data stored in `/data` directory on Railway
+# Run development servers
+npm run dev:all
+```
 
-The app will be automatically deployed and available at your Railway domain.
+Access the app:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:3001
 
-## 👥 Pre-configured Teacher Accounts
+## Project Structure
 
-The following teacher accounts are ready to use:
+```
+src/
+├── pages/          # Page components (Login, Dashboard, Admin, etc.)
+├── components/     # Reusable components
+│   ├── layout/    # Navbar, ProtectedRoute
+│   ├── shared/    # Modal, StatCard, etc.
+│   └── ui/        # UI primitives (Button, Card, Input)
+├── context/       # AppContext for state management
+├── hooks/         # Custom hooks (useAuth, useApi)
+├── lib/           # Utilities (utils, business-utils)
+└── api/           # API client
 
-| Username | Password | Name |
-|----------|----------|------|
-| `omar.samy` | `123` | Omar Samy |
-| `abdelatif.reda` | `123` | Abdelatif Reda |
-| `karim.ali` | `123` | Karim Ali |
+server/
+├── routes/        # API route handlers
+├── middleware/    # Auth middleware
+└── utils/         # Server utilities
 
-### Other Accounts:
+docs/              # Documentation
+├── deployment/    # Deployment guides
+├── database/      # Database setup
+└── troubleshooting/ # Troubleshooting guides
+```
+
+For detailed structure, see [docs/PROJECT_STRUCTURE.md](./docs/PROJECT_STRUCTURE.md)
+
+## Default Accounts
+
+### Staff Accounts
 - **Admin**: `admin` / `123`
-- **Default Teacher**: `teacher` / `123`
+- **Teacher**: `omar.samy` / `123`
 - **Sales**: `sales` / `123`
+
+### Student Login
+Students login using their registered phone number.
+
+## Deployment
+
+### Railway (Recommended)
+
+Railway provides persistent storage for the file-based database.
+
+📖 **See**: [docs/deployment/RAILWAY_QUICK_START.md](./docs/deployment/RAILWAY_QUICK_START.md)
+
+Quick steps:
+1. Connect repository to Railway
+2. Add volume mount: `/data`
+3. Set environment variables:
+   - `DATA_DIR=/data`
+   - `AUTO_INIT_DB=true`
+   - `NODE_ENV=production`
+4. Deploy
+
+### Netlify
+
+📖 **See**: [docs/deployment/NETLIFY_QUICK_DEPLOY.md](./docs/deployment/NETLIFY_QUICK_DEPLOY.md)
+
+**Note**: Netlify Functions use ephemeral storage. For production, connect to Railway API or use external storage.
+
+## Database
+
+The application uses file-based JSON storage:
+
+- **Railway**: Persistent `/data` directory
+- **Auto-initialization**: Set `AUTO_INIT_DB=true` for automatic setup
+
+📖 **See**: [docs/database/DATABASE_INIT.md](./docs/database/DATABASE_INIT.md)
+
+## Documentation
+
+All documentation is organized in the `docs/` directory:
+
+- **Deployment**: [docs/deployment/](./docs/deployment/)
+- **Database**: [docs/database/](./docs/database/)
+- **Troubleshooting**: [docs/troubleshooting/](./docs/troubleshooting/)
+
+## Scripts
+
+```bash
+npm run dev              # Frontend dev server
+npm run dev:server       # Backend dev server
+npm run dev:all          # Both servers
+npm run build            # Production build
+npm run init-db:seed    # Initialize database
+npm run setup:railway-db # Automated Railway setup
+```
+
+## Design
+
+The application features a modern red/black/white theme with:
+- Smooth animations and transitions
+- Card-based layouts
+- Responsive design
+- Arabic language support (RTL)
+
+## License
+
+Proprietary - All rights reserved
+
+## Support
+
+For issues and questions, check the [troubleshooting guides](./docs/troubleshooting/) or open an issue.
