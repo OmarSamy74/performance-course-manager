@@ -3,25 +3,32 @@ import * as path from 'path';
 
 // Get data directory - works in both local and Netlify environment
 function getDataDir() {
-  // In Netlify Functions, __dirname points to the function directory
-  // In local dev, it's relative to the function file
-  const baseDir = __dirname.includes('/.netlify') 
-    ? path.join(process.cwd(), 'netlify/functions/data')
-    : path.join(__dirname, '../data');
-  return baseDir;
+  // In Netlify Functions, use process.cwd() which points to the site root
+  // The functions are in netlify/functions/, so data should be in netlify/functions/data
+  if (process.env.NETLIFY) {
+    // Production Netlify environment
+    return path.join(process.cwd(), 'netlify/functions/data');
+  } else {
+    // Local development
+    return path.join(__dirname, '../data');
+  }
 }
 
-const DATA_DIR = getDataDir();
-
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+// Get data directory (lazy initialization)
+function getDataDirectory() {
+  const dataDir = getDataDir();
+  // Ensure data directory exists
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+  return dataDir;
 }
 
 /**
  * Read JSON data from file
  */
 export function readData<T>(filename: string): T[] {
+  const DATA_DIR = getDataDirectory();
   const filePath = path.join(DATA_DIR, `${filename}.json`);
   
   if (!fs.existsSync(filePath)) {
@@ -43,6 +50,7 @@ export function readData<T>(filename: string): T[] {
  * Write JSON data to file (atomic operation)
  */
 export function writeData<T>(filename: string, data: T[]): void {
+  const DATA_DIR = getDataDirectory();
   const filePath = path.join(DATA_DIR, `${filename}.json`);
   const tempPath = `${filePath}.tmp`;
   
@@ -94,6 +102,7 @@ export function deleteById<T extends { id: string }>(items: T[], id: string): bo
  * Create backup of data file
  */
 export function backupData(filename: string): void {
+  const DATA_DIR = getDataDirectory();
   const filePath = path.join(DATA_DIR, `${filename}.json`);
   const backupPath = path.join(DATA_DIR, `${filename}.backup.json`);
   

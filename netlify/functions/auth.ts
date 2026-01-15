@@ -12,6 +12,9 @@ export const handler: Handler = async (event, context) => {
 
   try {
     const { httpMethod, headers, body } = event;
+    
+    // Log for debugging (remove in production if needed)
+    console.log('Auth function called:', { httpMethod, path: event.path });
 
     // GET - Get current user
     if (httpMethod === 'GET') {
