@@ -163,7 +163,7 @@ async function main() {
 }
 
 // Run if executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url.endsWith(process.argv[1]) || process.argv[1]?.includes('init-database')) {
   main();
 }
 

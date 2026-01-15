@@ -3,6 +3,8 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { promises as fs } from 'fs';
+import { join } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,6 +23,34 @@ import gradesRoutes from './server/routes/grades.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Auto-initialize database if needed (optional, set AUTO_INIT_DB=true to enable)
+async function checkAndInitDatabase() {
+  if (process.env.AUTO_INIT_DB !== 'true') {
+    return;
+  }
+
+  try {
+    const DATA_DIR = process.env.DATA_DIR || join(process.cwd(), 'data');
+    const usersFile = join(DATA_DIR, 'users.json');
+    
+    // Check if database is initialized
+    try {
+      await fs.access(usersFile);
+      // Database exists, skip initialization
+      return;
+    } catch {
+      // Database doesn't exist, initialize it
+      console.log('📦 Database not found, initializing...');
+      const { initDatabase } = await import('./scripts/init-database.js');
+      await initDatabase();
+      console.log('✅ Database initialized successfully');
+    }
+  } catch (error) {
+    console.error('⚠️  Failed to auto-initialize database:', error);
+    console.log('💡 Run "npm run init-db" manually to initialize the database');
+  }
+}
 
 // Middleware
 app.use(cors());
@@ -51,6 +81,15 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Start server
+async function startServer() {
+  // Check and initialize database if needed
+  await checkAndInitDatabase();
+  
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📁 Data directory: ${process.env.DATA_DIR || join(process.cwd(), 'data')}`);
+  });
+}
+
+startServer();
