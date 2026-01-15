@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Phone, User, Lock, GraduationCap, Users, Eye, EyeOff } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -16,29 +16,8 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [pendingNavigation, setPendingNavigation] = useState<UserRole | null>(null);
-
-  // Navigate when user state updates after login
-  useEffect(() => {
-    if (pendingNavigation && state.user) {
-      const role = state.user.role;
-      if (role === pendingNavigation) {
-        setPendingNavigation(null);
-        setLoading(false);
-        if (role === UserRole.ADMIN) {
-          navigate('/admin', { replace: true });
-        } else if (role === UserRole.TEACHER) {
-          navigate('/teacher', { replace: true });
-        } else if (role === UserRole.SALES) {
-          navigate('/sales', { replace: true });
-        } else if (role === UserRole.STUDENT) {
-          navigate('/student', { replace: true });
-        } else {
-          navigate('/dashboard', { replace: true });
-        }
-      }
-    }
-  }, [state.user, pendingNavigation, navigate]);
+  const [hasNavigated, setHasNavigated] = useState(false);
+  const loginAttemptRef = React.useRef(false);
 
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,19 +37,34 @@ export const LoginPage: React.FC = () => {
 
   const handleStaffLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent multiple simultaneous login attempts
+    if (loginAttemptRef.current || loading) {
+      return;
+    }
+    
     setError('');
     setLoading(true);
-    setPendingNavigation(null);
+    setHasNavigated(false);
+    loginAttemptRef.current = true;
 
     try {
       const result = await actions.login(username, password);
       
+      // If we already navigated, don't navigate again
+      if (hasNavigated) {
+        return;
+      }
+      
       // Try to get user from result or state
-      let loggedInUser = result;
+      let loggedInUser = result || state.user;
       
       // If we have a user, navigate immediately
       if (loggedInUser?.role) {
+        setHasNavigated(true);
         setLoading(false);
+        loginAttemptRef.current = false;
+        
         if (loggedInUser.role === UserRole.ADMIN) {
           navigate('/admin', { replace: true });
         } else if (loggedInUser.role === UserRole.TEACHER) {
@@ -83,37 +77,38 @@ export const LoginPage: React.FC = () => {
           navigate('/dashboard', { replace: true });
         }
       } else {
-        // Wait for state to update, then navigate via useEffect
-        // Try to determine role from username (fallback)
-        let expectedRole: UserRole | null = null;
-        if (username === 'admin') {
-          expectedRole = UserRole.ADMIN;
-        } else if (username === 'omar.samy' || username === 'abdelatif.reda' || username === 'karim.ali' || username === 'teacher') {
-          expectedRole = UserRole.TEACHER;
-        } else if (username === 'sales') {
-          expectedRole = UserRole.SALES;
-        }
+        // Wait a bit for state to update, then check again
+        await new Promise(resolve => setTimeout(resolve, 300));
+        loggedInUser = state.user;
         
-        if (expectedRole) {
-          setPendingNavigation(expectedRole);
-          // Set timeout to prevent infinite loading
-          setTimeout(() => {
-            if (loading) {
-              setLoading(false);
-              setPendingNavigation(null);
-              setError('فشل في تسجيل الدخول. يرجى المحاولة مرة أخرى.');
-            }
-          }, 5000);
+        if (loggedInUser?.role && !hasNavigated) {
+          setHasNavigated(true);
+          setLoading(false);
+          loginAttemptRef.current = false;
+          
+          if (loggedInUser.role === UserRole.ADMIN) {
+            navigate('/admin', { replace: true });
+          } else if (loggedInUser.role === UserRole.TEACHER) {
+            navigate('/teacher', { replace: true });
+          } else if (loggedInUser.role === UserRole.SALES) {
+            navigate('/sales', { replace: true });
+          } else if (loggedInUser.role === UserRole.STUDENT) {
+            navigate('/student', { replace: true });
+          } else {
+            navigate('/dashboard', { replace: true });
+          }
         } else {
           setLoading(false);
-          navigate('/dashboard', { replace: true });
+          loginAttemptRef.current = false;
+          setError('فشل في تسجيل الدخول. يرجى المحاولة مرة أخرى.');
         }
       }
     } catch (err: any) {
       console.error('Login error:', err);
       setError(err.message || 'بيانات خاطئة. Admin: admin/123 | Teacher: omar.samy/123 | Sales: sales/123');
       setLoading(false);
-      setPendingNavigation(null);
+      loginAttemptRef.current = false;
+      setHasNavigated(false);
     }
   };
 

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { User, Student, Lead, CourseMaterial, UserRole } from '../../types';
 import { useAuth } from '../hooks/useAuth';
 import { studentsApi, leadsApi, materialsApi, lessonsApi, assignmentsApi, quizzesApi } from '../api/client';
@@ -114,18 +114,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+  const userRef = React.useRef<string | null>(null);
+  
   useEffect(() => {
-    refreshData();
-  }, [user]);
+    // Only refresh data if user is logged in and user ID actually changed
+    if (user && !authLoading && user.id !== userRef.current) {
+      userRef.current = user.id;
+      refreshData();
+    } else if (!user) {
+      userRef.current = null;
+    }
+  }, [user?.id, authLoading]); // Only depend on user.id to avoid unnecessary refreshes
 
+  const loginInProgressRef = useRef(false);
+  
   const login = async (username: string, password: string) => {
+    // Prevent multiple simultaneous login calls
+    if (loginInProgressRef.current) {
+      throw new Error('Login already in progress');
+    }
+    
+    loginInProgressRef.current = true;
     try {
       const result = await apiLogin(username, password);
-      // Wait a moment for state to update
-      await new Promise(resolve => setTimeout(resolve, 100));
       // Return the user from the login result for immediate navigation
+      // Don't wait for state to update - use the result directly
+      loginInProgressRef.current = false;
       return result?.user || user;
     } catch (error) {
+      loginInProgressRef.current = false;
       throw error;
     }
   };
