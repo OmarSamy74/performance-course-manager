@@ -31,31 +31,38 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
 
+    // Log for debugging (remove in production if needed)
+    console.log('Login attempt:', { username, password: password ? '***' : undefined, bodyKeys: Object.keys(req.body) });
+
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
+    // Trim whitespace from credentials
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
     // Check hardcoded admin/teacher/sales
     let user: User | null = null;
 
-    if (username === 'admin' && password === '123') {
+    if (trimmedUsername === 'admin' && trimmedPassword === '123') {
       user = { id: 'admin', username: 'Administrator', role: UserRole.ADMIN };
-    } else if (username === 'teacher' && password === '123') {
+    } else if (trimmedUsername === 'teacher' && trimmedPassword === '123') {
       user = { id: 'teacher', username: 'أ. المحاضر', role: UserRole.TEACHER };
-    } else if (username === 'sales' && password === '123') {
+    } else if (trimmedUsername === 'sales' && trimmedPassword === '123') {
       user = { id: 'sales1', username: 'Sales Agent', role: UserRole.SALES };
-    } else if (username === 'omar.samy' && password === '123') {
+    } else if (trimmedUsername === 'omar.samy' && trimmedPassword === '123') {
       user = { id: 'omar.samy', username: 'Omar Samy', role: UserRole.TEACHER };
-    } else if (username === 'abdelatif.reda' && password === '123') {
+    } else if (trimmedUsername === 'abdelatif.reda' && trimmedPassword === '123') {
       user = { id: 'abdelatif.reda', username: 'Abdelatif Reda', role: UserRole.TEACHER };
-    } else if (username === 'karim.ali' && password === '123') {
+    } else if (trimmedUsername === 'karim.ali' && trimmedPassword === '123') {
       user = { id: 'karim.ali', username: 'Karim Ali', role: UserRole.TEACHER };
     } else {
       // Check students
       const students = await readData<any>('students');
-      const student = students.find((s: any) => s.phone === username);
+      const student = students.find((s: any) => s.phone === trimmedUsername);
       
-      if (student && password === student.phone) {
+      if (student && trimmedPassword === student.phone) {
         user = {
           id: student.id,
           username: student.name,
