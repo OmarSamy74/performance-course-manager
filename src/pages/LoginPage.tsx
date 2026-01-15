@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Phone, User, Lock, GraduationCap, Users } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { UserRole } from '../../types';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { FormField } from '../components/ui/FormField';
 
 export const LoginPage: React.FC = () => {

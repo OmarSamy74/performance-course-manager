@@ -10,9 +10,9 @@ import { LessonPlayer } from '../components/classroom/LessonPlayer';
 import { SecureMaterialViewer } from '../components/shared/SecureMaterialViewer';
 import { Modal } from '../components/ui/Modal';
 import { FormField } from '../components/ui/FormField';
-import { Input } from '../components/ui/Input';
+import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/Textarea';
-import { Button } from '../components/ui/Button';
+import { Button } from '../components/ui/button';
 import { PageHeader } from '../components/layout/PageHeader';
 
 type ClassroomTab = 'MATERIALS' | 'LESSONS' | 'ASSIGNMENTS' | 'QUIZZES';
