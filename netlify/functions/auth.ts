@@ -52,6 +52,12 @@ export const handler: Handler = async (event, context) => {
         user = { id: 'teacher', username: 'أ. المحاضر', role: UserRole.TEACHER };
       } else if (username === 'sales' && password === '123') {
         user = { id: 'sales1', username: 'Sales Agent', role: UserRole.SALES };
+      } else if (username === 'omar.samy' && password === '123') {
+        user = { id: 'omar.samy', username: 'Omar Samy', role: UserRole.TEACHER };
+      } else if (username === 'abdelatif.reda' && password === '123') {
+        user = { id: 'abdelatif.reda', username: 'Abdelatif Reda', role: UserRole.TEACHER };
+      } else if (username === 'karim.ali' && password === '123') {
+        user = { id: 'karim.ali', username: 'Karim Ali', role: UserRole.TEACHER };
       } else {
         // Check students
         const students = await readData<any>('students');
