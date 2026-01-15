@@ -1,0 +1,27 @@
+{
+  "name": "performance-course-manager",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:netlify": "netlify dev",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "lucide-react": "0.344.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "recharts": "2.12.0",
+    "xlsx": "0.18.5"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^5.1.2",
+    "@types/node": "^22.19.6",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
+  }
+}

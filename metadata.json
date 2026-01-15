@@ -1,0 +1,5 @@
+{
+  "name": "Performance Course Manager",
+  "description": "A comprehensive payment tracking dashboard for the Performance Analysis course. Features installment tracking, automatic calculations, and Excel export.",
+  "requestFramePermissions": []
+}

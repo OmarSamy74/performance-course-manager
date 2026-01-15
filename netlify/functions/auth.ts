@@ -1,0 +1,102 @@
+import { Handler } from '@netlify/functions';
+import { createSession, getSession, deleteSession, getUserFromSession, extractToken } from './utils/auth';
+import { readData, writeData, findById } from './utils/storage';
+import { User, UserRole } from '../../types';
+import { jsonResponse, errorResponse, handleOptions, isValidPhone } from './utils/validation';
+
+export const handler: Handler = async (event, context) => {
+  // Handle CORS preflight
+  if (event.httpMethod === 'OPTIONS') {
+    return handleOptions();
+  }
+
+  try {
+    const { httpMethod, headers, body } = event;
+
+    // GET - Get current user
+    if (httpMethod === 'GET') {
+      const token = extractToken(headers);
+      if (!token) {
+        return errorResponse('No authorization token provided', 401);
+      }
+
+      const user = getUserFromSession(token);
+      if (!user) {
+        return errorResponse('Invalid or expired session', 401);
+      }
+
+      return jsonResponse({ user });
+    }
+
+    // POST - Login
+    if (httpMethod === 'POST') {
+      if (!body) {
+        return errorResponse('Request body is required');
+      }
+
+      const { username, password } = JSON.parse(body);
+
+      if (!username || !password) {
+        return errorResponse('Username and password are required');
+      }
+
+      // Check hardcoded admin/teacher/sales
+      let user: User | null = null;
+
+      if (username === 'admin' && password === '123') {
+        user = { id: 'admin', username: 'Administrator', role: UserRole.ADMIN };
+      } else if (username === 'teacher' && password === '123') {
+        user = { id: 'teacher', username: 'أ. المحاضر', role: UserRole.TEACHER };
+      } else if (username === 'sales' && password === '123') {
+        user = { id: 'sales1', username: 'Sales Agent', role: UserRole.SALES };
+      } else {
+        // Check students
+        const students = readData<any>('students');
+        const student = students.find((s: any) => s.phone === username);
+        
+        if (student && password === student.phone) {
+          user = {
+            id: student.id,
+            username: student.name,
+            role: UserRole.STUDENT,
+            studentId: student.id
+          };
+        }
+      }
+
+      if (!user) {
+        return errorResponse('Invalid credentials', 401);
+      }
+
+      // Create or update user in users.json
+      const users = readData<User>('users');
+      const existingUser = findById(users, user.id);
+      if (!existingUser) {
+        users.push(user);
+        writeData('users', users);
+      }
+
+      const session = createSession(user.id, user.role);
+
+      return jsonResponse({
+        user,
+        token: session.token,
+        expiresAt: session.expiresAt
+      });
+    }
+
+    // DELETE - Logout
+    if (httpMethod === 'DELETE') {
+      const token = extractToken(headers);
+      if (token) {
+        deleteSession(token);
+      }
+      return jsonResponse({ message: 'Logged out successfully' });
+    }
+
+    return errorResponse('Method not allowed', 405);
+  } catch (error: any) {
+    console.error('Auth error:', error);
+    return errorResponse(error.message || 'Internal server error', 500);
+  }
+};
