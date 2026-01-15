@@ -19,12 +19,33 @@ export const TeacherPage: React.FC = () => {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const maxSize = 10 * 1024 * 1024; // 10MB limit
+      
+      // Check file size before processing
+      if (file.size > maxSize) {
+        alert(`الملف كبير جداً. الحد الأقصى للحجم هو 10 ميجابايت. حجم الملف الحالي: ${(file.size / 1024 / 1024).toFixed(2)} ميجابايت`);
+        e.target.value = ''; // Clear the input
+        return;
+      }
+      
       setUploading(true);
       try {
-        const base64 = await fileToBase64(e.target.files[0]);
+        const base64 = await fileToBase64(file);
+        
+        // Check Base64 size (should be ~33% larger than original)
+        const base64Size = new Blob([base64]).size;
+        if (base64Size > 40 * 1024 * 1024) { // 40MB limit for Base64
+          alert('الملف كبير جداً بعد التحويل. يرجى اختيار ملف أصغر.');
+          e.target.value = '';
+          setUploading(false);
+          return;
+        }
+        
         setNewMaterial({ ...newMaterial, fileUrl: base64 });
       } catch (err) {
-        alert("خطأ في رفع الملف");
+        console.error('File upload error:', err);
+        alert("خطأ في رفع الملف. يرجى التأكد من أن الملف صحيح والمحاولة مرة أخرى.");
       }
       setUploading(false);
     }
@@ -33,6 +54,13 @@ export const TeacherPage: React.FC = () => {
   const handleAddMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMaterial.fileUrl) return alert("يرجى اختيار ملف");
+    
+    // Check Base64 size before sending
+    const base64Size = new Blob([newMaterial.fileUrl]).size;
+    if (base64Size > 40 * 1024 * 1024) { // 40MB limit
+      alert('الملف كبير جداً. الحد الأقصى للحجم هو 10 ميجابايت للملف الأصلي.');
+      return;
+    }
     
     try {
       const mat: CourseMaterial = {
@@ -49,9 +77,13 @@ export const TeacherPage: React.FC = () => {
       actions.updateMaterials([mat, ...state.materials]);
       setIsUploadModalOpen(false);
       setNewMaterial({ title: '', description: '', fileUrl: '' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save material:', error);
-      alert('فشل في حفظ المحتوى. يرجى المحاولة مرة أخرى.');
+      if (error.message?.includes('413') || error.message?.includes('Content Too Large')) {
+        alert('الملف كبير جداً. يرجى اختيار ملف أصغر (أقل من 10 ميجابايت).');
+      } else {
+        alert('فشل في حفظ المحتوى. يرجى المحاولة مرة أخرى.');
+      }
     }
   };
 
@@ -230,8 +262,9 @@ export const TeacherPage: React.FC = () => {
               
               <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
                 <input 
-                  type="file" 
-                  accept="application/pdf,image/*" 
+                  type="file"
+                  accept="application/pdf,image/*"
+                  onChange={handleFileUpload}
                   onChange={handleFileUpload} 
                   className="absolute inset-0 opacity-0 cursor-pointer" 
                 />

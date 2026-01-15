@@ -84,10 +84,16 @@ export const getLeadStatusColor = (status: LeadStatus) => {
 };
 
 // Helper to compress image before converting to base64
-const compressImage = (file: File, maxWidth: number = 1920, maxHeight: number = 1920, quality: number = 0.8): Promise<File> => {
+const compressImage = (file: File, maxWidth: number = 1920, maxHeight: number = 1920, quality: number = 0.7): Promise<File> => {
   return new Promise((resolve, reject) => {
     // Only compress images, not PDFs or other files
     if (!file.type.startsWith('image/')) {
+      resolve(file);
+      return;
+    }
+    
+    // Skip compression for very small images (< 500KB)
+    if (file.size < 500 * 1024) {
       resolve(file);
       return;
     }
