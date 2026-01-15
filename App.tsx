@@ -16,7 +16,7 @@ import {
   Users, Wallet, AlertCircle, Plus, Trash2, CheckCircle2, 
   FileSpreadsheet, Search, LogOut, Upload, Eye, XCircle, UserCircle, Loader2,
   Briefcase, Phone, MessageSquare, ArrowRight, LayoutDashboard, Target,
-  BookOpen, FileText, Lock, Shield
+  BookOpen, FileText, Lock, Shield, Play, Clock
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import * as XLSX from 'xlsx';
@@ -127,7 +127,7 @@ const App: React.FC = () => {
 
   // Teacher Role (Includes Admin features + Classroom)
   if (currentUser.role === UserRole.TEACHER) {
-    return <TeacherDashboard user={currentUser} students={students} setStudents={updateStudents} leads={leads} setLeads={updateLeads} materials={materials} setMaterials={updateMaterials} onLogout={logout} />;
+    return <TeacherDashboard user={currentUser} students={students} setStudents={updateStudents} leads={leads} setLeads={updateLeads} materials={materials} setMaterials={updateMaterials} lessons={lessons} setLessons={setLessons} onLogout={logout} />;
   }
 
   // Sales Role
@@ -1197,36 +1197,98 @@ const StudentPortal = ({ user, students, setStudents, materials, lessons, onLogo
 
         {/* CLASSROOM TAB */}
         {activeTab === 'CLASSROOM' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">المحاضرات المتاحة</h2>
-            
-            {materials.length === 0 ? (
-               <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
-                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <BookOpen className="text-gray-300" size={32} />
-                  </div>
-                  <p className="text-gray-400">لا يوجد محتوى متاح حتى الآن</p>
-               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {materials.map((item: CourseMaterial) => (
-                  <div key={item.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="p-3 bg-green-50 text-green-600 rounded-xl">
-                        <FileText size={24} />
-                      </div>
-                      <div className="bg-green-100 text-green-700 px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
-                        <Lock size={12} />
-                        محمي
-                      </div>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-8">
+            {/* Progress Overview */}
+            <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
+              <h2 className="text-2xl font-bold mb-4">المحاضرات والمواد التعليمية</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                  <p className="text-green-100 text-sm mb-1">الملفات</p>
+                  <p className="text-2xl font-bold">{materials.length}</p>
+                </div>
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                  <p className="text-green-100 text-sm mb-1">الدروس</p>
+                  <p className="text-2xl font-bold">{lessons.length}</p>
+                </div>
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                  <p className="text-green-100 text-sm mb-1">المكتمل</p>
+                  <p className="text-2xl font-bold">0</p>
+                </div>
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+                  <p className="text-green-100 text-sm mb-1">التقدم</p>
+                  <p className="text-2xl font-bold">0%</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Materials Section */}
+            <div>
+              <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <FileText size={24} className="text-green-600" />
+                الملفات والمستندات
+              </h3>
+              {materials.length === 0 ? (
+                 <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                    <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FileText className="text-green-600" size={32} />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-800 mb-2">{item.title}</h3>
-                    <p className="text-sm text-gray-500 mb-6 line-clamp-2">{item.description}</p>
-                    <button onClick={() => setViewingMaterial(item)} className="w-full py-3 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors shadow-lg shadow-green-100">
-                      ⚽ مشاهدة المحتوى
-                    </button>
-                  </div>
-                ))}
+                    <p className="text-gray-500 font-medium">لا يوجد محتوى متاح حتى الآن</p>
+                 </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {materials.map((item: CourseMaterial) => (
+                    <div key={item.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-green-200 transition-all duration-300 group">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 bg-gradient-to-br from-green-50 to-green-100 text-green-600 rounded-xl group-hover:scale-110 transition-transform">
+                          <FileText size={24} />
+                        </div>
+                        <div className="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                          <Lock size={12} />
+                          محمي
+                        </div>
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">{item.title}</h3>
+                      <p className="text-sm text-gray-500 mb-4 line-clamp-2">{item.description || 'لا يوجد وصف'}</p>
+                      <button onClick={() => setViewingMaterial(item)} className="w-full py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg shadow-green-100 flex items-center justify-center gap-2">
+                        <Eye size={18} />
+                        ⚽ مشاهدة المحتوى
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Lessons Section */}
+            {lessons.length > 0 && (
+              <div>
+                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <BookOpen size={24} className="text-blue-600" />
+                  الدروس التفاعلية
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {lessons.map((lesson: any) => (
+                    <div key={lesson.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="p-3 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
+                          <Play size={24} />
+                        </div>
+                        {lesson.duration && (
+                          <div className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                            <Clock size={12} />
+                            {lesson.duration} د
+                          </div>
+                        )}
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">{lesson.title}</h3>
+                      <p className="text-sm text-gray-500 mb-4 line-clamp-2">{lesson.description || 'لا يوجد وصف'}</p>
+                      <button className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2">
+                        <Play size={18} />
+                        بدء الدرس
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
