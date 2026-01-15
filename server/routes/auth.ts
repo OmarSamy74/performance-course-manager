@@ -4,6 +4,7 @@ import { readData, findById, createById } from '../utils/storage.js';
 import { User, UserRole } from '../../types.js';
 import { isValidPhone } from '../utils/validation.js';
 import { randomUUID } from 'crypto';
+import bcrypt from 'bcryptjs';
 
 const router = Router();
 
@@ -78,25 +79,37 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     // Look up user by username (since PostgreSQL uses UUID for id)
-    const allUsers = await readData<User>('users');
-    let existingUser = allUsers.find((u: User) => u.username === user.username);
+    const allUsers = await readData<any>('users');
+    let existingUser = allUsers.find((u: any) => u.username === user.username);
     
-    // If user doesn't exist, create with a proper UUID
+    // If user doesn't exist, create with a proper UUID and hashed password
     if (!existingUser) {
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
+      
       // Generate UUID for new user
-      const userWithUUID: User = {
+      const userWithUUID: any = {
         ...user,
-        id: randomUUID()
+        id: randomUUID(),
+        password: hashedPassword
       };
       await createById('users', userWithUUID);
       existingUser = userWithUUID;
+    } else {
+      // Verify password for existing user
+      if (existingUser.password && !await bcrypt.compare(trimmedPassword, existingUser.password)) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
     }
 
     // Use the UUID from database for session creation
     const session = await createSession(existingUser.id, existingUser.role);
 
+    // Remove password from response
+    const { password: _, ...userResponse } = existingUser;
+    
     return res.json({
-      user: existingUser,
+      user: userResponse,
       token: session.token,
       expiresAt: session.expiresAt
     });
