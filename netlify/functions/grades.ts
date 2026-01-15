@@ -46,7 +46,7 @@ export const handler: Handler = async (event, context) => {
 
     // POST - Create grade from assignment or quiz
     if (httpMethod === 'POST') {
-      if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
+      if (!hasRole(user.role, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
         return errorResponse('Forbidden', 403);
       }
 
@@ -100,7 +100,7 @@ export const handler: Handler = async (event, context) => {
 
     // PUT - Update grade
     if (httpMethod === 'PUT') {
-      if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
+      if (!hasRole(user.role, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
         return errorResponse('Forbidden', 403);
       }
 

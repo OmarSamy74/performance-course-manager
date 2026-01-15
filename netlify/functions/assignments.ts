@@ -101,7 +101,7 @@ export const handler: Handler = async (event, context) => {
       }
 
       // Create assignment (teacher/admin)
-      if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
+      if (!hasRole(user.role, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
         return errorResponse('Forbidden', 403);
       }
 
@@ -143,7 +143,7 @@ export const handler: Handler = async (event, context) => {
 
       // Grade submission (teacher/admin)
       if (submissionId) {
-        if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
+        if (!hasRole(user.role, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
           return errorResponse('Forbidden', 403);
         }
 
@@ -164,7 +164,7 @@ export const handler: Handler = async (event, context) => {
       }
 
       // Update assignment (teacher/admin)
-      if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
+      if (!hasRole(user.role, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
         return errorResponse('Forbidden', 403);
       }
 
@@ -187,7 +187,7 @@ export const handler: Handler = async (event, context) => {
 
     // DELETE - Delete assignment (teacher/admin)
     if (httpMethod === 'DELETE') {
-      if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
+      if (!hasRole(user.role, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
         return errorResponse('Forbidden', 403);
       }
 

@@ -18,7 +18,7 @@ export const handler: Handler = async (event, context) => {
     }
 
     // Only admin, teacher, and sales can access
-    if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && 
+    if (!hasRole(user.role, UserRole.ADMIN) && 
         user.role !== UserRole.TEACHER && 
         user.role !== UserRole.SALES) {
       return errorResponse('Forbidden', 403);

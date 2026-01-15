@@ -35,7 +35,7 @@ export const handler: Handler = async (event, context) => {
 
     // POST - Create material (only teacher/admin)
     if (httpMethod === 'POST') {
-      if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
+      if (!hasRole(user.role, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
         return errorResponse('Forbidden', 403);
       }
 
@@ -67,7 +67,7 @@ export const handler: Handler = async (event, context) => {
 
     // PUT - Update material (only teacher/admin)
     if (httpMethod === 'PUT') {
-      if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
+      if (!hasRole(user.role, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
         return errorResponse('Forbidden', 403);
       }
 
@@ -93,7 +93,7 @@ export const handler: Handler = async (event, context) => {
 
     // DELETE - Delete material (only teacher/admin)
     if (httpMethod === 'DELETE') {
-      if (!hasRole({ role: user.role } as any, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
+      if (!hasRole(user.role, UserRole.ADMIN) && user.role !== UserRole.TEACHER) {
         return errorResponse('Forbidden', 403);
       }
 
