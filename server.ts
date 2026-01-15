@@ -24,9 +24,12 @@ import gradesRoutes from './server/routes/grades.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Auto-initialize database if needed (optional, set AUTO_INIT_DB=true to enable)
+// Auto-initialize Railway database on startup (Primary Database)
 async function checkAndInitDatabase() {
-  if (process.env.AUTO_INIT_DB !== 'true') {
+  // Always check and initialize if needed (Railway is primary database)
+  const shouldAutoInit = process.env.AUTO_INIT_DB === 'true' || process.env.NODE_ENV === 'production';
+  
+  if (!shouldAutoInit) {
     return;
   }
 

@@ -1,10 +1,17 @@
-// File-based JSON storage for Railway
+// Railway Primary Database - File-based JSON storage
+// This is the PRIMARY database for the application
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
 
-// Use Railway volume if available, otherwise local data directory
-const DATA_DIR = process.env.DATA_DIR || (process.env.RAILWAY_VOLUME_MOUNT_PATH ? join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'data') : join(process.cwd(), 'data'));
+// Railway Primary Database Configuration
+// Priority: 1) DATA_DIR env var, 2) Railway volume mount, 3) /data directory
+const DATA_DIR = process.env.DATA_DIR || 
+  (process.env.RAILWAY_VOLUME_MOUNT_PATH ? join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'data') : 
+   join(process.cwd(), 'data'));
+
+// Log database location on startup
+console.log(`🗄️  Railway Primary Database: ${DATA_DIR}`);
 
 // Ensure data directory exists
 async function ensureDataDir() {
