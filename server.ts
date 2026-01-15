@@ -24,9 +24,31 @@ import gradesRoutes from './server/routes/grades.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Auto-initialize Railway database on startup (Primary Database)
+// Auto-initialize database on startup (PostgreSQL or File-based)
 async function checkAndInitDatabase() {
-  // Always check and initialize if needed (Railway is primary database)
+  // Check if PostgreSQL is available
+  if (process.env.DATABASE_URL) {
+    try {
+      console.log('🗄️  Initializing PostgreSQL database...');
+      const { initDatabase } = await import('./server/db/connection.js');
+      await initDatabase();
+      
+      // Seed initial data if needed
+      const shouldSeed = process.env.AUTO_INIT_DB === 'true' || process.env.SEED_DB === 'true';
+      if (shouldSeed) {
+        const { seedDatabase } = await import('./scripts/init-database-pg.js');
+        await seedDatabase();
+      }
+      
+      console.log('✅ PostgreSQL database initialized successfully');
+      return;
+    } catch (error) {
+      console.error('⚠️  Failed to initialize PostgreSQL:', error);
+      throw error;
+    }
+  }
+  
+  // Fallback to file-based storage
   const shouldAutoInit = process.env.AUTO_INIT_DB === 'true' || process.env.NODE_ENV === 'production';
   
   if (!shouldAutoInit) {
@@ -44,13 +66,13 @@ async function checkAndInitDatabase() {
       return;
     } catch {
       // Database doesn't exist, initialize it
-      console.log('📦 Database not found, initializing...');
+      console.log('📦 File-based database not found, initializing...');
       const { initDatabase } = await import('./scripts/init-database.js');
       await initDatabase();
-      console.log('✅ Database initialized successfully');
+      console.log('✅ File-based database initialized successfully');
     }
   } catch (error) {
-    console.error('⚠️  Failed to auto-initialize database:', error);
+    console.error('⚠️  Failed to auto-initialize file-based database:', error);
     console.log('💡 Run "npm run init-db" manually to initialize the database');
   }
 }
