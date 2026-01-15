@@ -80,7 +80,8 @@ export async function readData<T extends { id: string }>(collectionName: string)
       const pgStorage = await getPgStorage();
       if (!pgStorage) return [];
       
-      const dbPool = await pgStorage.getPool();
+      const { getPool } = pgStorage;
+      const dbPool = await getPool();
       const result = await dbPool.query('SELECT id FROM students ORDER BY created_at DESC');
       const students: T[] = [];
       
