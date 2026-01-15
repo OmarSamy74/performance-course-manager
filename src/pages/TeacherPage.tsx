@@ -273,7 +273,8 @@ export const TeacherPage: React.FC = () => {
                 ) : (
                   <Upload className="mx-auto text-gray-400 mb-2" size={24} />
                 )}
-                <p className="text-sm text-gray-500">{newMaterial.fileUrl ? "تم اختيار الملف ✅" : "اضغط لاختيار ملف PDF"}</p>
+                <p className="text-sm text-gray-500">{newMaterial.fileUrl ? "تم اختيار الملف ✅" : "اضغط لاختيار ملف PDF أو صورة"}</p>
+                <p className="text-xs text-gray-400 mt-1">الحد الأقصى: 10 ميجابايت</p>
               </div>
 
               <div className="flex gap-2 mt-4">
