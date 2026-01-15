@@ -14,6 +14,12 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
   const [iframeLoaded, setIframeLoaded] = useState(false);
 
   useEffect(() => {
+    if (!material || !material.fileUrl) {
+      setError('لا يوجد رابط للملف');
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError('');
     setIframeLoaded(false);
@@ -27,12 +33,15 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
     });
     
     // Timeout to detect if PDF fails to load
-    const loadTimeout = setTimeout(() => {
-      if (!iframeLoaded && blobUrl) {
-        console.warn('PDF load timeout - iframe may have failed to load');
-        // Don't set error immediately, give it more time
-      }
-    }, 10000); // 10 second timeout
+    let loadTimeout: NodeJS.Timeout;
+    if (typeof window !== 'undefined') {
+      loadTimeout = setTimeout(() => {
+        if (!iframeLoaded && blobUrl) {
+          console.warn('PDF load timeout - iframe may have failed to load');
+          // Don't set error immediately, give it more time
+        }
+      }, 10000); // 10 second timeout
+    }
     
     const createBlobUrl = async () => {
       try {
@@ -75,6 +84,11 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
         }
 
         try {
+          // Check if we're in browser environment
+          if (typeof window === 'undefined' || typeof window.atob === 'undefined' || typeof URL === 'undefined') {
+            throw new Error('Browser APIs not available');
+          }
+
           // Clean base64 string (remove whitespace and newlines)
           const cleanBase64 = base64.replace(/\s/g, '').replace(/\n/g, '').replace(/\r/g, '');
           
@@ -169,16 +183,22 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
     });
 
     return () => {
-      clearTimeout(loadTimeout);
+      if (loadTimeout) {
+        clearTimeout(loadTimeout);
+      }
     };
-  }, [material.fileUrl, material.title, material.fileType, iframeLoaded, blobUrl]);
+  }, [material?.fileUrl, material?.title, material?.fileType, iframeLoaded, blobUrl]);
 
   // Cleanup blob URL when component unmounts or blobUrl changes
   useEffect(() => {
     return () => {
-      if (blobUrl && blobUrl.startsWith('blob:')) {
-        console.log('Revoking blob URL:', blobUrl.substring(0, 50));
-        URL.revokeObjectURL(blobUrl);
+      if (blobUrl && typeof blobUrl === 'string' && blobUrl.startsWith('blob:') && typeof URL !== 'undefined') {
+        try {
+          console.log('Revoking blob URL:', blobUrl.substring(0, 50));
+          URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+          console.warn('Error revoking blob URL:', error);
+        }
       }
     };
   }, [blobUrl]);

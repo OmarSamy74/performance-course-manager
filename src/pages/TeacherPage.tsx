@@ -32,7 +32,7 @@ export const TeacherPage: React.FC = () => {
   // Lessons state
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
-  const [newLesson, setNewLesson] = useState({ title: '', description: '', content: '', videoUrl: '', moduleId: 'default', order: state.lessons.length, duration: 0 });
+  const [newLesson, setNewLesson] = useState({ title: '', description: '', content: '', videoUrl: '', moduleId: 'default', order: 0, duration: 0 });
   const [viewingLesson, setViewingLesson] = useState<Lesson | null>(null);
   
   // Assignments state
@@ -47,8 +47,10 @@ export const TeacherPage: React.FC = () => {
 
   // Load data
   useEffect(() => {
-    actions.refreshData();
-  }, []);
+    if (state.user) {
+      actions.refreshData();
+    }
+  }, [state.user]);
 
   // Materials handlers
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,7 +130,7 @@ export const TeacherPage: React.FC = () => {
         content: newLesson.content,
         videoUrl: newLesson.videoUrl || undefined,
         moduleId: newLesson.moduleId,
-        order: newLesson.order,
+        order: newLesson.order || state.lessons.length,
         duration: newLesson.duration || undefined,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -681,7 +683,10 @@ export const TeacherPage: React.FC = () => {
       {/* Lesson Modal */}
       <Modal
         isOpen={isLessonModalOpen}
-        onClose={() => setIsLessonModalOpen(false)}
+        onClose={() => {
+          setIsLessonModalOpen(false);
+          setNewLesson({ title: '', description: '', content: '', videoUrl: '', moduleId: 'default', order: state.lessons.length, duration: 0 });
+        }}
         title="إضافة درس جديد"
         icon={<Play className="text-white" size={24} />}
         iconColor="blue"
