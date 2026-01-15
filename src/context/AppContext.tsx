@@ -37,7 +37,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [lessons, setLessons] = useState<any[]>([]);
   const [assignments, setAssignments] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
-  const [dataLoading, setDataLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(false); // Start as false, will be set to true when needed
 
   // Fetch data from API when user is logged in
   const refreshData = async () => {
@@ -117,12 +117,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const userRef = React.useRef<string | null>(null);
   
   useEffect(() => {
-    // Only refresh data if user is logged in and user ID actually changed
-    if (user && !authLoading && user.id !== userRef.current) {
+    // If auth is still loading, wait
+    if (authLoading) {
+      return;
+    }
+    
+    // If no user, set loading to false and clear ref
+    if (!user) {
+      userRef.current = null;
+      setDataLoading(false);
+      return;
+    }
+    
+    // Only refresh data if user ID actually changed
+    if (user.id !== userRef.current) {
       userRef.current = user.id;
       refreshData();
-    } else if (!user) {
-      userRef.current = null;
     }
   }, [user?.id, authLoading]); // Only depend on user.id to avoid unnecessary refreshes
 
