@@ -1,4 +1,17 @@
 import React, { useState, useEffect, useMemo } from 'react';
+
+// Browser-compatible UUID generator
+const generateUUID = (): string => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return generateUUID();
+  }
+  // Fallback for older browsers
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+};
 import { 
   Users, Wallet, AlertCircle, Plus, Trash2, CheckCircle2, 
   FileSpreadsheet, Search, LogOut, Upload, Eye, XCircle, UserCircle, Loader2,
@@ -377,7 +390,7 @@ const SalesDashboard = ({ user, leads, setLeads, students, setStudents, onLogout
   const handleAddLead = (e: React.FormEvent) => {
     e.preventDefault();
     const lead: Lead = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       name: newLead.name,
       phone: newLead.phone,
       source: newLead.source || 'Direct',
@@ -415,7 +428,7 @@ const SalesDashboard = ({ user, leads, setLeads, students, setStudents, onLogout
       if (confirmConvert) {
          // Create Student
          const newStudent: Student = {
-          id: crypto.randomUUID(),
+          id: generateUUID(),
           name: lead.name,
           phone: lead.phone,
           plan: PaymentPlan.HALF,
@@ -616,7 +629,7 @@ const AdminDashboard = ({ user, students, setStudents, leads, setLeads, onLogout
     if (!newName) return;
 
     const newStudent: Student = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       name: newName,
       phone: newPhone,
       plan: newPlan,
@@ -889,7 +902,7 @@ const TeacherDashboard = ({ user, materials, setMaterials, students, setStudents
     if (!newMaterial.fileUrl) return alert("يرجى اختيار ملف");
     
     const mat: CourseMaterial = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       title: newMaterial.title,
       description: newMaterial.description,
       fileUrl: newMaterial.fileUrl,
