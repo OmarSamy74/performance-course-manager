@@ -233,11 +233,15 @@ export const TeacherPage: React.FC = () => {
     return <LessonPlayer lesson={viewingLesson} onBack={() => setViewingLesson(null)} />;
   }
 
-  // If Teacher wants to see Admin View - redirect to admin page
-  if (view === 'ADMIN') {
-    React.useEffect(() => {
+  // Redirect to admin page if view is ADMIN
+  useEffect(() => {
+    if (view === 'ADMIN') {
       navigate('/admin', { replace: true });
-    }, []);
+    }
+  }, [view, navigate]);
+
+  // If Teacher wants to see Admin View - show loading while redirecting
+  if (view === 'ADMIN') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
