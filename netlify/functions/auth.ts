@@ -71,16 +71,27 @@ export const handler: Handler = async (event, context) => {
         return errorResponse('Invalid credentials', 401);
       }
 
-      // Create or update user in Firestore
-      const existingUser = await findById<User>('users', user.id);
+      // Look up user by username (since PostgreSQL uses UUID for id)
+      const allUsers = await readData<User>('users');
+      let existingUser = allUsers.find((u: User) => u.username === user.username);
+      
+      // If user doesn't exist, create with a proper UUID
       if (!existingUser) {
-        await createById('users', user);
+        // Generate UUID for new user
+        const { randomUUID } = await import('crypto');
+        const userWithUUID: User = {
+          ...user,
+          id: randomUUID()
+        };
+        await createById('users', userWithUUID);
+        existingUser = userWithUUID;
       }
 
-      const session = await createSession(user.id, user.role);
+      // Use the UUID from database for session creation
+      const session = await createSession(existingUser.id, existingUser.role);
 
       return jsonResponse({
-        user,
+        user: existingUser,
         token: session.token,
         expiresAt: session.expiresAt
       });
