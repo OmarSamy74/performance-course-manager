@@ -83,12 +83,89 @@ export const getLeadStatusColor = (status: LeadStatus) => {
   }
 };
 
-// Helper to convert file to base64 for local storage simulation
-export const fileToBase64 = (file: File): Promise<string> => {
+// Helper to compress image before converting to base64
+const compressImage = (file: File, maxWidth: number = 1920, maxHeight: number = 1920, quality: number = 0.8): Promise<File> => {
   return new Promise((resolve, reject) => {
+    // Only compress images, not PDFs or other files
+    if (!file.type.startsWith('image/')) {
+      resolve(file);
+      return;
+    }
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Calculate new dimensions
+        if (width > height) {
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = (width * maxHeight) / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Failed to compress image'));
+              return;
+            }
+            const compressedFile = new File([blob], file.name, {
+              type: file.type,
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          file.type,
+          quality
+        );
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
   });
+};
+
+// Helper to convert file to base64 for local storage simulation
+// Automatically compresses images before conversion
+export const fileToBase64 = async (file: File, compress: boolean = true): Promise<string> => {
+  try {
+    // Compress image if it's an image file and compression is enabled
+    const fileToConvert = compress ? await compressImage(file) : file;
+    
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(fileToConvert);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  } catch (error) {
+    // If compression fails, try without compression
+    if (compress) {
+      return fileToBase64(file, false);
+    }
+    throw error;
+  }
 };
