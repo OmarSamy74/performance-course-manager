@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Phone, User, Lock, GraduationCap, Users, Eye, EyeOff } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -17,6 +17,29 @@ export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<UserRole | null>(null);
+
+  // Navigate when user state updates after login
+  useEffect(() => {
+    if (pendingNavigation && state.user) {
+      const role = state.user.role;
+      if (role === pendingNavigation) {
+        setPendingNavigation(null);
+        setLoading(false);
+        if (role === UserRole.ADMIN) {
+          navigate('/admin', { replace: true });
+        } else if (role === UserRole.TEACHER) {
+          navigate('/teacher', { replace: true });
+        } else if (role === UserRole.SALES) {
+          navigate('/sales', { replace: true });
+        } else if (role === UserRole.STUDENT) {
+          navigate('/student', { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
+      }
+    }
+  }, [state.user, pendingNavigation, navigate]);
 
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,27 +62,60 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
+    setPendingNavigation(null);
 
     try {
-      await actions.login(username, password);
-      setTimeout(() => {
-        const currentUser = state.user;
-        if (currentUser?.role === UserRole.ADMIN) {
+      const result = await actions.login(username, password);
+      
+      // Try to get user from result or state
+      let loggedInUser = result;
+      
+      // If we have a user, navigate immediately
+      if (loggedInUser?.role) {
+        setLoading(false);
+        if (loggedInUser.role === UserRole.ADMIN) {
           navigate('/admin', { replace: true });
-        } else if (currentUser?.role === UserRole.TEACHER) {
+        } else if (loggedInUser.role === UserRole.TEACHER) {
           navigate('/teacher', { replace: true });
-        } else if (currentUser?.role === UserRole.SALES) {
+        } else if (loggedInUser.role === UserRole.SALES) {
           navigate('/sales', { replace: true });
-        } else if (currentUser?.role === UserRole.STUDENT) {
+        } else if (loggedInUser.role === UserRole.STUDENT) {
           navigate('/student', { replace: true });
         } else {
           navigate('/dashboard', { replace: true });
         }
-      }, 200);
+      } else {
+        // Wait for state to update, then navigate via useEffect
+        // Try to determine role from username (fallback)
+        let expectedRole: UserRole | null = null;
+        if (username === 'admin') {
+          expectedRole = UserRole.ADMIN;
+        } else if (username === 'omar.samy' || username === 'abdelatif.reda' || username === 'karim.ali' || username === 'teacher') {
+          expectedRole = UserRole.TEACHER;
+        } else if (username === 'sales') {
+          expectedRole = UserRole.SALES;
+        }
+        
+        if (expectedRole) {
+          setPendingNavigation(expectedRole);
+          // Set timeout to prevent infinite loading
+          setTimeout(() => {
+            if (loading) {
+              setLoading(false);
+              setPendingNavigation(null);
+              setError('فشل في تسجيل الدخول. يرجى المحاولة مرة أخرى.');
+            }
+          }, 5000);
+        } else {
+          setLoading(false);
+          navigate('/dashboard', { replace: true });
+        }
+      }
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.message || 'بيانات خاطئة. Admin: admin/123 | Teacher: omar.samy/123 | Sales: sales/123');
-    } finally {
       setLoading(false);
+      setPendingNavigation(null);
     }
   };
 

@@ -119,10 +119,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [user]);
 
   const login = async (username: string, password: string) => {
-    const result = await apiLogin(username, password);
-    // The user state will be updated by the useAuth hook via useEffect
-    // Return the user from the login result for immediate navigation
-    return result?.user || user;
+    try {
+      const result = await apiLogin(username, password);
+      // Wait a moment for state to update
+      await new Promise(resolve => setTimeout(resolve, 100));
+      // Return the user from the login result for immediate navigation
+      return result?.user || user;
+    } catch (error) {
+      throw error;
+    }
   };
 
   const logout = async () => {
