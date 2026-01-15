@@ -6,7 +6,6 @@ export interface Session {
   id: string;
   userId: string;
   token: string;
-  role: UserRole;
   createdAt: string;
   expiresAt: string;
 }
@@ -29,11 +28,11 @@ export async function createSession(userId: string, role: UserRole): Promise<Ses
     id: randomUUID(),
     userId,
     token: generateToken(),
-    role,
     createdAt: new Date(now).toISOString(),
     expiresAt: new Date(now + SESSION_DURATION).toISOString()
   };
   
+  // Note: role is not stored in sessions table, we get it from users table
   await createById('sessions', session);
   
   return session;

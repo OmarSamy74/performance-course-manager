@@ -5,7 +5,6 @@ export interface Session {
   id: string;
   userId: string;
   token: string;
-  role: UserRole;
   createdAt: string;
   expiresAt: string;
 }
@@ -28,11 +27,11 @@ export async function createSession(userId: string, role: UserRole): Promise<Ses
     id: crypto.randomUUID(),
     userId,
     token: generateToken(),
-    role,
     createdAt: new Date(now).toISOString(),
     expiresAt: new Date(now + SESSION_DURATION).toISOString()
   };
   
+  // Note: role is not stored in sessions table, we get it from users table
   await createById('sessions', session);
   
   return session;
@@ -100,16 +99,16 @@ export async function getUserFromSession(token: string): Promise<User | null> {
 /**
  * Verify user has required role
  */
-export function hasRole(session: Session | null, requiredRole: UserRole): boolean {
-  if (!session) return false;
+export function hasRole(userRole: UserRole, requiredRole: UserRole): boolean {
+  if (!userRole) return false;
   
   // Admin has access to everything
-  if (session.role === UserRole.ADMIN) return true;
+  if (userRole === UserRole.ADMIN) return true;
   
   // Teacher has access to teacher and student features
-  if (session.role === UserRole.TEACHER && requiredRole !== UserRole.ADMIN) return true;
+  if (userRole === UserRole.TEACHER && requiredRole !== UserRole.ADMIN) return true;
   
-  return session.role === requiredRole;
+  return userRole === requiredRole;
 }
 
 /**
