@@ -13,23 +13,65 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
   useEffect(() => {
     const createBlobUrl = () => {
       try {
-        if (!material.fileUrl) return '';
-
-        const parts = material.fileUrl.split(',');
-        const base64 = parts.length > 1 ? parts[1] : parts[0];
-        const mime = parts.length > 1 ? parts[0].match(/:(.*?);/)?.[1] || 'application/pdf' : 'application/pdf';
-        
-        const binaryString = window.atob(base64);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
+        if (!material.fileUrl) {
+          console.warn('No fileUrl provided for material:', material.title);
+          return '';
         }
-        
-        const blob = new Blob([bytes], { type: mime });
-        return URL.createObjectURL(blob);
+
+        let base64 = '';
+        let mime = 'application/pdf';
+
+        // Handle different fileUrl formats
+        if (material.fileUrl.includes(',')) {
+          // Data URL format: data:mime;base64,data
+          const parts = material.fileUrl.split(',');
+          const header = parts[0];
+          base64 = parts[1] || parts[0];
+          
+          // Extract MIME type from header
+          const mimeMatch = header.match(/data:(.*?);/);
+          if (mimeMatch) {
+            mime = mimeMatch[1] || 'application/pdf';
+          }
+        } else if (material.fileUrl.startsWith('http://') || material.fileUrl.startsWith('https://')) {
+          // Direct URL - use as is
+          setBlobUrl(material.fileUrl);
+          return;
+        } else {
+          // Assume it's base64 without prefix
+          base64 = material.fileUrl;
+        }
+
+        if (!base64) {
+          console.warn('Empty base64 data for material:', material.title);
+          return '';
+        }
+
+        try {
+          const binaryString = window.atob(base64);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          
+          const blob = new Blob([bytes], { type: mime });
+          const url = URL.createObjectURL(blob);
+          return url;
+        } catch (decodeError) {
+          console.error('Failed to decode base64:', decodeError);
+          // Try to use fileUrl directly if it's a valid URL
+          if (material.fileUrl.startsWith('http://') || material.fileUrl.startsWith('https://')) {
+            return material.fileUrl;
+          }
+          return '';
+        }
       } catch (e) {
         console.error("Failed to create blob URL", e);
+        // Fallback: try to use fileUrl directly
+        if (material.fileUrl && (material.fileUrl.startsWith('http://') || material.fileUrl.startsWith('https://'))) {
+          return material.fileUrl;
+        }
         return '';
       }
     };
@@ -38,9 +80,11 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
     setBlobUrl(url);
 
     return () => {
-      if (url) URL.revokeObjectURL(url);
+      if (url && url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
     };
-  }, [material.fileUrl]);
+  }, [material.fileUrl, material.title]);
 
   return (
     <div className="fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center" onContextMenu={(e) => e.preventDefault()}>
@@ -58,15 +102,25 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
       <div className="flex-1 w-full relative bg-gray-800 overflow-hidden flex justify-center items-center">
         {blobUrl ? (
           <iframe 
-            src={`${blobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`} 
+            src={blobUrl.includes('#') ? blobUrl : `${blobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
             className="w-full h-full md:w-3/4 bg-white shadow-2xl"
             style={{ border: 'none' }}
             title="Secure Viewer"
+            onError={(e) => {
+              console.error('Iframe load error:', e);
+              setBlobUrl('');
+            }}
+            onLoad={() => {
+              console.log('Iframe loaded successfully');
+            }}
           />
         ) : (
-          <div className="text-white flex flex-col items-center gap-2">
+          <div className="text-white flex flex-col items-center gap-4 p-8">
             <Loader2 className="animate-spin text-indigo-500" size={32} />
             <span>جاري تحميل الملف...</span>
+            {!material.fileUrl && (
+              <p className="text-red-400 text-sm mt-2">خطأ: لا يوجد رابط للملف</p>
+            )}
           </div>
         )}
       </div>

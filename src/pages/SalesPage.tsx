@@ -110,9 +110,13 @@ export const SalesPage: React.FC = () => {
     }
   };
 
-  const filteredLeads = state.leads.filter((l: Lead) => 
-    l.name.includes(searchTerm) || l.phone.includes(searchTerm)
-  );
+  const filteredLeads = useMemo(() => {
+    if (!searchTerm) return state.leads;
+    const term = searchTerm.toLowerCase();
+    return state.leads.filter((l: Lead) => 
+      l.name.toLowerCase().includes(term) || l.phone.includes(term)
+    );
+  }, [state.leads, searchTerm]);
 
   const handleLogout = async () => {
     await actions.logout();
@@ -284,8 +288,21 @@ export const SalesPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {filteredLeads.length === 0 ? (
-                  <tr><td colSpan={6} className="text-center p-8 text-gray-400">لا يوجد عملاء حالياً</td></tr>
+                {state.loading ? (
+                  <tr>
+                    <td colSpan={6} className="text-center p-8">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                        <span className="text-gray-500">جاري التحميل...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredLeads.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center p-8 text-gray-400">
+                      {searchTerm ? 'لا توجد نتائج للبحث' : 'لا يوجد عملاء حالياً'}
+                    </td>
+                  </tr>
                 ) : filteredLeads.map((lead: Lead) => (
                   <tr key={lead.id} className="hover:bg-gray-50 transition-colors">
                     <td className="p-4">
