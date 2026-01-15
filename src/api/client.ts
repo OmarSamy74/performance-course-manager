@@ -38,18 +38,32 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
-let authToken: string | null = localStorage.getItem('auth_token') || null;
+let authToken: string | null = null;
+
+// Initialize from localStorage
+if (typeof window !== 'undefined') {
+  authToken = localStorage.getItem('auth_token');
+}
 
 export function setAuthToken(token: string | null) {
   authToken = token;
-  if (token) {
-    localStorage.setItem('auth_token', token);
-  } else {
-    localStorage.removeItem('auth_token');
+  if (typeof window !== 'undefined') {
+    if (token) {
+      localStorage.setItem('auth_token', token);
+    } else {
+      localStorage.removeItem('auth_token');
+    }
   }
 }
 
 export function getAuthToken(): string | null {
+  // Always get fresh from localStorage to ensure sync
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('auth_token');
+    if (stored !== authToken) {
+      authToken = stored;
+    }
+  }
   return authToken;
 }
 
@@ -80,8 +94,11 @@ async function request<T>(
     ...options.headers,
   };
 
-  if (authToken) {
-    headers['Authorization'] = `Bearer ${authToken}`;
+  // Always get the latest token (ensures it's fresh from localStorage)
+  const currentToken = getAuthToken();
+  
+  if (currentToken) {
+    headers['Authorization'] = `Bearer ${currentToken}`;
   }
 
   try {
