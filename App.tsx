@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 // Browser-compatible UUID generator
 const generateUUID = (): string => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return generateUUID();
+    return crypto.randomUUID();
   }
   // Fallback for older browsers
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
