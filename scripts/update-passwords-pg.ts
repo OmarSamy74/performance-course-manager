@@ -54,14 +54,22 @@ async function updatePasswords() {
 
   const pool = new Pool({
     connectionString: databaseUrl,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: { rejectUnauthorized: false }, // Always use SSL for Railway
+    connectionTimeoutMillis: 10000, // 10 second timeout
+    query_timeout: 30000, // 30 second query timeout
   });
 
   try {
     console.log('🔐 Connecting to database...');
+    console.log(`   Host: ${new URL(databaseUrl).hostname}`);
     
-    // Test connection
-    await pool.query('SELECT 1');
+    // Test connection with timeout
+    const connectPromise = pool.query('SELECT 1');
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Connection timeout after 10 seconds')), 10000)
+    );
+    
+    await Promise.race([connectPromise, timeoutPromise]);
     console.log('✅ Connected to database');
     
     // Get all users
@@ -106,9 +114,29 @@ async function updatePasswords() {
     await pool.end();
     process.exit(0);
   } catch (error: any) {
-    console.error('❌ Error updating passwords:', error.message);
-    console.error(error);
-    await pool.end();
+    console.error('\n❌ Error updating passwords:', error.message);
+    
+    if (error.message.includes('timeout')) {
+      console.error('\n💡 Connection timeout. Possible issues:');
+      console.error('   1. Check your internet connection');
+      console.error('   2. Verify DATABASE_URL is correct');
+      console.error('   3. Check if Railway PostgreSQL is running');
+      console.error('   4. Try again in a few moments');
+    } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      console.error('\n💡 Connection failed. Possible issues:');
+      console.error('   1. DATABASE_URL hostname is incorrect');
+      console.error('   2. PostgreSQL service is not accessible');
+      console.error('   3. Firewall blocking connection');
+      console.error('   4. Use PUBLIC DATABASE_URL (not .railway.internal)');
+    } else {
+      console.error('\n💡 Error details:', error.code || 'Unknown error');
+    }
+    
+    try {
+      await pool.end();
+    } catch (e) {
+      // Ignore errors when closing
+    }
     process.exit(1);
   }
 }
