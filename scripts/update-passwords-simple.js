@@ -6,8 +6,9 @@
  *   DATABASE_URL="..." node scripts/update-passwords-simple.js
  */
 
-const { Pool } = require('pg');
-const bcrypt = require('bcryptjs');
+import pg from 'pg';
+const { Pool } = pg;
+import bcrypt from 'bcryptjs';
 
 // Generate complex password (12 characters)
 function generateComplexPassword() {
