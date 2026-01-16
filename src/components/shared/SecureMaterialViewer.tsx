@@ -117,7 +117,7 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
           setIsLoading(false);
           setBlobUrl(driveUrl);
           setIframeLoaded(true); // Mark as "loaded" so we show the link UI immediately
-          return;
+          return driveUrl; // Return the URL so promise resolves correctly
         } else if (material.fileUrl.includes(',')) {
           // Data URL format: data:mime;base64,data
           const parts = material.fileUrl.split(',');
@@ -133,7 +133,7 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
           // Direct URL - use as is
           setIsLoading(false);
           setBlobUrl(material.fileUrl);
-          return;
+          return material.fileUrl; // Return the URL so promise resolves correctly
         } else {
           // Assume it's base64 without prefix
           base64 = material.fileUrl;
