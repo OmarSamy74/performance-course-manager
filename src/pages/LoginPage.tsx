@@ -114,15 +114,18 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#e0e5ec] flex items-center justify-center p-4 relative overflow-hidden" style={{ fontFamily: "'Cairo', 'Poppins', sans-serif" }}>
-      {/* Merged Horizontal Background */}
+      {/* Merged Horizontal Background - 3 Sections */}
       <div className="login-background-merged">
         <div className="login-bg-section login-bg-section-1"></div>
         <div className="login-bg-section login-bg-section-2"></div>
         <div className="login-bg-section login-bg-section-3"></div>
       </div>
       
+      {/* Alternative: Single merged background (uncomment to use) */}
+      {/* <div className="login-background-single"></div> */}
+      
       {/* Overlay for better readability */}
-      <div className="absolute inset-0 bg-[#e0e5ec]/70 backdrop-blur-sm"></div>
+      <div className="absolute inset-0 bg-[#e0e5ec]/60 backdrop-blur-[2px]"></div>
       
       <div className="login-container-neumorphic relative z-10">
         {/* Profile Image */}
