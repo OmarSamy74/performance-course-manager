@@ -112,8 +112,11 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
           // Store view URL in a way we can access it later
           (window as any).__driveViewUrl = viewUrl;
           
+          // For Google Drive, we don't use iframe (blocked by X-Frame-Options)
+          // Instead, we'll show a direct link button
           setIsLoading(false);
           setBlobUrl(driveUrl);
+          setIframeLoaded(true); // Mark as "loaded" so we show the link UI immediately
           return;
         } else if (material.fileUrl.includes(',')) {
           // Data URL format: data:mime;base64,data
@@ -338,46 +341,47 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
         ) : blobUrl ? (
           // Check if it's Google Drive URL first (before fileType check)
           blobUrl.includes('drive.google.com') ? (
-            <div className="w-full h-full flex flex-col items-center justify-center p-4">
-              <div className="w-full h-full bg-white shadow-2xl" style={{ minHeight: '600px' }}>
-                <iframe 
-                  key={blobUrl}
-                  src={blobUrl}
-                  className="w-full h-full"
-                  style={{ border: 'none', display: 'block' }}
-                  title="Google Drive Viewer"
-                  allow="fullscreen"
-                  loading="lazy"
-                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-                  onLoad={() => {
-                    setIframeLoaded(true);
-                    setIsLoading(false);
-                    console.log('Google Drive iframe loaded successfully');
-                  }}
-                  onError={() => {
-                    console.error('Google Drive iframe failed to load');
-                    setIsLoading(false);
-                  }}
-                />
-              </div>
-              {/* Always show fallback link for Google Drive */}
-              <div className="mt-4 bg-gray-800 p-4 rounded-lg max-w-md">
-                <p className="text-white text-sm mb-2 text-center">إذا لم يظهر الملف في الإطار أعلاه:</p>
-                <a 
-                  href={(() => {
-                    // Extract file ID and create view URL
-                    const fileIdMatch = blobUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-                    if (fileIdMatch) {
-                      return `https://drive.google.com/file/d/${fileIdMatch[1]}/view`;
-                    }
-                    return blobUrl.replace('/preview', '/view').replace('?usp=sharing', '');
-                  })()} 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 underline hover:text-blue-300 text-center block font-semibold"
-                >
-                  📎 اضغط هنا لفتح الملف في Google Drive
-                </a>
+            <div className="w-full h-full flex flex-col items-center justify-center p-8">
+              {/* Google Drive files cannot be embedded in iframe - show direct link */}
+              <div className="bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl shadow-2xl p-8 max-w-2xl w-full text-center">
+                <div className="mb-6">
+                  <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-white mb-2">{material.title}</h3>
+                  <p className="text-blue-100 text-sm">الملف موجود في Google Drive</p>
+                </div>
+                
+                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
+                  <p className="text-white text-lg mb-4">
+                    لفتح الملف، اضغط على الزر أدناه:
+                  </p>
+                  <a 
+                    href={(() => {
+                      // Extract file ID and create view URL
+                      const fileIdMatch = blobUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                      if (fileIdMatch) {
+                        return `https://drive.google.com/file/d/${fileIdMatch[1]}/view`;
+                      }
+                      // Try to get original URL from material
+                      if (material.fileUrl.includes('/view')) {
+                        return material.fileUrl;
+                      }
+                      return blobUrl.replace('/preview', '/view').replace('?usp=sharing', '');
+                    })()} 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 shadow-lg"
+                  >
+                    📎 فتح الملف في Google Drive
+                  </a>
+                </div>
+                
+                <p className="text-blue-100 text-xs">
+                  سيتم فتح الملف في تبويب جديد
+                </p>
               </div>
             </div>
           ) : material.fileType === 'IMAGE' ? (
