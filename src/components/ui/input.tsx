@@ -30,11 +30,3 @@ export const Input: React.FC<InputProps> = ({
     />
   );
 };
-        'disabled:bg-gray-50 disabled:cursor-not-allowed',
-        variantClasses[variant],
-        className
-      )}
-      {...props}
-    />
-  );
-};
