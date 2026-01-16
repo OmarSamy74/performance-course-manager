@@ -13,9 +13,19 @@ API_URL="${VITE_API_URL:-https://performance-course-manager-production.up.railwa
 
 echo "📡 API URL: $API_URL"
 echo ""
+echo "📋 How to get Admin Token:"
+echo "   1. Login as admin on your website"
+echo "   2. Open DevTools (F12)"
+echo "   3. Go to Network tab"
+echo "   4. Click any API request"
+echo "   5. Check Headers → Authorization: Bearer YOUR_TOKEN"
+echo "   6. Copy the token (without 'Bearer ')"
+echo ""
+echo "   Or see: docs/HOW_TO_GET_ADMIN_TOKEN.md"
+echo ""
 
 # Prompt for admin token
-read -p "Enter Admin Auth Token (from browser DevTools → Application → Cookies or Network tab): " ADMIN_TOKEN
+read -p "Enter Admin Auth Token: " ADMIN_TOKEN
 
 if [ -z "$ADMIN_TOKEN" ]; then
     echo "❌ Admin token is required"
