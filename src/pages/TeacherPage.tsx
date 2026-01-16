@@ -93,7 +93,7 @@ export const TeacherPage: React.FC = () => {
       await materialsApi.create(mat);
       actions.updateMaterials([mat, ...state.materials]);
       setIsUploadModalOpen(false);
-      setNewMaterial({ title: '', description: '', fileUrl: '' });
+      setNewMaterial({ title: '', description: '', fileUrl: '', fileType: 'PDF' });
     } catch (error: any) {
       console.error('Failed to save material:', error);
       alert('فشل في حفظ المحتوى.');
