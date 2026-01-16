@@ -36,8 +36,9 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center gap-4">
           <img 
             src="/logo.png" 
-            alt="أكاديمية كرة القدم" 
+            alt="SOCCER ANALYTICS PRO" 
             className="logo-large"
+            style={{ maxHeight: '120px', width: 'auto', objectFit: 'contain' }}
             onError={(e) => {
               e.currentTarget.style.display = 'none';
             }}
