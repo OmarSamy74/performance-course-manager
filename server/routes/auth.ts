@@ -91,25 +91,124 @@ router.post('/', async (req: Request, res: Response) => {
     // If user not found, check for students (student login uses phone as username)
     if (!existingUser) {
       try {
-        const students = await readData<any>('students');
-        const student = students.find((s: any) => s.phone === trimmedUsername);
+        // Query PostgreSQL students table directly
+        const studentResult = await pool.query(
+          'SELECT id, name, phone, user_id FROM students WHERE phone = $1',
+          [trimmedUsername]
+        );
         
-        if (student && trimmedPassword === student.phone) {
-          // Student login - create session directly
-          const session = await createSession(student.id, UserRole.STUDENT);
-          return res.json({
-            user: {
-              id: student.id,
-              username: student.name,
-              role: UserRole.STUDENT,
-              studentId: student.id
-            },
-            token: session.token,
-            expiresAt: session.expiresAt
-          });
+        if (studentResult.rows.length > 0) {
+          const student = studentResult.rows[0];
+          
+          // Student password is their phone number (or check if they have a user account)
+          if (trimmedPassword === student.phone) {
+            // Check if student has a user account
+            let studentUser = null;
+            if (student.user_id) {
+              const userResult = await pool.query(
+                'SELECT id, username, role FROM users WHERE id = $1',
+                [student.user_id]
+              );
+              if (userResult.rows.length > 0) {
+                studentUser = userResult.rows[0];
+              }
+            }
+            
+            // Use student's user_id if exists, otherwise use student.id
+            const userId = student.user_id || student.id;
+            
+            // Create or get user account for student if doesn't exist
+            if (!studentUser) {
+              const userIdForUser = randomUUID();
+              const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
+              
+              try {
+                await pool.query(
+                  'INSERT INTO users (id, username, password, role, student_id, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
+                  [userIdForUser, student.name, hashedPassword, UserRole.STUDENT, student.id]
+                );
+                
+                // Update student with user_id
+                await pool.query(
+                  'UPDATE students SET user_id = $1 WHERE id = $2',
+                  [userIdForUser, student.id]
+                );
+                
+                studentUser = {
+                  id: userIdForUser,
+                  username: student.name,
+                  role: UserRole.STUDENT
+                };
+              } catch (insertError: any) {
+                console.error('Error creating student user:', insertError);
+                // Continue with student.id as fallback
+              }
+            }
+            
+            // Create session using user_id (or student.id as fallback)
+            const sessionUserId = studentUser?.id || student.id;
+            const session = await createSession(sessionUserId, UserRole.STUDENT);
+            
+            return res.json({
+              user: {
+                id: sessionUserId,
+                username: student.name,
+                role: UserRole.STUDENT,
+                studentId: student.id
+              },
+              token: session.token,
+              expiresAt: session.expiresAt
+            });
+          } else {
+            // Password doesn't match phone - check if student has a user account with password
+            if (student.user_id) {
+              const userResult = await pool.query(
+                'SELECT id, username, password, role FROM users WHERE id = $1',
+                [student.user_id]
+              );
+              
+              if (userResult.rows.length > 0) {
+                const user = userResult.rows[0];
+                if (user.password && await bcrypt.compare(trimmedPassword, user.password)) {
+                  const session = await createSession(user.id, UserRole.STUDENT);
+                  return res.json({
+                    user: {
+                      id: user.id,
+                      username: user.username,
+                      role: UserRole.STUDENT,
+                      studentId: student.id
+                    },
+                    token: session.token,
+                    expiresAt: session.expiresAt
+                  });
+                }
+              }
+            }
+          }
         }
-      } catch (studentError) {
-        // Ignore student check errors
+      } catch (studentError: any) {
+        console.error('Student login error:', studentError);
+        // Fallback to file-based storage
+        try {
+          const students = await readData<any>('students');
+          const student = students.find((s: any) => s.phone === trimmedUsername);
+          
+          if (student && trimmedPassword === student.phone) {
+            const session = await createSession(student.id, UserRole.STUDENT);
+            return res.json({
+              user: {
+                id: student.id,
+                username: student.name,
+                role: UserRole.STUDENT,
+                studentId: student.id
+              },
+              token: session.token,
+              expiresAt: session.expiresAt
+            });
+          }
+        } catch (fallbackError) {
+          // Ignore fallback errors
+        }
       }
     }
     
