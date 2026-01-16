@@ -128,13 +128,27 @@ export const LoginPage: React.FC = () => {
       <div className="absolute inset-0 bg-[#e0e5ec]/60 backdrop-blur-[2px]"></div>
       
       <div className="login-container-neumorphic relative z-10">
-        {/* Profile Image */}
-        <div className="profile-img-neumorphic">
-          <GraduationCap size={40} className="text-red-600" />
+        {/* Logo */}
+        <div className="mb-6">
+          <img 
+            src="/logo.png" 
+            alt="SOCCER ANALYTICS PRO" 
+            className="h-24 w-auto mx-auto"
+            onError={(e) => {
+              // Fallback if logo not found
+              e.currentTarget.style.display = 'none';
+              const fallback = e.currentTarget.nextElementSibling;
+              if (fallback) fallback.style.display = 'block';
+            }}
+          />
+          <div className="hidden text-center">
+            <div className="profile-img-neumorphic mx-auto mb-3">
+              <GraduationCap size={40} className="text-[#00D9FF]" />
+            </div>
+            <h2 className="text-[#333] text-xl font-bold mb-1">SOCCER ANALYTICS PRO</h2>
+            <p className="text-[#666] text-sm">PERFORMANCE MASTERY</p>
+          </div>
         </div>
-
-        <h2 className="text-[#333] text-xl font-bold mb-1">⚽ أكاديمية كرة القدم</h2>
-        <p className="text-[#666] text-sm mb-6">نظام إدارة التدريب والأداء</p>
 
         {/* Login Type Selector */}
         <div className="flex gap-2 mb-6">
@@ -147,7 +161,7 @@ export const LoginPage: React.FC = () => {
             }}
             className={`flex-1 py-2.5 px-4 rounded-2xl font-semibold text-sm transition-all ${
               loginType === 'student'
-                ? 'bg-[#40a9c3] text-white shadow-[5px_5px_15px_#a3b1c6,-5px_-5px_15px_#ffffff]'
+                ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-[5px_5px_15px_#a3b1c6,-5px_-5px_15px_#ffffff]'
                 : 'bg-[#e0e5ec] text-[#666] shadow-[inset_6px_6px_10px_#a3b1c6,inset_-6px_-6px_10px_#ffffff] hover:shadow-[5px_5px_15px_#a3b1c6,-5px_-5px_15px_#ffffff]'
             }`}
           >
@@ -163,7 +177,7 @@ export const LoginPage: React.FC = () => {
             }}
             className={`flex-1 py-2.5 px-4 rounded-2xl font-semibold text-sm transition-all ${
               loginType === 'staff'
-                ? 'bg-[#40a9c3] text-white shadow-[5px_5px_15px_#a3b1c6,-5px_-5px_15px_#ffffff]'
+                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-[5px_5px_15px_#a3b1c6,-5px_-5px_15px_#ffffff]'
                 : 'bg-[#e0e5ec] text-[#666] shadow-[inset_6px_6px_10px_#a3b1c6,inset_-6px_-6px_10px_#ffffff] hover:shadow-[5px_5px_15px_#a3b1c6,-5px_-5px_15px_#ffffff]'
             }`}
           >
@@ -189,7 +203,7 @@ export const LoginPage: React.FC = () => {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 text-sm">
                 {error}
               </div>
             )}
@@ -197,7 +211,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 border-0 rounded-2xl bg-[#40a9c3] text-white text-base font-semibold cursor-pointer shadow-[5px_5px_15px_#a3b1c6,-5px_-5px_15px_#ffffff] transition-all hover:bg-[#3a97af] hover:shadow-[3px_3px_10px_#a3b1c6,-3px_-3px_10px_#ffffff] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 border-0 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-base font-semibold cursor-pointer shadow-[5px_5px_15px_#a3b1c6,-5px_-5px_15px_#ffffff] transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-[3px_3px_10px_#a3b1c6,-3px_-3px_10px_#ffffff] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'جاري الدخول...' : '🚀 دخول كطالب'}
             </button>
@@ -243,7 +257,7 @@ export const LoginPage: React.FC = () => {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 text-sm">
                 {error}
               </div>
             )}
@@ -251,7 +265,7 @@ export const LoginPage: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 border-0 rounded-2xl bg-[#40a9c3] text-white text-base font-semibold cursor-pointer shadow-[5px_5px_15px_#a3b1c6,-5px_-5px_15px_#ffffff] transition-all hover:bg-[#3a97af] hover:shadow-[3px_3px_10px_#a3b1c6,-3px_-3px_10px_#ffffff] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 border-0 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-base font-semibold cursor-pointer shadow-[5px_5px_15px_#a3b1c6,-5px_-5px_15px_#ffffff] transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-[3px_3px_10px_#a3b1c6,-3px_-3px_10px_#ffffff] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'جاري الدخول...' : '🚀 دخول كفريق عمل'}
             </button>

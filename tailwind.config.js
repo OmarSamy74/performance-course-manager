@@ -9,10 +9,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#dc2626', // Red 600 - Main theme color
-        secondary: '#991b1b', // Red 800
-        danger: '#ef4444', // Red 500
-        accent: '#7f1d1d', // Red 900
+        primary: '#2563eb', // Blue 600 - Main theme color (from logo)
+        secondary: '#10b981', // Green 500 - Secondary color (from logo)
+        accent: '#06b6d4', // Cyan 500 - Accent color
+        danger: '#ef4444', // Red 500 - Keep for errors
+        logoBlue: '#1e40af', // Blue 800 - Logo blue
+        logoGreen: '#10b981', // Green 500 - Logo green
+        logoCyan: '#00D9FF', // Cyan - Logo accent
       },
       fontFamily: {
         sans: ['Cairo', 'sans-serif'],

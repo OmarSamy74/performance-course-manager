@@ -147,7 +147,7 @@ export const AdminPage: React.FC = () => {
         <div className="fixed bottom-4 left-4 z-50">
           <button 
             onClick={() => setView('FINANCE')} 
-            className="bg-red-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 hover:bg-red-700"
+            className="bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center gap-2 hover:bg-blue-700"
           >
             <LayoutDashboard size={16} /> ⚽ العودة للمالية
           </button>
@@ -169,7 +169,7 @@ export const AdminPage: React.FC = () => {
           <div className="flex gap-3">
             <button 
               onClick={exportToExcel} 
-              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-red-200 transition-all"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-blue-200 transition-all"
             >
               <FileSpreadsheet size={20} /> <span>إكسيل</span>
             </button>
@@ -181,7 +181,7 @@ export const AdminPage: React.FC = () => {
             </button>
             <button 
               onClick={() => setIsModalOpen(true)} 
-              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-red-200 transition-all"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-blue-200 transition-all"
             >
               <Plus size={20} /> <span>⚽ طالب جديد</span>
             </button>
@@ -207,9 +207,9 @@ export const AdminPage: React.FC = () => {
           <StatCard 
             title="إجمالي المتأخرات" 
             value={formatCurrency(stats.totalRemaining)} 
-            icon={<AlertCircle className="text-red-600" />} 
-            bgColor="bg-red-50" 
-            textColor="text-red-900" 
+            icon={<AlertCircle className="text-blue-600" />}
+            bgColor="bg-blue-50"
+            textColor="text-blue-900"
           />
           <StatCard 
             title="طلبات المراجعة" 
@@ -301,11 +301,11 @@ export const AdminPage: React.FC = () => {
                         )}
                       </td>
                       <td className="p-4 text-green-600 font-bold">{formatCurrency(financials.paid)}</td>
-                      <td className="p-4 font-bold text-red-500">{formatCurrency(financials.remaining)}</td>
+                      <td className="p-4 font-bold text-orange-500">{formatCurrency(financials.remaining)}</td>
                       <td className="p-4">
                         <button 
                           onClick={() => handleDelete(student.id)} 
-                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"
+                          className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-lg"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -329,7 +329,7 @@ export const AdminPage: React.FC = () => {
               <div className="flex gap-3">
                 <button 
                   onClick={() => updateInstallmentStatus(proofModalData.studentId, proofModalData.installmentKey as any, InstallmentStatus.REJECTED)}
-                  className="flex-1 py-3 bg-red-100 text-red-700 hover:bg-red-200 font-bold rounded-xl transition-colors"
+                  className="flex-1 py-3 bg-blue-100 text-blue-700 hover:bg-blue-200 font-bold rounded-xl transition-colors"
                 >
                   رفض
                 </button>
@@ -384,7 +384,7 @@ export const AdminPage: React.FC = () => {
                   onClick={() => setNewPlan(PaymentPlan.HALF)} 
                   className={`p-4 rounded-xl border-2 transition-all font-semibold ${
                     newPlan === PaymentPlan.HALF 
-                      ? 'border-red-500 bg-gradient-to-br from-red-50 to-red-100 text-red-700 shadow-md scale-105' 
+                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 shadow-md scale-105' 
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
                   }`}
                 >
@@ -395,7 +395,7 @@ export const AdminPage: React.FC = () => {
                   onClick={() => setNewPlan(PaymentPlan.FULL)} 
                   className={`p-4 rounded-xl border-2 transition-all font-semibold ${
                     newPlan === PaymentPlan.FULL 
-                      ? 'border-red-500 bg-gradient-to-br from-red-50 to-red-100 text-red-700 shadow-md scale-105' 
+                      ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-700 shadow-md scale-105' 
                       : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-600'
                   }`}
                 >

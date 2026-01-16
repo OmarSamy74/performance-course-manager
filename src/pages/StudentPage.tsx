@@ -22,7 +22,7 @@ export const StudentPage: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">جاري التحميل...</p>
         </div>
       </div>
@@ -38,7 +38,7 @@ export const StudentPage: React.FC = () => {
           <p className="text-gray-600 mb-4">خطأ: لم يتم العثور على بيانات الطالب.</p>
           <button 
             onClick={() => navigate('/login')} 
-            className="text-red-600 underline hover:text-red-700"
+            className="text-blue-600 underline hover:text-blue-700"
           >
             العودة إلى تسجيل الدخول
           </button>
@@ -55,7 +55,7 @@ export const StudentPage: React.FC = () => {
           <p className="text-gray-600 mb-4">خطأ: لا يوجد معرف طالب مرتبط بحسابك.</p>
           <button 
             onClick={() => navigate('/login')} 
-            className="text-red-600 underline hover:text-red-700"
+            className="text-blue-600 underline hover:text-blue-700"
           >
             العودة إلى تسجيل الدخول
           </button>
@@ -105,13 +105,13 @@ export const StudentPage: React.FC = () => {
         <div className="container mx-auto px-4 flex gap-6">
           <button 
             onClick={() => setActiveTab('FINANCE')} 
-            className={`py-4 px-2 font-bold text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'FINANCE' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+            className={`py-4 px-2 font-bold text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'FINANCE' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
           >
             <Wallet size={18} /> المدفوعات
           </button>
           <button 
             onClick={() => setActiveTab('CLASSROOM')} 
-            className={`py-4 px-2 font-bold text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'CLASSROOM' ? 'border-red-600 text-red-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
+            className={`py-4 px-2 font-bold text-sm border-b-2 transition-colors flex items-center gap-2 ${activeTab === 'CLASSROOM' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-800'}`}
           >
             <BookOpen size={18} /> الكلاس روم
           </button>
@@ -122,15 +122,15 @@ export const StudentPage: React.FC = () => {
         {/* FINANCIALS TAB */}
         {activeTab === 'FINANCE' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 space-y-6">
-            <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-8 text-white shadow-lg">
+            <div className="bg-gradient-to-r from-blue-600 via-cyan-500 to-green-600 rounded-2xl p-8 text-white shadow-lg">
               <h2 className="text-2xl font-bold mb-2">مرحباً، {student.name}</h2>
               <div className="flex flex-col md:flex-row gap-8 mt-6">
                 <div>
-                  <p className="text-red-100 text-sm mb-1">إجمالي المدفوع</p>
+                  <p className="text-blue-100 text-sm mb-1">إجمالي المدفوع</p>
                   <p className="text-3xl font-bold">{formatCurrency(financials.paid)}</p>
                 </div>
                 <div>
-                  <p className="text-red-100 text-sm mb-1">المبلغ المتبقي</p>
+                  <p className="text-green-100 text-sm mb-1">المبلغ المتبقي</p>
                   <p className="text-3xl font-bold text-yellow-300">{formatCurrency(financials.remaining)}</p>
                 </div>
               </div>
@@ -169,7 +169,7 @@ export const StudentPage: React.FC = () => {
                         ) : isPending ? (
                           <span className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-lg text-sm font-bold animate-pulse">قيد المراجعة...</span>
                         ) : (
-                          <label className={`flex items-center gap-2 cursor-pointer bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl transition-all shadow-md ${uploadingKey === key ? 'opacity-70 pointer-events-none' : ''}`}>
+                          <label className={`flex items-center gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-all shadow-md ${uploadingKey === key ? 'opacity-70 pointer-events-none' : ''}`}>
                             {uploadingKey === key ? (
                               <>
                                 <Loader2 className="animate-spin" size={20} />
@@ -208,7 +208,7 @@ export const StudentPage: React.FC = () => {
                   onClick={() => setClassroomTab('STREAM')}
                   className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
                     classroomTab === 'STREAM' 
-                      ? 'bg-red-600 text-white border-b-2 border-red-600' 
+                      ? 'bg-blue-600 text-white border-b-2 border-blue-600' 
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -218,7 +218,7 @@ export const StudentPage: React.FC = () => {
                   onClick={() => setClassroomTab('CLASSWORK')}
                   className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
                     classroomTab === 'CLASSWORK' 
-                      ? 'bg-red-600 text-white border-b-2 border-red-600' 
+                      ? 'bg-blue-600 text-white border-b-2 border-blue-600' 
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -228,7 +228,7 @@ export const StudentPage: React.FC = () => {
                   onClick={() => setClassroomTab('TODO')}
                   className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
                     classroomTab === 'TODO' 
-                      ? 'bg-red-600 text-white border-b-2 border-red-600' 
+                      ? 'bg-blue-600 text-white border-b-2 border-blue-600' 
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -238,7 +238,7 @@ export const StudentPage: React.FC = () => {
                   onClick={() => setClassroomTab('GRADES')}
                   className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
                     classroomTab === 'GRADES' 
-                      ? 'bg-red-600 text-white border-b-2 border-red-600' 
+                      ? 'bg-blue-600 text-white border-b-2 border-blue-600' 
                       : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
@@ -251,19 +251,19 @@ export const StudentPage: React.FC = () => {
             {classroomTab === 'STREAM' && (
               <div className="space-y-6">
                 {/* Progress Overview */}
-                <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-2xl p-6 text-white shadow-lg">
+                <div className="bg-gradient-to-r from-blue-600 via-cyan-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
                   <h2 className="text-2xl font-bold mb-4">مرحباً، {student.name}</h2>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                      <p className="text-red-100 text-sm mb-1">الملفات</p>
+                      <p className="text-blue-100 text-sm mb-1">الملفات</p>
                       <p className="text-2xl font-bold">{state.materials.length}</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                      <p className="text-red-100 text-sm mb-1">الدروس</p>
+                      <p className="text-cyan-100 text-sm mb-1">الدروس</p>
                       <p className="text-2xl font-bold">{state.lessons.length}</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                      <p className="text-red-100 text-sm mb-1">الواجبات</p>
+                      <p className="text-green-100 text-sm mb-1">الواجبات</p>
                       <p className="text-2xl font-bold">{state.assignments?.length || 0}</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
@@ -320,13 +320,13 @@ export const StudentPage: React.FC = () => {
                 {/* Materials Section */}
                 <div>
                   <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <FileText size={24} className="text-red-600" />
+                    <FileText size={24} className="text-blue-600" />
                     الملفات والمستندات
                   </h3>
                   {state.materials.length === 0 ? (
                     <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                      <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <FileText className="text-red-600" size={32} />
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-cyan-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FileText className="text-blue-600" size={32} />
                       </div>
                       <p className="text-gray-500 font-medium">لا يوجد محتوى متاح حتى الآن</p>
                     </div>
@@ -347,7 +347,7 @@ export const StudentPage: React.FC = () => {
                           <p className="text-sm text-gray-500 mb-4 line-clamp-2">{item.description || 'لا يوجد وصف'}</p>
                           <button 
                             onClick={() => setViewingMaterial(item)} 
-                            className="w-full py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:from-red-700 hover:to-red-800 transition-all shadow-lg shadow-red-100 flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white font-bold rounded-xl hover:from-blue-700 hover:to-green-700 transition-all shadow-lg shadow-blue-100 flex items-center justify-center gap-2"
                           >
                             <Eye size={18} />
                             ⚽ مشاهدة المحتوى

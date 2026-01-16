@@ -20,9 +20,9 @@ body {
   min-height: 100vh;
 }
 
-/* New Navbar Design - Red/Black/White Theme */
+/* New Navbar Design - Blue/Green Theme (SOCCER ANALYTICS PRO) */
 .navbar-new {
-  background: linear-gradient(135deg, #dc2626 0%, #991b1b 50%, #7f1d1d 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #10b981 100%);
   padding: 20px 0;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   animation: slideDown 0.6s ease-out;

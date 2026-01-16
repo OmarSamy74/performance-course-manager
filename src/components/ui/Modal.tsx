@@ -34,7 +34,7 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   const iconColorClasses = {
-    red: 'bg-gradient-to-br from-red-500 to-red-600',
+    red: 'bg-gradient-to-br from-blue-500 to-blue-600',
     blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
     green: 'bg-gradient-to-br from-green-500 to-green-600',
     purple: 'bg-gradient-to-br from-purple-500 to-purple-600',

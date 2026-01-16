@@ -19,7 +19,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   className = '',
 }) => {
   const iconColorClasses = {
-    red: 'from-red-600 to-red-700',
+    red: 'from-blue-600 to-blue-700',
     blue: 'from-blue-600 to-blue-700',
     green: 'from-green-600 to-green-700',
     purple: 'from-purple-600 to-purple-700',

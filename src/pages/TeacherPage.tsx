@@ -248,7 +248,7 @@ export const TeacherPage: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">جاري التوجيه إلى صفحة الإدارة...</p>
         </div>
       </div>
@@ -262,10 +262,10 @@ export const TeacherPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-red-600 to-red-700 shadow-lg border-b border-red-800 px-6 py-4 mb-8">
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-green-600 shadow-lg border-b border-blue-800 px-6 py-4 mb-8">
         <div className="container mx-auto flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="bg-white text-red-600 p-2 rounded-lg">
+            <div className="bg-white text-blue-600 p-2 rounded-lg">
               <BookOpen size={20} />
             </div>
             <span className="font-bold text-white">⚽ منصة المحتوى (Classroom)</span>
@@ -286,37 +286,37 @@ export const TeacherPage: React.FC = () => {
       <div className="container mx-auto p-4 md:p-8 max-w-7xl">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white shadow-lg">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-red-100 text-sm mb-1">الملفات</p>
+                <p className="text-blue-100 text-sm mb-1">الملفات</p>
                 <p className="text-3xl font-bold">{state.materials.length}</p>
               </div>
               <FileText size={32} className="opacity-80" />
             </div>
           </div>
-          <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-6 text-white shadow-lg">
+          <div className="bg-gradient-to-br from-blue-600 to-cyan-500 rounded-2xl p-6 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-red-100 text-sm mb-1">الدروس</p>
+                <p className="text-blue-100 text-sm mb-1">الدروس</p>
                 <p className="text-3xl font-bold">{state.lessons.length}</p>
               </div>
               <Play size={32} className="opacity-80" />
             </div>
           </div>
-          <div className="bg-gradient-to-br from-red-700 to-red-800 rounded-2xl p-6 text-white shadow-lg">
+          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-red-100 text-sm mb-1">الواجبات</p>
+                <p className="text-green-100 text-sm mb-1">الواجبات</p>
                 <p className="text-3xl font-bold">{assignments.length}</p>
               </div>
               <FileCheck size={32} className="opacity-80" />
             </div>
           </div>
-          <div className="bg-gradient-to-br from-red-800 to-red-900 rounded-2xl p-6 text-white shadow-lg">
+          <div className="bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl p-6 text-white shadow-lg">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-red-100 text-sm mb-1">الاختبارات</p>
+                <p className="text-green-100 text-sm mb-1">الاختبارات</p>
                 <p className="text-3xl font-bold">{quizzes.length}</p>
               </div>
               <Brain size={32} className="opacity-80" />
@@ -331,7 +331,7 @@ export const TeacherPage: React.FC = () => {
               onClick={() => setActiveTab('STREAM')}
               className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
                 activeTab === 'STREAM' 
-                  ? 'bg-red-600 text-white border-b-2 border-red-600' 
+                  ? 'bg-blue-600 text-white border-b-2 border-blue-600' 
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -341,7 +341,7 @@ export const TeacherPage: React.FC = () => {
               onClick={() => setActiveTab('CLASSWORK')}
               className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
                 activeTab === 'CLASSWORK' 
-                  ? 'bg-red-600 text-white border-b-2 border-red-600' 
+                  ? 'bg-blue-600 text-white border-b-2 border-blue-600' 
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -351,7 +351,7 @@ export const TeacherPage: React.FC = () => {
               onClick={() => setActiveTab('PEOPLE')}
               className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
                 activeTab === 'PEOPLE' 
-                  ? 'bg-red-600 text-white border-b-2 border-red-600' 
+                  ? 'bg-blue-600 text-white border-b-2 border-blue-600' 
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -361,7 +361,7 @@ export const TeacherPage: React.FC = () => {
               onClick={() => setActiveTab('GRADES')}
               className={`flex-1 py-4 px-6 font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
                 activeTab === 'GRADES' 
-                  ? 'bg-red-600 text-white border-b-2 border-red-600' 
+                  ? 'bg-blue-600 text-white border-b-2 border-blue-600' 
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
@@ -453,7 +453,7 @@ export const TeacherPage: React.FC = () => {
                 onClick={() => setClassworkTab('MATERIALS')}
                 className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
                   classworkTab === 'MATERIALS' 
-                    ? 'bg-white text-red-600 shadow-sm' 
+                    ? 'bg-white text-blue-600 shadow-sm' 
                     : 'text-gray-600 hover:bg-white/50'
                 }`}
               >
@@ -463,7 +463,7 @@ export const TeacherPage: React.FC = () => {
                 onClick={() => setClassworkTab('LESSONS')}
                 className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
                   classworkTab === 'LESSONS' 
-                    ? 'bg-white text-red-600 shadow-sm' 
+                    ? 'bg-white text-blue-600 shadow-sm' 
                     : 'text-gray-600 hover:bg-white/50'
                 }`}
               >
@@ -473,7 +473,7 @@ export const TeacherPage: React.FC = () => {
                 onClick={() => setClassworkTab('ASSIGNMENTS')}
                 className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
                   classworkTab === 'ASSIGNMENTS' 
-                    ? 'bg-white text-red-600 shadow-sm' 
+                    ? 'bg-white text-blue-600 shadow-sm' 
                     : 'text-gray-600 hover:bg-white/50'
                 }`}
               >
@@ -483,7 +483,7 @@ export const TeacherPage: React.FC = () => {
                 onClick={() => setClassworkTab('QUIZZES')}
                 className={`flex-1 py-2 px-4 rounded-lg font-semibold text-sm transition-colors ${
                   classworkTab === 'QUIZZES' 
-                    ? 'bg-white text-red-600 shadow-sm' 
+                    ? 'bg-white text-blue-600 shadow-sm' 
                     : 'text-gray-600 hover:bg-white/50'
                 }`}
               >
@@ -506,7 +506,7 @@ export const TeacherPage: React.FC = () => {
                   if (classworkTab === 'ASSIGNMENTS') setIsAssignmentModalOpen(true);
                   if (classworkTab === 'QUIZZES') setIsQuizModalOpen(true);
                 }}
-                className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-xl hover:from-red-700 hover:to-red-800 shadow-lg shadow-red-200 transition-all font-bold"
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-green-600 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-green-700 shadow-lg shadow-blue-200 transition-all font-bold"
               >
                 <Plus size={20} /> 
                 <span>
@@ -528,7 +528,7 @@ export const TeacherPage: React.FC = () => {
                 <p className="text-gray-500 mb-6">ابدأ برفع المحاضرات والمواد التعليمية</p>
                 <button 
                   onClick={() => setIsUploadModalOpen(true)} 
-                  className="bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 font-bold"
+                  className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 font-bold"
                 >
                   ⚽ رفع أول محتوى
                 </button>
@@ -536,11 +536,11 @@ export const TeacherPage: React.FC = () => {
             ) : state.materials.map((item: CourseMaterial) => (
               <div 
                 key={item.id} 
-                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-red-200 transition-all duration-300 group cursor-pointer"
+                className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-200 transition-all duration-300 group cursor-pointer"
                 onClick={() => setViewingMaterial(item)}
               >
                 <div className="flex justify-between items-start mb-4">
-                  <div className="p-4 bg-gradient-to-br from-red-50 to-red-100 text-red-600 rounded-xl group-hover:scale-110 transition-transform">
+                  <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
                     <FileText size={28} />
                   </div>
                   <button 
@@ -548,19 +548,19 @@ export const TeacherPage: React.FC = () => {
                       e.stopPropagation();
                       deleteMaterial(item.id);
                     }} 
-                    className="text-gray-300 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50"
+                    className="text-gray-300 hover:text-blue-500 transition-colors p-1 rounded-lg hover:bg-blue-50"
                   >
                     <Trash2 size={18} />
                   </button>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">{item.title}</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">{item.title}</h3>
                 <p className="text-sm text-gray-500 mb-4 line-clamp-3 min-h-[3rem]">{item.description || 'لا يوجد وصف'}</p>
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <div className="flex items-center gap-2 text-xs text-gray-400">
                     <Clock size={14} />
                     <span>{new Date(item.createdAt).toLocaleDateString('ar-EG')}</span>
                   </div>
-                  <span className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-xs font-bold">{item.fileType}</span>
+                  <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold">{item.fileType}</span>
                 </div>
               </div>
             ))}
@@ -577,13 +577,13 @@ export const TeacherPage: React.FC = () => {
                 <p className="text-gray-500 mb-6">ابدأ بإضافة دروس جديدة</p>
                 <button 
                   onClick={() => setIsLessonModalOpen(true)} 
-                  className="bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 font-bold"
+                  className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 font-bold"
                 >
                   إضافة أول درس
                 </button>
               </div>
             ) : state.lessons.map((lesson: Lesson) => (
-              <div key={lesson.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-red-200 transition-all duration-300 group">
+              <div key={lesson.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-cyan-200 transition-all duration-300 group">
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600 rounded-xl group-hover:scale-110 transition-transform">
                     <Play size={28} />
@@ -598,13 +598,13 @@ export const TeacherPage: React.FC = () => {
                     </button>
                     <button 
                       onClick={() => deleteLesson(lesson.id)} 
-                      className="text-gray-300 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50"
+                      className="text-gray-300 hover:text-blue-500 transition-colors p-1 rounded-lg hover:bg-blue-50"
                     >
                       <Trash2 size={18} />
                     </button>
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">{lesson.title}</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-cyan-600 transition-colors">{lesson.title}</h3>
                 <p className="text-sm text-gray-500 mb-4 line-clamp-3 min-h-[3rem]">{lesson.description || 'لا يوجد وصف'}</p>
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -632,25 +632,25 @@ export const TeacherPage: React.FC = () => {
                 <p className="text-gray-500 mb-6">ابدأ بإضافة واجبات جديدة</p>
                 <button 
                   onClick={() => setIsAssignmentModalOpen(true)} 
-                  className="bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 font-bold"
+                  className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 font-bold"
                 >
                   إضافة أول واجب
                 </button>
               </div>
             ) : assignments.map((assignment: Assignment) => (
-              <div key={assignment.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-red-200 transition-all duration-300 group">
+              <div key={assignment.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-green-200 transition-all duration-300 group">
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 text-green-600 rounded-xl group-hover:scale-110 transition-transform">
                     <FileCheck size={28} />
                   </div>
                   <button 
                     onClick={() => deleteAssignment(assignment.id)} 
-                    className="text-gray-300 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50"
+                    className="text-gray-300 hover:text-blue-500 transition-colors p-1 rounded-lg hover:bg-blue-50"
                   >
                     <Trash2 size={18} />
                   </button>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">{assignment.title}</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">{assignment.title}</h3>
                 <p className="text-sm text-gray-500 mb-4 line-clamp-3 min-h-[3rem]">{assignment.description || 'لا يوجد وصف'}</p>
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -673,30 +673,30 @@ export const TeacherPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {quizzes.length === 0 ? (
               <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                <Brain className="text-red-600 mx-auto mb-4" size={40} />
+                <Brain className="text-purple-600 mx-auto mb-4" size={40} />
                 <h3 className="text-2xl font-bold text-gray-600 mb-2">لا توجد اختبارات حالياً</h3>
                 <p className="text-gray-500 mb-6">ابدأ بإضافة اختبارات جديدة</p>
                 <button 
                   onClick={() => setIsQuizModalOpen(true)} 
-                  className="bg-red-600 text-white px-6 py-3 rounded-xl hover:bg-red-700 font-bold"
+                  className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 font-bold"
                 >
                   إضافة أول اختبار
                 </button>
               </div>
             ) : quizzes.map((quiz: Quiz) => (
-              <div key={quiz.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-red-200 transition-all duration-300 group">
+              <div key={quiz.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-purple-200 transition-all duration-300 group">
                 <div className="flex justify-between items-start mb-4">
                   <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 rounded-xl group-hover:scale-110 transition-transform">
                     <Brain size={28} />
                   </div>
                   <button 
                     onClick={() => deleteQuiz(quiz.id)} 
-                    className="text-gray-300 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50"
+                    className="text-gray-300 hover:text-blue-500 transition-colors p-1 rounded-lg hover:bg-blue-50"
                   >
                     <Trash2 size={18} />
                   </button>
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">{quiz.title}</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">{quiz.title}</h3>
                 <p className="text-sm text-gray-500 mb-4 line-clamp-3 min-h-[3rem]">{quiz.description || 'لا يوجد وصف'}</p>
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <div className="flex items-center gap-2 text-xs text-gray-400">
@@ -732,8 +732,8 @@ export const TeacherPage: React.FC = () => {
                 ) : state.students.map((student: any) => (
                   <div key={student.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                        <Users className="text-red-600" size={24} />
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Users className="text-blue-600" size={24} />
                       </div>
                       <div>
                         <p className="font-bold text-gray-800">{student.name}</p>
@@ -805,7 +805,7 @@ export const TeacherPage: React.FC = () => {
                             <span className={`px-3 py-1 rounded-full text-sm font-bold ${
                               percentage >= 80 ? 'bg-green-100 text-green-700' :
                               percentage >= 60 ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-red-100 text-red-700'
+                              'bg-blue-100 text-blue-700'
                             }`}>
                               {percentage}%
                             </span>
@@ -827,7 +827,7 @@ export const TeacherPage: React.FC = () => {
         onClose={() => setIsUploadModalOpen(false)}
         title="رفع محتوى جديد"
         icon={<FileText className="text-white" size={24} />}
-        iconColor="red"
+        iconColor="blue"
         size="lg"
       >
         <form onSubmit={handleAddMaterial} className="space-y-5">
@@ -850,7 +850,7 @@ export const TeacherPage: React.FC = () => {
           </FormField>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">رفع الملف *</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-red-400 hover:bg-red-50/50 transition-all cursor-pointer relative group">
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer relative group">
                   <input 
                     type="file"
                     accept="application/pdf,image/*"
@@ -859,13 +859,13 @@ export const TeacherPage: React.FC = () => {
                   />
                   {uploading ? (
                     <div className="space-y-3">
-                      <Loader2 className="animate-spin mx-auto text-red-600" size={32} />
+                      <Loader2 className="animate-spin mx-auto text-blue-600" size={32} />
                       <p className="text-sm font-medium text-gray-600">جاري معالجة الملف...</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <div className="mx-auto w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Upload className="text-red-600" size={28} />
+                      <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Upload className="text-blue-600" size={28} />
                       </div>
                       <div>
                         <p className="text-base font-semibold text-gray-700">

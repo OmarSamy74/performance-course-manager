@@ -44,7 +44,7 @@ export const Navbar: React.FC = () => {
           />
           <div>
             <h1 className="text-3xl font-black text-white">⚽ أكاديمية كرة القدم</h1>
-            <p className="text-red-100 font-semibold">{state.user.username}</p>
+            <p className="text-blue-100 font-semibold">{state.user.username}</p>
           </div>
         </div>
 
