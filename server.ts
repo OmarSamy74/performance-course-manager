@@ -45,16 +45,12 @@ async function checkAndInitDatabase() {
       if (process.env.UPDATE_PASSWORDS_ON_DEPLOY === 'true') {
         try {
           console.log('🔐 Updating passwords on deploy...');
-          const { exec } = await import('child_process');
-          const { promisify } = await import('util');
-          const execAsync = promisify(exec);
-          
-          await execAsync('node scripts/update-passwords-on-deploy.js', {
-            env: { ...process.env },
-            timeout: 60000 // 60 second timeout
-          });
+          // Import and run the update function directly
+          const { updatePasswordsOnDeploy } = await import('./scripts/update-passwords-on-deploy.js');
+          await updatePasswordsOnDeploy();
         } catch (error: any) {
           console.error('⚠️  Password update failed (non-blocking):', error.message);
+          console.error('   Error details:', error);
           // Don't block deployment if password update fails
         }
       }

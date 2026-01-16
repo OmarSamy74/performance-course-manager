@@ -35,9 +35,11 @@ function generateComplexPassword() {
 async function updatePasswordsOnDeploy() {
   // Only run if explicitly enabled
   if (process.env.UPDATE_PASSWORDS_ON_DEPLOY !== 'true') {
-    console.log('ℹ️  Password update skipped (UPDATE_PASSWORDS_ON_DEPLOY not set to true)');
-    process.exit(0);
+    // Don't log if not enabled (normal case)
+    return;
   }
+  
+  console.log('🔐 [Deploy] Starting password update...');
 
   const databaseUrl = process.env.DATABASE_URL;
   
@@ -53,11 +55,12 @@ async function updatePasswordsOnDeploy() {
   });
 
   try {
-    console.log('🔐 [Deploy] Updating user passwords...');
+    console.log('🔐 [Deploy] Connecting to database...');
     
     // Test connection
     await pool.query('SELECT 1');
     console.log('✅ [Deploy] Connected to database');
+    console.log('🔐 [Deploy] Updating user passwords...');
     
     // Get all users
     const usersResult = await pool.query('SELECT id, username, role FROM users ORDER BY username');
@@ -99,8 +102,11 @@ async function updatePasswordsOnDeploy() {
     console.log('   They cannot be recovered if lost.\n');
     
     await pool.end();
-    console.log('✅ [Deploy] Password update completed');
-    process.exit(0);
+    console.log('✅ [Deploy] Password update completed successfully');
+    // Don't exit if called as module
+    if (import.meta.url === `file://${process.argv[1]}`) {
+      process.exit(0);
+    }
   } catch (error) {
     console.error('❌ [Deploy] Error updating passwords:', error.message);
     // Don't fail deployment if password update fails
@@ -110,8 +116,17 @@ async function updatePasswordsOnDeploy() {
     } catch (e) {
       // Ignore
     }
-    process.exit(0); // Exit with success to not block deployment
+    // Don't exit if called as module
+    if (import.meta.url === `file://${process.argv[1]}`) {
+      process.exit(0);
+    }
   }
 }
 
-updatePasswordsOnDeploy();
+// Only run if called directly (not imported)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  updatePasswordsOnDeploy();
+}
+
+// Export for use as module
+export { updatePasswordsOnDeploy };
