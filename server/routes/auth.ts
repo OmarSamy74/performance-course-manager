@@ -79,28 +79,83 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Look up user by username (since PostgreSQL uses UUID for id)
-    const allUsers = await readData<any>('users');
-    let existingUser = allUsers.find((u: any) => u.username === user.username);
+    // Look up user directly in PostgreSQL by username
+    let existingUser: any = null;
     
-    // If user doesn't exist, create with a proper UUID and hashed password
+    try {
+      // First, try to find user in PostgreSQL database
+      const dbResult = await pool.query(
+        'SELECT id, username, password, role, student_id, course_id FROM users WHERE username = $1',
+        [trimmedUsername]
+      );
+      
+      if (dbResult.rows.length > 0) {
+        existingUser = {
+          id: dbResult.rows[0].id,
+          username: dbResult.rows[0].username,
+          password: dbResult.rows[0].password,
+          role: dbResult.rows[0].role,
+          studentId: dbResult.rows[0].student_id,
+          courseId: dbResult.rows[0].course_id
+        };
+        
+        // Verify password
+        if (existingUser.password && !await bcrypt.compare(trimmedPassword, existingUser.password)) {
+          return res.status(401).json({ error: 'Invalid credentials' });
+        }
+      }
+    } catch (dbError: any) {
+      console.error('Database query error:', dbError);
+      // Fallback to file-based storage if PostgreSQL fails
+    }
+    
+    // If not found in PostgreSQL, check file-based storage (fallback)
     if (!existingUser) {
+      const allUsers = await readData<any>('users');
+      existingUser = allUsers.find((u: any) => u.username === trimmedUsername);
+      
+      if (existingUser) {
+        // Verify password
+        if (existingUser.password && !await bcrypt.compare(trimmedPassword, existingUser.password)) {
+          return res.status(401).json({ error: 'Invalid credentials' });
+        }
+      }
+    }
+    
+    // If user still doesn't exist and we have a hardcoded user, create it
+    if (!existingUser && user) {
       // Hash the password
       const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
       
       // Generate UUID for new user
-      const userWithUUID: any = {
-        ...user,
-        id: randomUUID(),
-        password: hashedPassword
-      };
-      await createById('users', userWithUUID);
-      existingUser = userWithUUID;
-    } else {
-      // Verify password for existing user
-      if (existingUser.password && !await bcrypt.compare(trimmedPassword, existingUser.password)) {
-        return res.status(401).json({ error: 'Invalid credentials' });
+      const userId = randomUUID();
+      
+      try {
+        // Try to insert into PostgreSQL
+        await pool.query(
+          'INSERT INTO users (id, username, password, role, created_at) VALUES ($1, $2, $3, $4, NOW())',
+          [userId, user.username, hashedPassword, user.role]
+        );
+        existingUser = {
+          id: userId,
+          username: user.username,
+          password: hashedPassword,
+          role: user.role
+        };
+      } catch (insertError: any) {
+        // Fallback to file-based storage
+        const userWithUUID: any = {
+          ...user,
+          id: userId,
+          password: hashedPassword
+        };
+        await createById('users', userWithUUID);
+        existingUser = userWithUUID;
       }
+    }
+    
+    if (!existingUser) {
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Use the UUID from database for session creation
