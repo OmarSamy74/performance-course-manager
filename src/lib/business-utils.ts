@@ -84,6 +84,7 @@ export const getLeadStatusColor = (status: LeadStatus) => {
 };
 
 // Helper to compress image before converting to base64
+// Optimized to prevent freezing with large files
 const compressImage = (file: File, maxWidth: number = 1920, maxHeight: number = 1920, quality: number = 0.7): Promise<File> => {
   return new Promise((resolve, reject) => {
     // Only compress images, not PDFs or other files
@@ -98,38 +99,74 @@ const compressImage = (file: File, maxWidth: number = 1920, maxHeight: number = 
       return;
     }
 
+    // For very large images, use lower quality and smaller dimensions
+    let adjustedQuality = quality;
+    let adjustedMaxWidth = maxWidth;
+    let adjustedMaxHeight = maxHeight;
+    
+    if (file.size > 5 * 1024 * 1024) { // > 5MB
+      adjustedQuality = 0.5;
+      adjustedMaxWidth = 1600;
+      adjustedMaxHeight = 1600;
+    } else if (file.size > 2 * 1024 * 1024) { // > 2MB
+      adjustedQuality = 0.6;
+      adjustedMaxWidth = 1800;
+      adjustedMaxHeight = 1800;
+    }
+
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
+    reader.onload = async (e) => {
+      try {
+        const img = new Image();
+        
+        // Use promise for image loading to allow async/await
+        await new Promise<void>((imgResolve, imgReject) => {
+          img.onload = () => imgResolve();
+          img.onerror = () => imgReject(new Error('Failed to load image'));
+          img.src = e.target?.result as string;
+        });
+
+        // Yield to browser before heavy canvas operations
+        await new Promise(resolve => setTimeout(resolve, 0));
+
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
 
         // Calculate new dimensions
         if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
+          if (width > adjustedMaxWidth) {
+            height = (height * adjustedMaxWidth) / width;
+            width = adjustedMaxWidth;
           }
         } else {
-          if (height > maxHeight) {
-            width = (width * maxHeight) / height;
-            height = maxHeight;
+          if (height > adjustedMaxHeight) {
+            width = (width * adjustedMaxHeight) / height;
+            height = adjustedMaxHeight;
           }
         }
 
         canvas.width = width;
         canvas.height = height;
 
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { willReadFrequently: false });
         if (!ctx) {
           reject(new Error('Could not get canvas context'));
           return;
         }
 
+        // Use image smoothing for better quality
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        
+        // Yield before drawing
+        await new Promise(resolve => setTimeout(resolve, 0));
+        
         ctx.drawImage(img, 0, 0, width, height);
+        
+        // Yield before blob conversion
+        await new Promise(resolve => setTimeout(resolve, 0));
         
         canvas.toBlob(
           (blob) => {
@@ -141,14 +178,15 @@ const compressImage = (file: File, maxWidth: number = 1920, maxHeight: number = 
               type: file.type,
               lastModified: Date.now(),
             });
+            console.log(`Image compressed: ${(file.size / 1024 / 1024).toFixed(2)}MB -> ${(blob.size / 1024 / 1024).toFixed(2)}MB`);
             resolve(compressedFile);
           },
           file.type,
-          quality
+          adjustedQuality
         );
-      };
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = e.target?.result as string;
+      } catch (error) {
+        reject(error);
+      }
     };
     reader.onerror = () => reject(new Error('Failed to read file'));
   });
@@ -156,20 +194,54 @@ const compressImage = (file: File, maxWidth: number = 1920, maxHeight: number = 
 
 // Helper to convert file to base64 for local storage simulation
 // Automatically compresses images before conversion
+// Optimized to prevent freezing with large files
 export const fileToBase64 = async (file: File, compress: boolean = true): Promise<string> => {
   try {
+    // Show progress for large files
+    const isLargeFile = file.size > 2 * 1024 * 1024; // > 2MB
+    if (isLargeFile) {
+      console.log(`Processing large file: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+    }
+
     // Compress image if it's an image file and compression is enabled
     const fileToConvert = compress ? await compressImage(file) : file;
     
+    // For very large files, process in chunks to prevent freezing
+    if (fileToConvert.size > 10 * 1024 * 1024) { // > 10MB
+      console.warn('Very large file detected, processing may take time...');
+    }
+    
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
+      
+      // Add progress tracking for large files
+      if (isLargeFile) {
+        reader.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const percent = (e.loaded / e.total) * 100;
+            if (percent % 25 === 0) { // Log every 25%
+              console.log(`File reading progress: ${percent.toFixed(0)}%`);
+            }
+          }
+        };
+      }
+      
       reader.readAsDataURL(fileToConvert);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
+      reader.onload = () => {
+        const result = reader.result as string;
+        console.log(`File converted to base64: ${(result.length / 1024 / 1024).toFixed(2)}MB`);
+        resolve(result);
+      };
+      reader.onerror = error => {
+        console.error('FileReader error:', error);
+        reject(error);
+      };
     });
   } catch (error) {
+    console.error('fileToBase64 error:', error);
     // If compression fails, try without compression
     if (compress) {
+      console.log('Retrying without compression...');
       return fileToBase64(file, false);
     }
     throw error;

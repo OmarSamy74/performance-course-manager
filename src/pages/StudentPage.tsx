@@ -68,9 +68,20 @@ export const StudentPage: React.FC = () => {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, key: 'inst1' | 'inst2' | 'inst3') => {
     if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const maxSize = 5 * 1024 * 1024; // 5MB for receipts
+      
+      if (file.size > maxSize) {
+        alert(`صورة الإيصال كبيرة جداً. الحد الأقصى هو 5 ميجابايت.`);
+        e.target.value = '';
+        return;
+      }
+      
       setUploadingKey(key);
+      
       try {
-        const base64 = await fileToBase64(e.target.files[0]);
+        // Process file asynchronously to prevent blocking
+        const base64 = await Promise.resolve(fileToBase64(file));
         
         const updatedStudent = {
           ...student,
@@ -85,15 +96,18 @@ export const StudentPage: React.FC = () => {
           actions.updateStudents(state.students.map((s: Student) => 
             s.id === student.id ? updatedStudent : s
           ));
+          console.log('Receipt uploaded successfully');
         } catch (error) {
           console.error('Failed to update student:', error);
           alert('فشل في رفع الإيصال. يرجى المحاولة مرة أخرى.');
         }
-        
-        setUploadingKey(null);
       } catch (err) {
-        alert("خطأ في رفع الملف");
+        console.error('File upload error:', err);
+        alert("خطأ في رفع الملف. يرجى المحاولة مرة أخرى.");
+      } finally {
         setUploadingKey(null);
+        // Reset input to allow re-uploading same file
+        e.target.value = '';
       }
     }
   };

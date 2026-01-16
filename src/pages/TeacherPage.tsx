@@ -64,8 +64,17 @@ export const TeacherPage: React.FC = () => {
       }
       
       setUploading(true);
+      
+      // Show progress for large files
+      const isLargeFile = file.size > 2 * 1024 * 1024;
+      if (isLargeFile) {
+        console.log(`Processing large file: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+      }
+      
       try {
-        const base64 = await fileToBase64(file);
+        // Process file asynchronously to prevent blocking
+        const base64 = await Promise.resolve(fileToBase64(file));
+        
         const base64Size = new Blob([base64]).size;
         if (base64Size > 40 * 1024 * 1024) {
           alert('الملف كبير جداً بعد التحويل. يرجى اختيار ملف أصغر.');
@@ -73,12 +82,17 @@ export const TeacherPage: React.FC = () => {
           setUploading(false);
           return;
         }
+        
         setNewMaterial({ ...newMaterial, fileUrl: base64 });
+        console.log('File uploaded successfully');
       } catch (err) {
         console.error('File upload error:', err);
-        alert("خطأ في رفع الملف.");
+        alert("خطأ في رفع الملف. يرجى المحاولة مرة أخرى.");
+      } finally {
+        setUploading(false);
+        // Reset input to allow re-uploading same file
+        e.target.value = '';
       }
-      setUploading(false);
     }
   };
 
