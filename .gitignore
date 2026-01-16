@@ -48,3 +48,6 @@ npm-debug.log*
 # Temporary files
 tmp/
 temp/
+
+# Sensitive password file
+docs/USER_PASSWORDS.md
