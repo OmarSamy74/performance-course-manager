@@ -77,10 +77,22 @@ async function createTablesDirectly() {
       password VARCHAR(255) NOT NULL,
       role VARCHAR(50) NOT NULL CHECK (role IN ('ADMIN', 'STUDENT', 'SALES', 'TEACHER')),
       student_id UUID,
-      course_id VARCHAR(255),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `);
+  
+  // Add course_id column if it doesn't exist (migration)
+  try {
+    await pool.query(`
+      ALTER TABLE users 
+      ADD COLUMN IF NOT EXISTS course_id VARCHAR(255)
+    `);
+  } catch (error: any) {
+    // Column might already exist, ignore error
+    if (!error.message.includes('already exists')) {
+      console.warn('⚠️  Could not add course_id column:', error.message);
+    }
+  }
   
   // Sessions table
   await pool.query(`

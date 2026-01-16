@@ -78,6 +78,30 @@ async function seedDatabase() {
     });
     console.log('==========================================\n');
     
+    // Check if course_id column exists
+    let hasCourseIdColumn = false;
+    try {
+      const columnCheck = await pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'users' AND column_name = 'course_id'
+      `);
+      hasCourseIdColumn = columnCheck.rows.length > 0;
+      
+      if (!hasCourseIdColumn) {
+        console.log('⚠️  course_id column not found, adding it...');
+        try {
+          await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS course_id VARCHAR(255)');
+          hasCourseIdColumn = true;
+          console.log('✅ course_id column added');
+        } catch (alterError: any) {
+          console.log('⚠️  Could not add course_id column, continuing without it');
+        }
+      }
+    } catch (checkError) {
+      // Ignore check errors
+    }
+    
     // Create users
     const users = [
       { username: 'admin', password: '123', role: UserRole.ADMIN, courseId: null },
@@ -90,10 +114,19 @@ async function seedDatabase() {
     
     for (const user of users) {
       const hashedPassword = await hashPassword(user.password);
-      await pool.query(
-        'INSERT INTO users (id, username, password, role, course_id) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (username) DO NOTHING',
-        [randomUUID(), user.username, hashedPassword, user.role, user.courseId]
-      );
+      
+      // Build INSERT query based on whether course_id exists
+      if (hasCourseIdColumn) {
+        await pool.query(
+          'INSERT INTO users (id, username, password, role, course_id) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (username) DO NOTHING',
+          [randomUUID(), user.username, hashedPassword, user.role, user.courseId]
+        );
+      } else {
+        await pool.query(
+          'INSERT INTO users (id, username, password, role) VALUES ($1, $2, $3, $4) ON CONFLICT (username) DO NOTHING',
+          [randomUUID(), user.username, hashedPassword, user.role]
+        );
+      }
     }
     
     console.log(`✅ Created ${users.length} users`);
