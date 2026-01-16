@@ -30,21 +30,69 @@ async function seedDatabase() {
       return bcrypt.default.hash(password, 10);
     };
     
+    // Generate complex password (12 characters: uppercase, lowercase, numbers, symbols)
+    const generateComplexPassword = (): string => {
+      const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const lowercase = 'abcdefghijklmnopqrstuvwxyz';
+      const numbers = '0123456789';
+      const symbols = '!@#$%^&*';
+      const all = uppercase + lowercase + numbers + symbols;
+      
+      let password = '';
+      // Ensure at least one of each type
+      password += uppercase[Math.floor(Math.random() * uppercase.length)];
+      password += lowercase[Math.floor(Math.random() * lowercase.length)];
+      password += numbers[Math.floor(Math.random() * numbers.length)];
+      password += symbols[Math.floor(Math.random() * symbols.length)];
+      
+      // Fill the rest randomly
+      for (let i = password.length; i < 12; i++) {
+        password += all[Math.floor(Math.random() * all.length)];
+      }
+      
+      // Shuffle the password
+      return password.split('').sort(() => Math.random() - 0.5).join('');
+    };
+    
+    // Default course ID for all teachers
+    const DEFAULT_COURSE_ID = 'soccer-analytics-pro-performance-mastery';
+    
+    // Generate complex passwords for teachers
+    const omarPassword = generateComplexPassword();
+    const abdelatifPassword = generateComplexPassword();
+    const karimPassword = generateComplexPassword();
+    const teacherPassword = generateComplexPassword();
+    
+    // Store passwords for documentation
+    const teacherPasswords = {
+      'omar.samy': omarPassword,
+      'abdelatif.reda': abdelatifPassword,
+      'karim.ali': karimPassword,
+      'teacher': teacherPassword,
+    };
+    
+    console.log('\n📋 Teacher Passwords (SAVE THESE SECURELY):');
+    console.log('==========================================');
+    Object.entries(teacherPasswords).forEach(([username, password]) => {
+      console.log(`${username}: ${password}`);
+    });
+    console.log('==========================================\n');
+    
     // Create users
     const users = [
-      { username: 'admin', password: '123', role: UserRole.ADMIN },
-      { username: 'teacher', password: '123', role: UserRole.TEACHER },
-      { username: 'sales', password: '123', role: UserRole.SALES },
-      { username: 'omar.samy', password: '123', role: UserRole.TEACHER },
-      { username: 'abdelatif.reda', password: '123', role: UserRole.TEACHER },
-      { username: 'karim.ali', password: '123', role: UserRole.TEACHER },
+      { username: 'admin', password: '123', role: UserRole.ADMIN, courseId: null },
+      { username: 'sales', password: '123', role: UserRole.SALES, courseId: null },
+      { username: 'teacher', password: teacherPassword, role: UserRole.TEACHER, courseId: DEFAULT_COURSE_ID },
+      { username: 'omar.samy', password: omarPassword, role: UserRole.TEACHER, courseId: DEFAULT_COURSE_ID },
+      { username: 'abdelatif.reda', password: abdelatifPassword, role: UserRole.TEACHER, courseId: DEFAULT_COURSE_ID },
+      { username: 'karim.ali', password: karimPassword, role: UserRole.TEACHER, courseId: DEFAULT_COURSE_ID },
     ];
     
     for (const user of users) {
       const hashedPassword = await hashPassword(user.password);
       await pool.query(
-        'INSERT INTO users (id, username, password, role) VALUES ($1, $2, $3, $4) ON CONFLICT (username) DO NOTHING',
-        [randomUUID(), user.username, hashedPassword, user.role]
+        'INSERT INTO users (id, username, password, role, course_id) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (username) DO NOTHING',
+        [randomUUID(), user.username, hashedPassword, user.role, user.courseId]
       );
     }
     
