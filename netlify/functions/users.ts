@@ -1,8 +1,8 @@
 import { Handler } from '@netlify/functions';
-import { jsonResponse, errorResponse } from './utils/response.js';
-import { extractToken, getUserFromSession, hasRole } from './utils/auth.js';
-import { UserRole } from '../../types.js';
-import { getPool } from './utils/storage-pg.js';
+import { jsonResponse, errorResponse } from './utils/validation';
+import { extractToken, getUserFromSession, hasRole } from './utils/auth';
+import { UserRole } from '../../types';
+import { getPool } from './utils/storage-pg';
 
 export const handler: Handler = async (event, context) => {
   try {

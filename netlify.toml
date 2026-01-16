@@ -29,6 +29,9 @@
 
 [functions]
   node_bundler = "esbuild"
-  included_files = ["netlify/functions/data/**"]
+  included_files = [
+    "netlify/functions/data/**",
+    "netlify/functions/utils/**"
+  ]
   # PostgreSQL support - mark pg as external if needed
   # external_node_modules = ["pg"]
