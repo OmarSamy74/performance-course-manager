@@ -29,7 +29,7 @@ export const TeacherPage: React.FC = () => {
   // Materials state
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [newMaterial, setNewMaterial] = useState({ title: '', description: '', fileUrl: '' });
-  const [uploading, setUploading] = useState(false);
+  // Removed uploading state - no longer needed with Google Drive links
   const [viewingMaterial, setViewingMaterial] = useState<CourseMaterial | null>(null);
   
   // Lessons state
@@ -51,49 +51,29 @@ export const TeacherPage: React.FC = () => {
   // Data is automatically loaded by AppContext when user changes
   // No need to manually call refreshData here
 
-  // Materials handlers
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const maxSize = 10 * 1024 * 1024;
-      
-      if (file.size > maxSize) {
-        alert(`الملف كبير جداً. الحد الأقصى للحجم هو 10 ميجابايت.`);
-        e.target.value = '';
-        return;
-      }
-      
-      setUploading(true);
-      
-      // Show progress for large files
-      const isLargeFile = file.size > 2 * 1024 * 1024;
-      if (isLargeFile) {
-        console.log(`Processing large file: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-      }
-      
-      try {
-        // Process file asynchronously to prevent blocking
-        const base64 = await Promise.resolve(fileToBase64(file));
-        
-        const base64Size = new Blob([base64]).size;
-        if (base64Size > 40 * 1024 * 1024) {
-          alert('الملف كبير جداً بعد التحويل. يرجى اختيار ملف أصغر.');
-          e.target.value = '';
-          setUploading(false);
-          return;
-        }
-        
-        setNewMaterial({ ...newMaterial, fileUrl: base64 });
-        console.log('File uploaded successfully');
-      } catch (err) {
-        console.error('File upload error:', err);
-        alert("خطأ في رفع الملف. يرجى المحاولة مرة أخرى.");
-      } finally {
-        setUploading(false);
-        // Reset input to allow re-uploading same file
-        e.target.value = '';
+  // Materials handlers - Use Google Drive link instead of file upload
+  const handleDriveLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const driveUrl = e.target.value.trim();
+    
+    // Validate Google Drive URL
+    if (driveUrl && !driveUrl.includes('drive.google.com')) {
+      alert('يرجى إدخال رابط Google Drive صحيح');
+      return;
+    }
+    
+    // Convert Google Drive sharing URL to direct view URL if needed
+    let finalUrl = driveUrl;
+    if (driveUrl.includes('/file/d/')) {
+      // Extract file ID from sharing URL
+      const fileIdMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (fileIdMatch) {
+        const fileId = fileIdMatch[1];
+        // Convert to direct view URL
+        finalUrl = `https://drive.google.com/file/d/${fileId}/preview`;
       }
     }
+    
+    setNewMaterial({ ...newMaterial, fileUrl: finalUrl });
   };
 
   const handleAddMaterial = async (e: React.FormEvent) => {
@@ -862,35 +842,27 @@ export const TeacherPage: React.FC = () => {
               className="h-28"
             />
           </FormField>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">رفع الملف *</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer relative group">
-                  <input 
-                    type="file"
-                    accept="application/pdf,image/*"
-                    onChange={handleFileUpload}
-                    className="absolute inset-0 opacity-0 cursor-pointer z-10" 
-                  />
-                  {uploading ? (
-                    <div className="space-y-3">
-                      <Loader2 className="animate-spin mx-auto text-blue-600" size={32} />
-                      <p className="text-sm font-medium text-gray-600">جاري معالجة الملف...</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Upload className="text-blue-600" size={28} />
-                      </div>
-                      <div>
-                        <p className="text-base font-semibold text-gray-700">
-                          {newMaterial.fileUrl ? "✅ تم اختيار الملف" : "اضغط لاختيار ملف PDF أو صورة"}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">الحد الأقصى: 10 ميجابايت</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <FormField label="رابط Google Drive *" required>
+                <Input 
+                  type="url" 
+                  required 
+                  placeholder="https://drive.google.com/file/d/1fB_M6Sumtr37jx5VOvmMADAHCdcNEQhk/view?usp=sharing" 
+                  value={newMaterial.fileUrl} 
+                  onChange={handleDriveLinkChange}
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  أدخل رابط مشاركة Google Drive للملف (PDF أو صورة)
+                </p>
+                {newMaterial.fileUrl && newMaterial.fileUrl.includes('drive.google.com') && (
+                  <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="text-xs text-green-700 flex items-center gap-1">
+                      <CheckCircle2 size={14} className="text-green-600" />
+                      رابط Google Drive صحيح
+                    </p>
+                  </div>
+                )}
+              </FormField>
           <div className="flex gap-3 pt-4">
             <Button 
               type="button" 

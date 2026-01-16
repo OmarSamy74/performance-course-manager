@@ -65,7 +65,23 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
         let mime = material.fileType === 'IMAGE' ? 'image/jpeg' : 'application/pdf';
 
         // Handle different fileUrl formats
-        if (material.fileUrl.includes(',')) {
+        if (material.fileUrl.includes('drive.google.com')) {
+          // Google Drive URL - convert to preview URL if needed
+          let driveUrl = material.fileUrl;
+          
+          // If it's a sharing URL, convert to preview URL
+          if (driveUrl.includes('/file/d/') && !driveUrl.includes('/preview')) {
+            const fileIdMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (fileIdMatch) {
+              const fileId = fileIdMatch[1];
+              driveUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+            }
+          }
+          
+          setIsLoading(false);
+          setBlobUrl(driveUrl);
+          return;
+        } else if (material.fileUrl.includes(',')) {
           // Data URL format: data:mime;base64,data
           const parts = material.fileUrl.split(',');
           const header = parts[0];
