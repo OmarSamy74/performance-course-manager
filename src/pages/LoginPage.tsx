@@ -113,8 +113,18 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#e0e5ec] flex items-center justify-center p-4" style={{ fontFamily: "'Cairo', 'Poppins', sans-serif" }}>
-      <div className="login-container-neumorphic">
+    <div className="min-h-screen bg-[#e0e5ec] flex items-center justify-center p-4 relative overflow-hidden" style={{ fontFamily: "'Cairo', 'Poppins', sans-serif" }}>
+      {/* Merged Horizontal Background */}
+      <div className="login-background-merged">
+        <div className="login-bg-section login-bg-section-1"></div>
+        <div className="login-bg-section login-bg-section-2"></div>
+        <div className="login-bg-section login-bg-section-3"></div>
+      </div>
+      
+      {/* Overlay for better readability */}
+      <div className="absolute inset-0 bg-[#e0e5ec]/70 backdrop-blur-sm"></div>
+      
+      <div className="login-container-neumorphic relative z-10">
         {/* Profile Image */}
         <div className="profile-img-neumorphic">
           <GraduationCap size={40} className="text-red-600" />

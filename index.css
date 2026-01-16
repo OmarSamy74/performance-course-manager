@@ -284,6 +284,43 @@ body {
   text-align: left;
 }
 
+/* Merged Horizontal Background for Login */
+.login-background-merged {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.login-bg-section {
+  flex: 1;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.login-bg-section-1 {
+  /* First photo: Man in white shirt with water/sky background */
+  background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=640&h=1080&fit=crop&q=80');
+  /* You can replace this with your actual image path: url('/images/login-bg-1.jpg') */
+}
+
+.login-bg-section-2 {
+  /* Second photo: Man in sports attire with tablet */
+  background-image: url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=1080&fit=crop&q=80');
+  /* You can replace this with your actual image path: url('/images/login-bg-2.jpg') */
+}
+
+.login-bg-section-3 {
+  /* Third photo: Man in navy suit with urban background */
+  background-image: url('https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=640&h=1080&fit=crop&q=80');
+  /* You can replace this with your actual image path: url('/images/login-bg-3.jpg') */
+}
+
 /* Neumorphic Login Form Styles */
 .login-container-neumorphic {
   background: #e0e5ec;
@@ -294,6 +331,8 @@ body {
   width: 100%;
   max-width: 340px;
   text-align: center;
+  position: relative;
+  z-index: 10;
 }
 
 .profile-img-neumorphic {
