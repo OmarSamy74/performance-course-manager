@@ -24,6 +24,15 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
     setError('');
     setIframeLoaded(false);
     
+    // Cleanup previous blob URL
+    if (blobUrl && typeof blobUrl === 'string' && blobUrl.startsWith('blob:') && typeof URL !== 'undefined') {
+      try {
+        URL.revokeObjectURL(blobUrl);
+      } catch (error) {
+        console.warn('Error revoking previous blob URL:', error);
+      }
+    }
+    
     console.log('SecureMaterialViewer - Material:', {
       id: material.id,
       title: material.title,
@@ -36,11 +45,11 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
     let loadTimeout: NodeJS.Timeout;
     if (typeof window !== 'undefined') {
       loadTimeout = setTimeout(() => {
-        if (!iframeLoaded && blobUrl) {
+        if (!iframeLoaded) {
           console.warn('PDF load timeout - iframe may have failed to load');
           // Don't set error immediately, give it more time
         }
-      }, 10000); // 10 second timeout
+      }, 15000); // 15 second timeout
     }
     
     const createBlobUrl = async () => {
@@ -101,10 +110,25 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
             console.warn('Base64 string contains invalid characters, attempting to decode anyway');
           }
           
-          // Decode base64
+          // Decode base64 in chunks to prevent blocking the main thread
           let binaryString: string;
           try {
-            binaryString = window.atob(cleanBase64);
+            // For large files, decode in chunks to prevent freezing
+            if (cleanBase64.length > 1000000) { // 1MB threshold
+              console.log('Large file detected, decoding in chunks...');
+              binaryString = '';
+              const chunkSize = 500000; // Process 500KB at a time
+              for (let i = 0; i < cleanBase64.length; i += chunkSize) {
+                const chunk = cleanBase64.substring(i, i + chunkSize);
+                binaryString += window.atob(chunk);
+                // Yield to browser to prevent freezing
+                if (i % (chunkSize * 2) === 0) {
+                  await new Promise(resolve => setTimeout(resolve, 0));
+                }
+              }
+            } else {
+              binaryString = window.atob(cleanBase64);
+            }
           } catch (atobError) {
             // Try with padding if it fails
             const paddedBase64 = cleanBase64 + '='.repeat((4 - cleanBase64.length % 4) % 4);
@@ -116,9 +140,25 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
             throw new Error('Decoded binary string is empty');
           }
           
+          // Create bytes array in chunks for large files
           const bytes = new Uint8Array(len);
-          for (let i = 0; i < len; i++) {
-            bytes[i] = binaryString.charCodeAt(i);
+          if (len > 1000000) {
+            // Process in chunks to prevent blocking
+            const chunkSize = 500000;
+            for (let i = 0; i < len; i += chunkSize) {
+              const end = Math.min(i + chunkSize, len);
+              for (let j = i; j < end; j++) {
+                bytes[j] = binaryString.charCodeAt(j);
+              }
+              // Yield to browser
+              if (i % (chunkSize * 2) === 0) {
+                await new Promise(resolve => setTimeout(resolve, 0));
+              }
+            }
+          } else {
+            for (let i = 0; i < len; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
           }
           
           // Create blob with correct MIME type
@@ -186,25 +226,37 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
       if (loadTimeout) {
         clearTimeout(loadTimeout);
       }
+      // Cleanup blob URL on unmount
+      if (blobUrl && typeof blobUrl === 'string' && blobUrl.startsWith('blob:') && typeof URL !== 'undefined') {
+        try {
+          URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+          console.warn('Error revoking blob URL in cleanup:', error);
+        }
+      }
     };
-  }, [material?.fileUrl, material?.title, material?.fileType, iframeLoaded, blobUrl]);
+  }, [material?.id, material?.fileUrl]); // Only depend on material ID and fileUrl to prevent infinite loops
 
-  // Cleanup blob URL when component unmounts or blobUrl changes
+  // Cleanup blob URL when component unmounts
   useEffect(() => {
     return () => {
       if (blobUrl && typeof blobUrl === 'string' && blobUrl.startsWith('blob:') && typeof URL !== 'undefined') {
         try {
-          console.log('Revoking blob URL:', blobUrl.substring(0, 50));
+          console.log('Revoking blob URL on unmount:', blobUrl.substring(0, 50));
           URL.revokeObjectURL(blobUrl);
         } catch (error) {
           console.warn('Error revoking blob URL:', error);
         }
       }
     };
-  }, [blobUrl]);
+  }, []); // Only run on unmount
 
   return (
-    <div className="fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center" onContextMenu={(e) => e.preventDefault()}>
+    <div 
+      className="fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center" 
+      onContextMenu={(e) => e.preventDefault()}
+      style={{ willChange: 'auto' }} // Optimize rendering
+    >
       <div className="w-full bg-gray-900 p-4 flex justify-between items-center text-white">
         <h3 className="font-bold flex items-center gap-2">
           <Shield size={18} className="text-green-400" />
