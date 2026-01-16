@@ -129,24 +129,21 @@ export const LoginPage: React.FC = () => {
       
       <div className="login-container-neumorphic relative z-10">
         {/* Logo */}
-        <div className="mb-6">
+        <div className="mb-8 flex flex-col items-center justify-center w-full">
           <img 
             src="/logo.png" 
             alt="SOCCER ANALYTICS PRO" 
-            className="h-24 w-auto mx-auto"
+            className="h-40 md:h-48 lg:h-56 w-auto mb-4 drop-shadow-2xl mx-auto"
             onError={(e) => {
               // Fallback if logo not found
               e.currentTarget.style.display = 'none';
-              const fallback = e.currentTarget.nextElementSibling;
-              if (fallback) fallback.style.display = 'block';
             }}
           />
-          <div className="hidden text-center">
-            <div className="profile-img-neumorphic mx-auto mb-3">
-              <GraduationCap size={40} className="text-[#00D9FF]" />
-            </div>
-            <h2 className="text-[#333] text-xl font-bold mb-1">SOCCER ANALYTICS PRO</h2>
-            <p className="text-[#666] text-sm">PERFORMANCE MASTERY</p>
+          <div className="text-center w-full">
+            <h2 className="text-[#1e40af] text-xl md:text-2xl font-bold mb-1 bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent">
+              SOCCER ANALYTICS PRO
+            </h2>
+            <p className="text-[#10b981] text-sm md:text-base font-semibold">PERFORMANCE MASTERY</p>
           </div>
         </div>
 
