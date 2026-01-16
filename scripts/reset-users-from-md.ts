@@ -23,7 +23,6 @@ interface UserPassword {
   username: string;
   password: string;
   role: UserRole;
-  courseId?: string;
   displayName?: string;
 }
 
@@ -34,7 +33,7 @@ function parsePasswordsFromMD(): UserPassword[] {
     const content = readFileSync(mdPath, 'utf-8');
     const users: UserPassword[] = [];
     
-    // Parse markdown format
+    // Parse markdown format - split by sections
     const sections = content.split(/### |## /);
     
     for (const section of sections) {
@@ -43,23 +42,30 @@ function parsePasswordsFromMD(): UserPassword[] {
       // Extract username
       const usernameMatch = section.match(/\*\*Username\*\*:\s*`([^`]+)`/);
       if (!usernameMatch) continue;
-      const username = usernameMatch[1];
+      const username = usernameMatch[1].trim();
       
       // Extract password
       const passwordMatch = section.match(/\*\*Password\*\*:\s*`([^`]+)`/);
       if (!passwordMatch) continue;
-      const password = passwordMatch[1];
+      const password = passwordMatch[1].trim();
       
-      // Extract role
-      const roleMatch = section.match(/\*\*Role\*\*:\s*(\w+)/);
+      // Extract role - look for "Role: ADMIN" or "Role: `ADMIN`" or "Role: ADMIN"
+      let roleMatch = section.match(/\*\*Role\*\*:\s*`?([A-Z]+)`?/);
+      if (!roleMatch) {
+        // Try without markdown formatting
+        roleMatch = section.match(/Role:\s*([A-Z]+)/);
+      }
       if (!roleMatch) continue;
-      const role = roleMatch[1] as UserRole;
       
-      // Extract course (optional)
-      const courseMatch = section.match(/\*\*Course\*\*:\s*([^\n]+)/);
-      const courseId = courseMatch ? courseMatch[1].trim() : undefined;
+      let role = roleMatch[1].toUpperCase().trim() as UserRole;
       
-      // Extract display name (from section title)
+      // Validate role
+      if (!['ADMIN', 'STUDENT', 'SALES', 'TEACHER'].includes(role)) {
+        console.warn(`⚠️  Invalid role "${role}" for user ${username}, skipping`);
+        continue;
+      }
+      
+      // Extract display name (from section title - first line)
       const titleMatch = section.match(/^([^\n]+)/);
       const displayName = titleMatch ? titleMatch[1].trim() : username;
       
@@ -67,7 +73,6 @@ function parsePasswordsFromMD(): UserPassword[] {
         username,
         password,
         role,
-        courseId,
         displayName
       });
     }
@@ -164,30 +169,6 @@ async function resetUsersFromMD() {
       console.log(`✅ Deleted ${deleteResult.rowCount} user(s)\n`);
     }
     
-    // Check if course_id column exists
-    let hasCourseIdColumn = false;
-    try {
-      const columnCheck = await pool.query(`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'users' AND column_name = 'course_id'
-      `);
-      hasCourseIdColumn = columnCheck.rows.length > 0;
-      
-      if (!hasCourseIdColumn && isDeploy) {
-        console.log('⚠️  [Deploy] course_id column not found, adding it...');
-        try {
-          await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS course_id VARCHAR(255)');
-          hasCourseIdColumn = true;
-          console.log('✅ [Deploy] course_id column added');
-        } catch (alterError: any) {
-          console.log('⚠️  [Deploy] Could not add course_id column, continuing without it');
-        }
-      }
-    } catch (checkError) {
-      // Ignore check errors
-    }
-    
     // Create new users with passwords from MD file
     if (isDeploy) {
       console.log('👥 [Deploy] Creating users with passwords from MD file...\n');
@@ -199,31 +180,17 @@ async function resetUsersFromMD() {
       const hashedPassword = await bcrypt.hash(userData.password, 10);
       const userId = randomUUID();
       
-      // Build INSERT query based on whether course_id exists
-      if (hasCourseIdColumn) {
-        await pool.query(
-          `INSERT INTO users (id, username, password, role, course_id, created_at) 
-           VALUES ($1, $2, $3, $4, $5, NOW())`,
-          [
-            userId,
-            userData.username,
-            hashedPassword,
-            userData.role,
-            userData.courseId || null
-          ]
-        );
-      } else {
-        await pool.query(
-          `INSERT INTO users (id, username, password, role, created_at) 
-           VALUES ($1, $2, $3, $4, NOW())`,
-          [
-            userId,
-            userData.username,
-            hashedPassword,
-            userData.role
-          ]
-        );
-      }
+      // Insert without course_id (removed as requested)
+      await pool.query(
+        `INSERT INTO users (id, username, password, role, created_at) 
+         VALUES ($1, $2, $3, $4, NOW())`,
+        [
+          userId,
+          userData.username,
+          hashedPassword,
+          userData.role
+        ]
+      );
       
       if (isDeploy) {
         console.log(`✅ [Deploy] Created: ${userData.username} (${userData.role})`);
