@@ -5,7 +5,7 @@ import { User, UserRole } from '../../types.js';
 import { isValidPhone } from '../utils/validation.js';
 import { randomUUID } from 'crypto';
 import bcrypt from 'bcryptjs';
-import { pool } from '../db/connection.js';
+import pool from '../db/connection.js';
 
 const router = Router();
 

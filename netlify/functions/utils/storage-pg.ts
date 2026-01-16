@@ -71,6 +71,7 @@ async function initDatabase() {
         password VARCHAR(255) NOT NULL,
         role VARCHAR(50) NOT NULL CHECK (role IN ('ADMIN', 'STUDENT', 'SALES', 'TEACHER')),
         student_id UUID,
+        course_id VARCHAR(255),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
