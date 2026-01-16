@@ -31,9 +31,16 @@ fi
 
 # Get DATABASE_URL from Railway
 echo "📡 Getting DATABASE_URL from Railway..."
-export DATABASE_URL=$(railway variables --json | jq -r '.[] | select(.name == "DATABASE_URL") | .value' 2>/dev/null || railway variables | grep DATABASE_URL | awk '{print $2}')
 
-if [ -z "$DATABASE_URL" ]; then
+# Try to get DATABASE_URL using JSON (more reliable)
+if command -v jq &> /dev/null; then
+    export DATABASE_URL=$(railway variables --json 2>/dev/null | jq -r '.DATABASE_URL // empty')
+else
+    # Fallback: parse from table format
+    export DATABASE_URL=$(railway variables 2>/dev/null | grep -A 3 "DATABASE_URL" | grep -v "DATABASE_URL" | tr -d '│' | tr -d ' ' | tr '\n' '' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+fi
+
+if [ -z "$DATABASE_URL" ] || [ "$DATABASE_URL" == "null" ]; then
     echo "❌ Could not get DATABASE_URL from Railway"
     echo ""
     echo "💡 Try manually:"
@@ -48,17 +55,30 @@ fi
 
 # Check if it's internal URL (won't work)
 if [[ "$DATABASE_URL" == *".railway.internal"* ]]; then
-    echo "⚠️  Warning: Internal URL detected (won't work from local machine)"
+    echo "⚠️  Internal URL detected: $DATABASE_URL"
+    echo ""
+    echo "❌ This URL won't work from your local machine"
     echo ""
     echo "💡 You need the PUBLIC DATABASE_URL:"
-    echo "   1. Go to Railway Dashboard"
-    echo "   2. Select PostgreSQL service"
-    echo "   3. Go to 'Connect' or 'Connection' tab"
-    echo "   4. Copy the PUBLIC connection string"
-    echo "   5. Run: DATABASE_URL=\"public-url\" npm run update-passwords:pg"
+    echo ""
+    echo "   Option 1: Get from Railway Dashboard"
+    echo "   1. Go to Railway Dashboard → Your Project"
+    echo "   2. Click on PostgreSQL service"
+    echo "   3. Click 'Connect' or 'Connection' tab"
+    echo "   4. Look for 'Public Network' connection"
+    echo "   5. Copy the connection string (should have .railway.app, not .railway.internal)"
+    echo ""
+    echo "   Option 2: Use manual script"
+    echo "   npm run update-passwords:manual"
+    echo ""
+    echo "   Option 3: Get public URL from Railway CLI"
+    echo "   railway connect postgres"
+    echo "   (Then copy the public connection string shown)"
     echo ""
     exit 1
 fi
+
+echo "✅ Got DATABASE_URL: ${DATABASE_URL:0:50}..."
 
 echo "✅ Got DATABASE_URL"
 echo ""

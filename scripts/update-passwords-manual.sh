@@ -6,9 +6,16 @@ set -e
 echo "🔐 Update User Passwords in PostgreSQL"
 echo "======================================"
 echo ""
+echo "📋 To get DATABASE_URL:"
+echo "   1. Go to Railway Dashboard → PostgreSQL service"
+echo "   2. Click 'Connect' or 'Connection' tab"
+echo "   3. Copy the PUBLIC connection string"
+echo "   4. (Should have .railway.app, NOT .railway.internal)"
+echo ""
+echo ""
 
 # Prompt for DATABASE_URL
-read -p "Enter DATABASE_URL from Railway: " DATABASE_URL
+read -p "Enter PUBLIC DATABASE_URL: " DATABASE_URL
 
 if [ -z "$DATABASE_URL" ]; then
     echo "❌ DATABASE_URL is required"
