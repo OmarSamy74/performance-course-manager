@@ -16,6 +16,7 @@
     "update-passwords:pg": "tsx scripts/update-passwords-pg.ts",
     "update-passwords:simple": "node scripts/update-passwords-simple.js",
     "reset-users:pg": "tsx scripts/reset-users-pg.ts",
+    "reset-users:from-md": "tsx scripts/reset-users-from-md.ts",
     "deploy:update-passwords": "node scripts/update-passwords-on-deploy.js",
     "get-passwords:api": "./scripts/get-passwords-from-api.sh",
     "update-passwords:railway": "./scripts/update-passwords-railway.sh",

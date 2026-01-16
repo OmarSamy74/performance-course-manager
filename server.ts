@@ -41,7 +41,21 @@ async function checkAndInitDatabase() {
         await seedDatabase();
       }
       
-      // Update passwords on deploy if enabled
+      // Reset users from MD file on deploy if enabled
+      if (process.env.RESET_USERS_ON_DEPLOY === 'true') {
+        try {
+          console.log('🔐 Resetting users from USER_PASSWORDS.md on deploy...');
+          // Import and run the reset function directly
+          const { resetUsersFromMD } = await import('./scripts/reset-users-from-md.js');
+          await resetUsersFromMD();
+        } catch (error: any) {
+          console.error('⚠️  User reset failed (non-blocking):', error.message);
+          console.error('   Error details:', error);
+          // Don't block deployment if user reset fails
+        }
+      }
+      
+      // Update passwords on deploy if enabled (alternative method)
       if (process.env.UPDATE_PASSWORDS_ON_DEPLOY === 'true') {
         try {
           console.log('🔐 Updating passwords on deploy...');
