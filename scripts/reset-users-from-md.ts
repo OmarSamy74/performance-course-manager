@@ -81,10 +81,18 @@ function parsePasswordsFromMD(): UserPassword[] {
 }
 
 async function resetUsersFromMD() {
-  // Only run if explicitly enabled
-  if (process.env.RESET_USERS_ON_DEPLOY !== 'true' && !process.env.DATABASE_URL) {
-    console.log('ℹ️  User reset skipped (RESET_USERS_ON_DEPLOY not set to true)');
+  // Only run if explicitly enabled OR if DATABASE_URL is set (manual run)
+  const isDeploy = process.env.RESET_USERS_ON_DEPLOY === 'true';
+  const isManual = !!process.env.DATABASE_URL;
+  
+  if (!isDeploy && !isManual) {
+    // Silent skip if not enabled (normal case)
     return;
+  }
+  
+  if (isDeploy) {
+    console.log('🔐 [Deploy] RESET_USERS_ON_DEPLOY=true detected');
+    console.log('🔐 [Deploy] Starting user reset from USER_PASSWORDS.md...');
   }
 
   const databaseUrl = process.env.DATABASE_URL;
@@ -103,33 +111,65 @@ async function resetUsersFromMD() {
   });
 
   try {
-    console.log('🔐 Resetting users from USER_PASSWORDS.md...');
-    console.log('   Host: ' + new URL(databaseUrl).hostname);
+    if (isDeploy) {
+      console.log('🔐 [Deploy] Resetting users from USER_PASSWORDS.md...');
+    } else {
+      console.log('🔐 Resetting users from USER_PASSWORDS.md...');
+      console.log('   Host: ' + new URL(databaseUrl).hostname);
+    }
     console.log('');
     
     // Test connection
     await pool.query('SELECT 1');
-    console.log('✅ Connected to database\n');
+    if (isDeploy) {
+      console.log('✅ [Deploy] Connected to database\n');
+    } else {
+      console.log('✅ Connected to database\n');
+    }
     
     // Parse passwords from MD file
-    console.log('📖 Reading passwords from docs/USER_PASSWORDS.md...');
+    if (isDeploy) {
+      console.log('📖 [Deploy] Reading passwords from docs/USER_PASSWORDS.md...');
+    } else {
+      console.log('📖 Reading passwords from docs/USER_PASSWORDS.md...');
+    }
     const usersToCreate = parsePasswordsFromMD();
     
     if (usersToCreate.length === 0) {
       console.error('❌ No users found in USER_PASSWORDS.md');
       console.error('   Please check the file format');
+      if (isDeploy) {
+        console.error('⚠️  [Deploy] Continuing deployment despite error');
+        return; // Don't exit, just return
+      }
       process.exit(1);
     }
     
-    console.log(`✅ Found ${usersToCreate.length} user(s) to create\n`);
+    if (isDeploy) {
+      console.log(`✅ [Deploy] Found ${usersToCreate.length} user(s) to create\n`);
+    } else {
+      console.log(`✅ Found ${usersToCreate.length} user(s) to create\n`);
+    }
     
     // Delete all existing users
-    console.log('🗑️  Deleting all existing users...');
+    if (isDeploy) {
+      console.log('🗑️  [Deploy] Deleting all existing users...');
+    } else {
+      console.log('🗑️  Deleting all existing users...');
+    }
     const deleteResult = await pool.query('DELETE FROM users');
-    console.log(`✅ Deleted ${deleteResult.rowCount} user(s)\n`);
+    if (isDeploy) {
+      console.log(`✅ [Deploy] Deleted ${deleteResult.rowCount} user(s)\n`);
+    } else {
+      console.log(`✅ Deleted ${deleteResult.rowCount} user(s)\n`);
+    }
     
     // Create new users with passwords from MD file
-    console.log('👥 Creating users with passwords from MD file...\n');
+    if (isDeploy) {
+      console.log('👥 [Deploy] Creating users with passwords from MD file...\n');
+    } else {
+      console.log('👥 Creating users with passwords from MD file...\n');
+    }
     
     for (const userData of usersToCreate) {
       const hashedPassword = await bcrypt.hash(userData.password, 10);
@@ -147,19 +187,32 @@ async function resetUsersFromMD() {
         ]
       );
       
-      console.log(`✅ Created: ${userData.username} (${userData.role})`);
+      if (isDeploy) {
+        console.log(`✅ [Deploy] Created: ${userData.username} (${userData.role})`);
+      } else {
+        console.log(`✅ Created: ${userData.username} (${userData.role})`);
+      }
     }
     
     // Display all passwords
     console.log('\n' + '='.repeat(70));
-    console.log('📋 USER PASSWORDS (from USER_PASSWORDS.md):');
+    if (isDeploy) {
+      console.log('📋 [Deploy] USER PASSWORDS (from USER_PASSWORDS.md):');
+    } else {
+      console.log('📋 USER PASSWORDS (from USER_PASSWORDS.md):');
+    }
     console.log('='.repeat(70));
     for (const user of usersToCreate) {
       const displayName = user.displayName || user.username;
       console.log(`${user.username.padEnd(20)} (${displayName.padEnd(25)}) : ${user.password}`);
     }
     console.log('='.repeat(70));
-    console.log('\n✅ Users reset successfully!\n');
+    if (isDeploy) {
+      console.log('\n✅ [Deploy] Users reset successfully!');
+      console.log('⚠️  [Deploy] IMPORTANT: Save these passwords from Railway logs!\n');
+    } else {
+      console.log('\n✅ Users reset successfully!\n');
+    }
     
     await pool.end();
     
