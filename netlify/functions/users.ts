@@ -30,6 +30,9 @@ export const handler: Handler = async (event, context) => {
 
       // Get all users from PostgreSQL
       const pool = await getPool();
+      if (!pool) {
+        return errorResponse('Database connection not available', 500);
+      }
       const result = await pool.query(`
         SELECT 
           id,
@@ -92,6 +95,9 @@ export const handler: Handler = async (event, context) => {
 
       // Get all users
       const pool = await getPool();
+      if (!pool) {
+        return errorResponse('Database connection not available', 500);
+      }
       const usersResult = await pool.query('SELECT id, username, role FROM users ORDER BY username');
       const users = usersResult.rows;
 
