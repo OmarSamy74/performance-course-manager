@@ -92,7 +92,7 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
           }
           
           if (fileId) {
-            // Convert to preview URL
+            // Convert to preview URL (for embedding)
             driveUrl = `https://drive.google.com/file/d/${fileId}/preview`;
             console.log('Converted Google Drive URL to preview:', driveUrl);
           } else {
@@ -103,6 +103,14 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
               driveUrl = driveUrl.replace('/view', '/preview').replace('?usp=sharing', '');
             }
           }
+          
+          // Store original view URL for fallback
+          const viewUrl = fileId 
+            ? `https://drive.google.com/file/d/${fileId}/view`
+            : driveUrl.replace('/preview', '/view');
+          
+          // Store view URL in a way we can access it later
+          (window as any).__driveViewUrl = viewUrl;
           
           setIsLoading(false);
           setBlobUrl(driveUrl);
@@ -354,12 +362,19 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
               </div>
               {/* Always show fallback link for Google Drive */}
               <div className="mt-4 bg-gray-800 p-4 rounded-lg max-w-md">
-                <p className="text-white text-sm mb-2 text-center">إذا لم يظهر الملف، يمكنك فتحه مباشرة:</p>
+                <p className="text-white text-sm mb-2 text-center">إذا لم يظهر الملف في الإطار أعلاه:</p>
                 <a 
-                  href={blobUrl.replace('/preview', '/view').replace('?usp=sharing', '')} 
+                  href={(() => {
+                    // Extract file ID and create view URL
+                    const fileIdMatch = blobUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                    if (fileIdMatch) {
+                      return `https://drive.google.com/file/d/${fileIdMatch[1]}/view`;
+                    }
+                    return blobUrl.replace('/preview', '/view').replace('?usp=sharing', '');
+                  })()} 
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 underline hover:text-blue-300 text-center block"
+                  className="text-blue-400 underline hover:text-blue-300 text-center block font-semibold"
                 >
                   📎 اضغط هنا لفتح الملف في Google Drive
                 </a>
