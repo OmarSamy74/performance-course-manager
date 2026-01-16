@@ -14,6 +14,7 @@
     "init-db:seed": "tsx scripts/init-database.ts --seed",
     "init-db:pg": "tsx scripts/init-database-pg.ts",
     "update-passwords:pg": "tsx scripts/update-passwords-pg.ts",
+    "update-passwords:simple": "node scripts/update-passwords-simple.js",
     "update-passwords:railway": "./scripts/update-passwords-railway.sh",
     "update-passwords:manual": "./scripts/update-passwords-manual.sh",
     "clear-materials": "tsx scripts/clear-materials.ts",
