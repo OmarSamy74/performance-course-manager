@@ -523,7 +523,7 @@ export const TeacherPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {state.materials.length === 0 ? (
               <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                <FileText className="text-red-600 mx-auto mb-4" size={40} />
+                <FileText className="text-blue-600 mx-auto mb-4" size={40} />
                 <h3 className="text-2xl font-bold text-gray-600 mb-2">لا يوجد محتوى حالياً</h3>
                 <p className="text-gray-500 mb-6">ابدأ برفع المحاضرات والمواد التعليمية</p>
                 <button 
@@ -572,7 +572,7 @@ export const TeacherPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {state.lessons.length === 0 ? (
               <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                <Play className="text-red-600 mx-auto mb-4" size={40} />
+                <Play className="text-cyan-600 mx-auto mb-4" size={40} />
                 <h3 className="text-2xl font-bold text-gray-600 mb-2">لا توجد دروس حالياً</h3>
                 <p className="text-gray-500 mb-6">ابدأ بإضافة دروس جديدة</p>
                 <button 
@@ -627,7 +627,7 @@ export const TeacherPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {assignments.length === 0 ? (
               <div className="col-span-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
-                <FileCheck className="text-red-600 mx-auto mb-4" size={40} />
+                <FileCheck className="text-green-600 mx-auto mb-4" size={40} />
                 <h3 className="text-2xl font-bold text-gray-600 mb-2">لا توجد واجبات حالياً</h3>
                 <p className="text-gray-500 mb-6">ابدأ بإضافة واجبات جديدة</p>
                 <button 
