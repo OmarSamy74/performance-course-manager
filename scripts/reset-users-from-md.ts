@@ -164,6 +164,30 @@ async function resetUsersFromMD() {
       console.log(`✅ Deleted ${deleteResult.rowCount} user(s)\n`);
     }
     
+    // Check if course_id column exists
+    let hasCourseIdColumn = false;
+    try {
+      const columnCheck = await pool.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'users' AND column_name = 'course_id'
+      `);
+      hasCourseIdColumn = columnCheck.rows.length > 0;
+      
+      if (!hasCourseIdColumn && isDeploy) {
+        console.log('⚠️  [Deploy] course_id column not found, adding it...');
+        try {
+          await pool.query('ALTER TABLE users ADD COLUMN IF NOT EXISTS course_id VARCHAR(255)');
+          hasCourseIdColumn = true;
+          console.log('✅ [Deploy] course_id column added');
+        } catch (alterError: any) {
+          console.log('⚠️  [Deploy] Could not add course_id column, continuing without it');
+        }
+      }
+    } catch (checkError) {
+      // Ignore check errors
+    }
+    
     // Create new users with passwords from MD file
     if (isDeploy) {
       console.log('👥 [Deploy] Creating users with passwords from MD file...\n');
@@ -175,17 +199,31 @@ async function resetUsersFromMD() {
       const hashedPassword = await bcrypt.hash(userData.password, 10);
       const userId = randomUUID();
       
-      await pool.query(
-        `INSERT INTO users (id, username, password, role, course_id, created_at) 
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [
-          userId,
-          userData.username,
-          hashedPassword,
-          userData.role,
-          userData.courseId || null
-        ]
-      );
+      // Build INSERT query based on whether course_id exists
+      if (hasCourseIdColumn) {
+        await pool.query(
+          `INSERT INTO users (id, username, password, role, course_id, created_at) 
+           VALUES ($1, $2, $3, $4, $5, NOW())`,
+          [
+            userId,
+            userData.username,
+            hashedPassword,
+            userData.role,
+            userData.courseId || null
+          ]
+        );
+      } else {
+        await pool.query(
+          `INSERT INTO users (id, username, password, role, created_at) 
+           VALUES ($1, $2, $3, $4, NOW())`,
+          [
+            userId,
+            userData.username,
+            hashedPassword,
+            userData.role
+          ]
+        );
+      }
       
       if (isDeploy) {
         console.log(`✅ [Deploy] Created: ${userData.username} (${userData.role})`);
