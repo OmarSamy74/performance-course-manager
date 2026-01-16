@@ -10,7 +10,7 @@
  *   DATABASE_URL="postgresql://..." npm run update-passwords:pg
  */
 
-import pool, { initDatabase } from '../server/db/connection.js';
+import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
 
 // Generate complex password (12 characters: uppercase, lowercase, numbers, symbols)
@@ -38,11 +38,31 @@ function generateComplexPassword(): string {
 }
 
 async function updatePasswords() {
+  const databaseUrl = process.env.DATABASE_URL;
+  
+  if (!databaseUrl) {
+    console.error('❌ DATABASE_URL environment variable is required');
+    console.log('\n💡 To get DATABASE_URL:');
+    console.log('   1. Go to Railway Dashboard');
+    console.log('   2. Select your PostgreSQL service');
+    console.log('   3. Go to Variables tab');
+    console.log('   4. Copy DATABASE_URL value');
+    console.log('\n   Then run:');
+    console.log('   DATABASE_URL="your-url" npm run update-passwords:pg');
+    process.exit(1);
+  }
+
+  const pool = new Pool({
+    connectionString: databaseUrl,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  });
+
   try {
     console.log('🔐 Connecting to database...');
     
-    // Initialize database connection
-    await initDatabase();
+    // Test connection
+    await pool.query('SELECT 1');
+    console.log('✅ Connected to database');
     
     // Get all users
     const usersResult = await pool.query('SELECT id, username, role FROM users ORDER BY username');
