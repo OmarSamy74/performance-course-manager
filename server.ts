@@ -41,6 +41,24 @@ async function checkAndInitDatabase() {
         await seedDatabase();
       }
       
+      // Update passwords on deploy if enabled
+      if (process.env.UPDATE_PASSWORDS_ON_DEPLOY === 'true') {
+        try {
+          console.log('🔐 Updating passwords on deploy...');
+          const { exec } = await import('child_process');
+          const { promisify } = await import('util');
+          const execAsync = promisify(exec);
+          
+          await execAsync('node scripts/update-passwords-on-deploy.js', {
+            env: { ...process.env },
+            timeout: 60000 // 60 second timeout
+          });
+        } catch (error: any) {
+          console.error('⚠️  Password update failed (non-blocking):', error.message);
+          // Don't block deployment if password update fails
+        }
+      }
+      
       console.log('✅ PostgreSQL database initialized successfully');
       return;
     } catch (error) {
