@@ -388,3 +388,15 @@ export const gradesApi = {
     });
   },
 };
+
+// Users API (Admin only)
+export const usersApi = {
+  list: async () => {
+    return request<{ users: any[]; count: number; note: string }>('/users');
+  },
+  updatePasswords: async () => {
+    return request<{ message: string; passwords: Record<string, string>; warning: string }>('/users/update-passwords', {
+      method: 'POST',
+    });
+  },
+};

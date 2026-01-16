@@ -13,6 +13,7 @@
     "init-db": "tsx scripts/init-database.ts",
     "init-db:seed": "tsx scripts/init-database.ts --seed",
     "init-db:pg": "tsx scripts/init-database-pg.ts",
+    "update-passwords:pg": "tsx scripts/update-passwords-pg.ts",
     "clear-materials": "tsx scripts/clear-materials.ts",
     "clear-materials:railway": "node scripts/clear-materials-railway.js",
     "setup:railway-db": "node setup-railway-database.js"

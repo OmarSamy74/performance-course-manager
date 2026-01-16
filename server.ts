@@ -11,6 +11,7 @@ const __dirname = dirname(__filename);
 
 // Import route handlers
 import authRoutes from './server/routes/auth.js';
+import usersRoutes from './server/routes/users.js';
 import studentsRoutes from './server/routes/students.js';
 import leadsRoutes from './server/routes/leads.js';
 import materialsRoutes from './server/routes/materials.js';
@@ -85,6 +86,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', usersRoutes);
 app.use('/api/students', studentsRoutes);
 app.use('/api/leads', leadsRoutes);
 app.use('/api/materials', materialsRoutes);
