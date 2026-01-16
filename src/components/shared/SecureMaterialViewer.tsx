@@ -321,34 +321,68 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
             </div>
           ) : (
             <div className="w-full h-full flex items-center justify-center p-4">
-              {/* Primary: iframe with proper dimensions */}
-              <div className="w-full h-full md:w-3/4 bg-white shadow-2xl" style={{ minHeight: '600px' }}>
-                <iframe 
-                  key={blobUrl}
-                  src={`${blobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
-                  className="w-full h-full"
-                  style={{ border: 'none', display: 'block' }}
-                  title="PDF Viewer"
-                  allow="fullscreen"
-                  onLoad={() => {
-                    setIframeLoaded(true);
-                    setIsLoading(false);
-                    console.log('PDF iframe loaded successfully');
-                  }}
-                />
-              </div>
-              {/* Fallback: Show download link if iframe doesn't load after timeout */}
-              {!iframeLoaded && blobUrl && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 rounded-lg">
-                  <p className="text-white text-sm mb-2">إذا لم يظهر الملف، يمكنك تحميله:</p>
-                  <a 
-                    href={blobUrl} 
-                    download={`${material.title}.pdf`}
-                    className="text-blue-400 underline hover:text-blue-300"
-                  >
-                    اضغط هنا لتحميل الملف
-                  </a>
+              {/* Check if it's Google Drive URL */}
+              {blobUrl.includes('drive.google.com') ? (
+                <div className="w-full h-full bg-white shadow-2xl" style={{ minHeight: '600px' }}>
+                  <iframe 
+                    key={blobUrl}
+                    src={blobUrl}
+                    className="w-full h-full"
+                    style={{ border: 'none', display: 'block' }}
+                    title="Google Drive Viewer"
+                    allow="fullscreen"
+                    loading="lazy"
+                    onLoad={() => {
+                      setIframeLoaded(true);
+                      setIsLoading(false);
+                      console.log('Google Drive iframe loaded successfully');
+                    }}
+                    onError={() => {
+                      console.error('Google Drive iframe failed to load');
+                      setError('فشل في تحميل الملف من Google Drive');
+                      setIsLoading(false);
+                    }}
+                  />
                 </div>
+              ) : (
+                <>
+                  {/* Primary: iframe with proper dimensions for direct PDF */}
+                  <div className="w-full h-full md:w-3/4 bg-white shadow-2xl" style={{ minHeight: '600px' }}>
+                    <iframe 
+                      key={blobUrl}
+                      src={`${blobUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                      className="w-full h-full"
+                      style={{ border: 'none', display: 'block' }}
+                      title="PDF Viewer"
+                      allow="fullscreen"
+                      loading="lazy"
+                      onLoad={() => {
+                        setIframeLoaded(true);
+                        setIsLoading(false);
+                        console.log('PDF iframe loaded successfully');
+                      }}
+                      onError={() => {
+                        console.error('PDF iframe failed to load');
+                        setError('فشل في تحميل الملف');
+                        setIsLoading(false);
+                      }}
+                    />
+                  </div>
+                  {/* Fallback: Show download link if iframe doesn't load after timeout */}
+                  {!iframeLoaded && blobUrl && (
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 p-4 rounded-lg">
+                      <p className="text-white text-sm mb-2">إذا لم يظهر الملف، يمكنك فتحه:</p>
+                      <a 
+                        href={blobUrl} 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 underline hover:text-blue-300"
+                      >
+                        اضغط هنا لفتح الملف في تبويب جديد
+                      </a>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )

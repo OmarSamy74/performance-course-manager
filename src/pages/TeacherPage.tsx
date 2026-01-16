@@ -874,13 +874,12 @@ export const TeacherPage: React.FC = () => {
             </Button>
             <Button 
               type="submit" 
-              disabled={!newMaterial.fileUrl || uploading} 
+              disabled={!newMaterial.fileUrl} 
               variant="primary"
-              isLoading={uploading}
               className="flex-1"
-              leftIcon={uploading ? undefined : '📤'}
+              leftIcon="📤"
             >
-              {uploading ? undefined : 'نشر المحتوى'}
+              نشر المحتوى
             </Button>
           </div>
         </form>
