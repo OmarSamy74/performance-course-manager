@@ -41,15 +41,19 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
       fileUrlPreview: material.fileUrl?.substring(0, 100) || 'null'
     });
     
-    // Timeout to detect if PDF fails to load
+    // Timeout to detect if file fails to load
     let loadTimeout: NodeJS.Timeout;
     if (typeof window !== 'undefined') {
       loadTimeout = setTimeout(() => {
-        if (!iframeLoaded) {
-          console.warn('PDF load timeout - iframe may have failed to load');
-          // Don't set error immediately, give it more time
+        if (!iframeLoaded && blobUrl) {
+          console.warn('File load timeout - iframe may have failed to load');
+          // For Google Drive, this is normal - show fallback link
+          if (blobUrl.includes('drive.google.com')) {
+            setIsLoading(false);
+            // Keep iframeLoaded as false to show fallback
+          }
         }
-      }, 15000); // 15 second timeout
+      }, 10000); // 10 second timeout for Google Drive
     }
     
     const createBlobUrl = async () => {
@@ -67,14 +71,36 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
         // Handle different fileUrl formats
         if (material.fileUrl.includes('drive.google.com')) {
           // Google Drive URL - convert to preview URL if needed
-          let driveUrl = material.fileUrl;
+          let driveUrl = material.fileUrl.trim();
           
-          // If it's a sharing URL, convert to preview URL
-          if (driveUrl.includes('/file/d/') && !driveUrl.includes('/preview')) {
-            const fileIdMatch = driveUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-            if (fileIdMatch) {
-              const fileId = fileIdMatch[1];
-              driveUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+          // Extract file ID from various Google Drive URL formats
+          let fileId: string | null = null;
+          
+          // Try to extract file ID from different URL patterns
+          const patterns = [
+            /\/file\/d\/([a-zA-Z0-9_-]+)/,  // Standard: /file/d/FILE_ID
+            /id=([a-zA-Z0-9_-]+)/,          // Alternative: ?id=FILE_ID
+            /\/d\/([a-zA-Z0-9_-]+)/,        // Short: /d/FILE_ID
+          ];
+          
+          for (const pattern of patterns) {
+            const match = driveUrl.match(pattern);
+            if (match) {
+              fileId = match[1];
+              break;
+            }
+          }
+          
+          if (fileId) {
+            // Convert to preview URL
+            driveUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+            console.log('Converted Google Drive URL to preview:', driveUrl);
+          } else {
+            // If we can't extract file ID, try to use the URL as-is
+            console.warn('Could not extract file ID from Google Drive URL:', driveUrl);
+            // Try to add /preview if not present
+            if (!driveUrl.includes('/preview') && driveUrl.includes('/file/d/')) {
+              driveUrl = driveUrl.replace('/view', '/preview').replace('?usp=sharing', '');
             }
           }
           
@@ -302,7 +328,44 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
             </button>
           </div>
         ) : blobUrl ? (
-          material.fileType === 'IMAGE' ? (
+          // Check if it's Google Drive URL first (before fileType check)
+          blobUrl.includes('drive.google.com') ? (
+            <div className="w-full h-full flex flex-col items-center justify-center p-4">
+              <div className="w-full h-full bg-white shadow-2xl" style={{ minHeight: '600px' }}>
+                <iframe 
+                  key={blobUrl}
+                  src={blobUrl}
+                  className="w-full h-full"
+                  style={{ border: 'none', display: 'block' }}
+                  title="Google Drive Viewer"
+                  allow="fullscreen"
+                  loading="lazy"
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                  onLoad={() => {
+                    setIframeLoaded(true);
+                    setIsLoading(false);
+                    console.log('Google Drive iframe loaded successfully');
+                  }}
+                  onError={() => {
+                    console.error('Google Drive iframe failed to load');
+                    setIsLoading(false);
+                  }}
+                />
+              </div>
+              {/* Always show fallback link for Google Drive */}
+              <div className="mt-4 bg-gray-800 p-4 rounded-lg max-w-md">
+                <p className="text-white text-sm mb-2 text-center">إذا لم يظهر الملف، يمكنك فتحه مباشرة:</p>
+                <a 
+                  href={blobUrl.replace('/preview', '/view').replace('?usp=sharing', '')} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 underline hover:text-blue-300 text-center block"
+                >
+                  📎 اضغط هنا لفتح الملف في Google Drive
+                </a>
+              </div>
+            </div>
+          ) : material.fileType === 'IMAGE' ? (
             <div className="w-full h-full flex items-center justify-center p-4">
               <img 
                 src={blobUrl} 
@@ -323,26 +386,40 @@ export const SecureMaterialViewer: React.FC<SecureMaterialViewerProps> = ({ mate
             <div className="w-full h-full flex items-center justify-center p-4">
               {/* Check if it's Google Drive URL */}
               {blobUrl.includes('drive.google.com') ? (
-                <div className="w-full h-full bg-white shadow-2xl" style={{ minHeight: '600px' }}>
-                  <iframe 
-                    key={blobUrl}
-                    src={blobUrl}
-                    className="w-full h-full"
-                    style={{ border: 'none', display: 'block' }}
-                    title="Google Drive Viewer"
-                    allow="fullscreen"
-                    loading="lazy"
-                    onLoad={() => {
-                      setIframeLoaded(true);
-                      setIsLoading(false);
-                      console.log('Google Drive iframe loaded successfully');
-                    }}
-                    onError={() => {
-                      console.error('Google Drive iframe failed to load');
-                      setError('فشل في تحميل الملف من Google Drive');
-                      setIsLoading(false);
-                    }}
-                  />
+                <div className="w-full h-full flex flex-col items-center justify-center p-4">
+                  <div className="w-full h-full bg-white shadow-2xl" style={{ minHeight: '600px' }}>
+                    <iframe 
+                      key={blobUrl}
+                      src={blobUrl}
+                      className="w-full h-full"
+                      style={{ border: 'none', display: 'block' }}
+                      title="Google Drive Viewer"
+                      allow="fullscreen"
+                      loading="lazy"
+                      sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                      onLoad={() => {
+                        setIframeLoaded(true);
+                        setIsLoading(false);
+                        console.log('Google Drive iframe loaded successfully');
+                      }}
+                      onError={() => {
+                        console.error('Google Drive iframe failed to load');
+                        // Don't set error immediately - show fallback link
+                      }}
+                    />
+                  </div>
+                  {/* Fallback: Direct link if iframe doesn't work */}
+                  <div className="mt-4 bg-gray-800 p-4 rounded-lg max-w-md">
+                    <p className="text-white text-sm mb-2 text-center">إذا لم يظهر الملف، يمكنك فتحه مباشرة:</p>
+                    <a 
+                      href={blobUrl.replace('/preview', '/view')} 
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 underline hover:text-blue-300 text-center block"
+                    >
+                      اضغط هنا لفتح الملف في Google Drive
+                    </a>
+                  </div>
                 </div>
               ) : (
                 <>
