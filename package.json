@@ -14,6 +14,7 @@
     "init-db:seed": "tsx scripts/init-database.ts --seed",
     "init-db:pg": "tsx scripts/init-database-pg.ts",
     "clear-materials": "tsx scripts/clear-materials.ts",
+    "clear-materials:railway": "node scripts/clear-materials-railway.js",
     "setup:railway-db": "node setup-railway-database.js"
   },
   "dependencies": {
