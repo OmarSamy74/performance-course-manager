@@ -185,11 +185,25 @@ async function createTablesDirectly() {
       title VARCHAR(255) NOT NULL,
       description TEXT,
       due_date TIMESTAMP,
+      status VARCHAR(50) DEFAULT 'PUBLISHED' CHECK (status IN ('DRAFT', 'PUBLISHED', 'CLOSED')),
       max_score INTEGER DEFAULT 100,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
   `);
+  
+  // Add status column if it doesn't exist (migration)
+  try {
+    await pool.query(`
+      ALTER TABLE assignments 
+      ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'PUBLISHED' CHECK (status IN ('DRAFT', 'PUBLISHED', 'CLOSED'))
+    `);
+  } catch (error: any) {
+    // Column might already exist, ignore error
+    if (!error.message.includes('already exists')) {
+      console.warn('⚠️  Could not add status column to assignments:', error.message);
+    }
+  }
   
   // Submissions table
   await pool.query(`
