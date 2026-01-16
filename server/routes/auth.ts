@@ -45,41 +45,7 @@ router.post('/', async (req: Request, res: Response) => {
     const trimmedUsername = username.trim();
     const trimmedPassword = password.trim();
 
-    // Check hardcoded admin/teacher/sales
-    let user: User | null = null;
-
-    if (trimmedUsername === 'admin' && trimmedPassword === '123') {
-      user = { id: 'admin', username: 'Administrator', role: UserRole.ADMIN };
-    } else if (trimmedUsername === 'teacher' && trimmedPassword === '123') {
-      user = { id: 'teacher', username: 'أ. المحاضر', role: UserRole.TEACHER };
-    } else if (trimmedUsername === 'sales' && trimmedPassword === '123') {
-      user = { id: 'sales1', username: 'Sales Agent', role: UserRole.SALES };
-    } else if (trimmedUsername === 'omar.samy' && trimmedPassword === '123') {
-      user = { id: 'omar.samy', username: 'Omar Samy', role: UserRole.TEACHER };
-    } else if (trimmedUsername === 'abdelatif.reda' && trimmedPassword === '123') {
-      user = { id: 'abdelatif.reda', username: 'Abdelatif Reda', role: UserRole.TEACHER };
-    } else if (trimmedUsername === 'karim.ali' && trimmedPassword === '123') {
-      user = { id: 'karim.ali', username: 'Karim Ali', role: UserRole.TEACHER };
-    } else {
-      // Check students
-      const students = await readData<any>('students');
-      const student = students.find((s: any) => s.phone === trimmedUsername);
-      
-      if (student && trimmedPassword === student.phone) {
-        user = {
-          id: student.id,
-          username: student.name,
-          role: UserRole.STUDENT,
-          studentId: student.id
-        };
-      }
-    }
-
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Look up user directly in PostgreSQL by username
+    // Look up user directly in PostgreSQL by username (primary method)
     let existingUser: any = null;
     
     try {
@@ -122,35 +88,73 @@ router.post('/', async (req: Request, res: Response) => {
       }
     }
     
-    // If user still doesn't exist and we have a hardcoded user, create it
-    if (!existingUser && user) {
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
-      
-      // Generate UUID for new user
-      const userId = randomUUID();
-      
+    // If user not found, check for students (student login uses phone as username)
+    if (!existingUser) {
       try {
-        // Try to insert into PostgreSQL
-        await pool.query(
-          'INSERT INTO users (id, username, password, role, created_at) VALUES ($1, $2, $3, $4, NOW())',
-          [userId, user.username, hashedPassword, user.role]
-        );
-        existingUser = {
-          id: userId,
-          username: user.username,
-          password: hashedPassword,
-          role: user.role
-        };
-      } catch (insertError: any) {
-        // Fallback to file-based storage
-        const userWithUUID: any = {
-          ...user,
-          id: userId,
-          password: hashedPassword
-        };
-        await createById('users', userWithUUID);
-        existingUser = userWithUUID;
+        const students = await readData<any>('students');
+        const student = students.find((s: any) => s.phone === trimmedUsername);
+        
+        if (student && trimmedPassword === student.phone) {
+          // Student login - create session directly
+          const session = await createSession(student.id, UserRole.STUDENT);
+          return res.json({
+            user: {
+              id: student.id,
+              username: student.name,
+              role: UserRole.STUDENT,
+              studentId: student.id
+            },
+            token: session.token,
+            expiresAt: session.expiresAt
+          });
+        }
+      } catch (studentError) {
+        // Ignore student check errors
+      }
+    }
+    
+    // Fallback: Check hardcoded users only if not found in database
+    if (!existingUser) {
+      let hardcodedUser: User | null = null;
+      
+      if (trimmedUsername === 'admin' && trimmedPassword === '123') {
+        hardcodedUser = { id: 'admin', username: 'Administrator', role: UserRole.ADMIN };
+      } else if (trimmedUsername === 'teacher' && trimmedPassword === '123') {
+        hardcodedUser = { id: 'teacher', username: 'أ. المحاضر', role: UserRole.TEACHER };
+      } else if (trimmedUsername === 'sales' && trimmedPassword === '123') {
+        hardcodedUser = { id: 'sales1', username: 'Sales Agent', role: UserRole.SALES };
+      } else if (trimmedUsername === 'omar.samy' && trimmedPassword === '123') {
+        hardcodedUser = { id: 'omar.samy', username: 'Omar Samy', role: UserRole.TEACHER };
+      } else if (trimmedUsername === 'abdelatif.reda' && trimmedPassword === '123') {
+        hardcodedUser = { id: 'abdelatif.reda', username: 'Abdelatif Reda', role: UserRole.TEACHER };
+      } else if (trimmedUsername === 'karim.ali' && trimmedPassword === '123') {
+        hardcodedUser = { id: 'karim.ali', username: 'Karim Ali', role: UserRole.TEACHER };
+      }
+      
+      if (hardcodedUser) {
+        // Create user in database for hardcoded user
+        const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
+        const userId = randomUUID();
+        
+        try {
+          await pool.query(
+            'INSERT INTO users (id, username, password, role, created_at) VALUES ($1, $2, $3, $4, NOW()) ON CONFLICT (username) DO NOTHING',
+            [userId, hardcodedUser.username, hashedPassword, hardcodedUser.role]
+          );
+          existingUser = {
+            id: userId,
+            username: hardcodedUser.username,
+            password: hashedPassword,
+            role: hardcodedUser.role
+          };
+        } catch (insertError: any) {
+          // Use hardcoded user directly if insert fails
+          existingUser = {
+            id: hardcodedUser.id,
+            username: hardcodedUser.username,
+            role: hardcodedUser.role
+          };
+        }
       }
     }
     
